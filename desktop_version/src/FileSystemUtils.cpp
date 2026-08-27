@@ -19,27 +19,9 @@
 #include "VFormat.h"
 #include "Vlogging.h"
 
-/* These are needed for PLATFORM_* crap */
-#if defined(_WIN32)
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-#include <shlobj.h>
-static int mkdir(char* path, int mode)
-{
-    WCHAR utf16_path[MAX_PATH];
-    MultiByteToWideChar(CP_UTF8, 0, path, -1, utf16_path, MAX_PATH);
-    return CreateDirectoryW(utf16_path, NULL);
-}
-#elif defined(__EMSCRIPTEN__)
 #include <limits.h>
-#include <sys/stat.h>
-#include <emscripten.h>
+#include <pspkernel.h>
 #define MAX_PATH PATH_MAX
-#elif defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__HAIKU__) || defined(__DragonFly__) || defined(__unix__)
-#include <limits.h>
-#include <sys/stat.h>
-#define MAX_PATH PATH_MAX
-#endif
 
 static bool isInit = false;
 
@@ -77,7 +59,6 @@ static const PHYSFS_Allocator allocator = {
     SDL_free
 };
 
-#ifndef __ANDROID__
 static bool mount_pre_datazip(
     char* out_path,
     const char* real_dirname,
@@ -176,7 +157,6 @@ static bool mount_pre_datazip(
 
     return dir_found;
 }
-#endif
 
 int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langDir, char* fontsDir)
 {
@@ -185,14 +165,6 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
     pathSep = PHYSFS_getDirSeparator();
 
     PHYSFS_setAllocator(&allocator);
-
-    // Yes, this is actually how you're supposed to use PhysFS on Android.
-#ifdef __ANDROID__
-    PHYSFS_AndroidInit androidInit;
-    androidInit.jnienv = SDL_AndroidGetJNIEnv();
-    androidInit.context = SDL_AndroidGetActivity();
-    argvZero = (char*) &androidInit;
-#endif
 
     if (!PHYSFS_init(argvZero))
     {
@@ -249,7 +221,7 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
         "saves",
         pathSep
     );
-    mkdir(saveDir, 0777);
+    sceIoMkdir(saveDir, 0777);
     vlog_info("Save directory: %s", saveDir);
 
     /* Store full level directory */
@@ -258,7 +230,7 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
         "levels",
         pathSep
     );
-    mkdir(levelDir, 0777);
+    sceIoMkdir(levelDir, 0777);
     vlog_info("Level directory: %s", levelDir);
 
     /* Store full screenshot directory */
@@ -267,7 +239,7 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
         "screenshots",
         pathSep
     );
-    mkdir(screenshotDir, 0777);
+    sceIoMkdir(screenshotDir, 0777);
     vlog_info("Screenshot directory: %s", screenshotDir);
 
     /* We also need to make the subdirectories */
@@ -276,11 +248,11 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
         SDL_snprintf(temp, sizeof(temp), "%s%s%s",
             screenshotDir, "1x", pathSep
         );
-        mkdir(temp, 0777);
+        sceIoMkdir(temp, 0777);
         SDL_snprintf(temp, sizeof(temp), "%s%s%s",
             screenshotDir, "2x", pathSep
         );
-        mkdir(temp, 0777);
+        sceIoMkdir(temp, 0777);
     }
 
     basePath = SDL_GetBasePath();
@@ -291,24 +263,6 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
         basePath = SDL_strdup("./");
     }
 
-#ifdef __ANDROID__
-    // This is kind of a mess, but that's not really solvable unless we expect the user to download the data.zip manually.
-    if (!PHYSFS_mount(PHYSFS_getBaseDir(), "/apk", 1))
-    {
-        vlog_error("Failed to mount apk!");
-        return 0;
-    }
-
-    PHYSFS_File* repoZip = PHYSFS_openRead("/apk/assets/repo.zip");
-    if (repoZip && PHYSFS_mountHandle(repoZip, "repo.zip", NULL, 1))
-    {
-        doesLangDirExist = true;
-        doesFontsDirExist = true;
-    }
-
-    PHYSFS_File* dataZip = PHYSFS_openRead("/apk/assets/data.zip");
-    if (!dataZip || !PHYSFS_mountHandle(dataZip, "data.zip", NULL, 1))
-#else
     doesLangDirExist = mount_pre_datazip(mainLangDir, "lang", "lang/", langDir);
     vlog_info("Languages directory: %s", mainLangDir);
 
@@ -326,8 +280,8 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
             "data.zip"
         );
     }
+
     if (!PHYSFS_mount(output, NULL, 1))
-#endif
     {
         vlog_error("Error: data.zip missing!");
         vlog_error("You do not have data.zip!");
@@ -1091,21 +1045,7 @@ bool FILESYSTEM_saveTiXml2Document(const char *name, tinyxml2::XMLDocument& doc,
     PHYSFS_writeBytes(handle, printer.CStr(), printer.CStrSize() - 1); // subtract one because CStrSize includes terminating null
     PHYSFS_close(handle);
 
-#ifdef __EMSCRIPTEN__
-    if (sync)
-    {
-        EM_ASM(FS.syncfs(false, function(err)
-        {
-            if (err)
-            {
-                console.warn("Error saving:", err);
-                alert("Error saving. Check console for more information.");
-            }
-        }));
-    }
-#else
     UNUSED(sync);
-#endif
 
     return true;
 }
@@ -1276,62 +1216,6 @@ void FILESYSTEM_freeEnumerate(EnumHandle* handle)
 
 static int PLATFORM_getOSDirectory(char* output, const size_t output_size)
 {
-#ifdef _WIN32
-    /* This block is here for compatibility, do not touch it! */
-    WCHAR utf16_path[MAX_PATH];
-    HRESULT retcode = SHGetFolderPathW(
-        NULL,
-        CSIDL_PERSONAL,
-        NULL,
-        SHGFP_TYPE_CURRENT,
-        utf16_path
-    );
-    int num_bytes;
-
-    if (FAILED(retcode))
-    {
-        vlog_error(
-            "Could not get OS directory: SHGetFolderPathW returned 0x%08x",
-            retcode
-        );
-        return 0;
-    }
-
-    num_bytes = WideCharToMultiByte(
-        CP_UTF8,
-        0,
-        utf16_path,
-        -1,
-        output,
-        output_size,
-        NULL,
-        NULL
-    );
-    if (num_bytes == 0)
-    {
-        vlog_error(
-            "Could not get OS directory: UTF-8 conversion failed with %d",
-            GetLastError()
-        );
-        return 0;
-    }
-
-    SDL_strlcat(output, "\\VVVVVV\\", MAX_PATH);
-    mkdir(output, 0777);
-    return 1;
-#elif defined(__ANDROID__)
-    const char* externalStoragePath = SDL_AndroidGetExternalStoragePath();
-    if (externalStoragePath == NULL)
-    {
-        vlog_error(
-            "Could not get OS directory: %s",
-            SDL_GetError()
-        );
-        return 0;
-    }
-    SDL_snprintf(output, output_size, "%s/", externalStoragePath);
-    return 1;
-#else
     const char* prefDir = PHYSFS_getPrefDir("distractionware", "VVVVVV");
     if (prefDir == NULL)
     {
@@ -1343,7 +1227,6 @@ static int PLATFORM_getOSDirectory(char* output, const size_t output_size)
     }
     SDL_strlcpy(output, prefDir, output_size);
     return 1;
-#endif
 }
 
 bool FILESYSTEM_openDirectoryEnabled(void)
@@ -1351,12 +1234,6 @@ bool FILESYSTEM_openDirectoryEnabled(void)
     return !gameScreen.isForcedFullscreen();
 }
 
-#if defined(__EMSCRIPTEN__)
-bool FILESYSTEM_openDirectory(const char *dname)
-{
-    return false;
-}
-#else
 bool FILESYSTEM_openDirectory(const char *dname)
 {
     char url[MAX_PATH];
@@ -1368,7 +1245,6 @@ bool FILESYSTEM_openDirectory(const char *dname)
     }
     return true;
 }
-#endif
 
 bool FILESYSTEM_delete(const char *name)
 {
