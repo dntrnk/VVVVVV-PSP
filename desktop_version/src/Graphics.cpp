@@ -3763,8 +3763,6 @@ bool Graphics::reloadresources(void)
     images[IMAGE_SITE4] = grphx.im_image11;
     images[IMAGE_CUSTOMMINIMAP] = grphx.im_image12;
 
-    gameScreen.LoadIcon();
-
     music.destroy();
     music.init();
 

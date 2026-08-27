@@ -744,148 +744,148 @@ void musicclass::init(void)
 
     SoundTrack::Init(44100);
 
-    soundTracks.push_back(SoundTrack( "sounds/jump.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/jump2.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/hurt.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/souleyeminijingle.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/coin.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/save.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/crumble.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/vanish.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/blip.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/preteleport.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/teleport.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/crew1.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/crew2.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/crew3.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/crew4.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/crew5.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/crew6.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/terminal.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/gamesaved.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/crashing.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/blip2.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/countdown.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/go.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/crash.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/combine.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/newrecord.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/trophy.wav" ));
-    soundTracks.push_back(SoundTrack( "sounds/rescue.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/jump.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/jump2.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/hurt.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/souleyeminijingle.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/coin.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/save.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/crumble.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/vanish.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/blip.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/preteleport.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/teleport.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/crew1.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/crew2.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/crew3.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/crew4.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/crew5.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/crew6.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/terminal.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/gamesaved.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/crashing.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/blip2.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/countdown.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/go.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/crash.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/combine.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/newrecord.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/trophy.wav" ));
+    // soundTracks.push_back(SoundTrack( "sounds/rescue.wav" ));
 
-#ifdef VVV_COMPILEMUSIC
-    binaryBlob musicWriteBlob;
-#define FOREACH_TRACK(blob, track_name) blob.AddFileToBinaryBlob("data/" track_name);
-    TRACK_NAMES(musicWriteBlob)
-#undef FOREACH_TRACK
+// #ifdef VVV_COMPILEMUSIC
+//     binaryBlob musicWriteBlob;
+// #define FOREACH_TRACK(blob, track_name) blob.AddFileToBinaryBlob("data/" track_name);
+//     TRACK_NAMES(musicWriteBlob)
+// #undef FOREACH_TRACK
 
-    musicWriteBlob.writeBinaryBlob("data/BinaryMusic.vvv");
-    musicWriteBlob.clear();
-#endif
+//     musicWriteBlob.writeBinaryBlob("data/BinaryMusic.vvv");
+//     musicWriteBlob.clear();
+// #endif
 
-    num_mmmmmm_tracks = 0;
-    num_pppppp_tracks = 0;
+//     num_mmmmmm_tracks = 0;
+//     num_pppppp_tracks = 0;
 
-    if (!mmmmmm_blob.unPackBinary("mmmmmm.vvv"))
-    {
-        if (pppppp_blob.unPackBinary("vvvvvvmusic.vvv"))
-        {
-            vlog_info("Loading music from PPPPPP blob...");
+//     if (!mmmmmm_blob.unPackBinary("mmmmmm.vvv"))
+//     {
+//         if (pppppp_blob.unPackBinary("vvvvvvmusic.vvv"))
+//         {
+//             vlog_info("Loading music from PPPPPP blob...");
 
-            mmmmmm = false;
-            usingmmmmmm=false;
+//             mmmmmm = false;
+//             usingmmmmmm=false;
 
-            int index;
-            SDL_RWops* rw;
+//             int index;
+//             SDL_RWops* rw;
 
-#define TRACK_LOAD_BLOB(blob, track_name) \
-    index = blob.getIndex("data/" track_name); \
-    if (index >= 0 && index < blob.max_headers) \
-    { \
-        rw = SDL_RWFromConstMem(blob.getAddress(index), blob.getSize(index)); \
-        if (rw == NULL) \
-        { \
-            vlog_error("Unable to read music file header: %s", SDL_GetError()); \
-        } \
-        else \
-        { \
-            musicTracks.push_back(MusicTrack(rw)); \
-        } \
-    }
+// #define TRACK_LOAD_BLOB(blob, track_name) \
+//     index = blob.getIndex("data/" track_name); \
+//     if (index >= 0 && index < blob.max_headers) \
+//     { \
+//         rw = SDL_RWFromConstMem(blob.getAddress(index), blob.getSize(index)); \
+//         if (rw == NULL) \
+//         { \
+//             vlog_error("Unable to read music file header: %s", SDL_GetError()); \
+//         } \
+//         else \
+//         { \
+//             musicTracks.push_back(MusicTrack(rw)); \
+//         } \
+//     }
 
-#define FOREACH_TRACK(blob, track_name) TRACK_LOAD_BLOB(blob, track_name)
+// #define FOREACH_TRACK(blob, track_name) TRACK_LOAD_BLOB(blob, track_name)
 
-            TRACK_NAMES(pppppp_blob)
+//             TRACK_NAMES(pppppp_blob)
 
-#undef FOREACH_TRACK
-        }
-        else
-        {
-            vlog_info("Loading music from loose files...");
+// #undef FOREACH_TRACK
+//         }
+//         else
+//         {
+//             vlog_info("Loading music from loose files...");
 
-            SDL_RWops* rw;
+//             SDL_RWops* rw;
 
-#define FOREACH_TRACK(_, track_name) \
-    rw = PHYSFSRWOPS_openRead(track_name); \
-    if (rw == NULL) \
-    { \
-        vlog_error("Unable to read loose music file: %s", SDL_GetError()); \
-    } \
-    else \
-    { \
-        musicTracks.push_back(MusicTrack(rw)); \
-    }
+// #define FOREACH_TRACK(_, track_name) \
+//     rw = PHYSFSRWOPS_openRead(track_name); \
+//     if (rw == NULL) \
+//     { \
+//         vlog_error("Unable to read loose music file: %s", SDL_GetError()); \
+//     } \
+//     else \
+//     { \
+//         musicTracks.push_back(MusicTrack(rw)); \
+//     }
 
-            TRACK_NAMES(_)
+//             TRACK_NAMES(_)
 
-#undef FOREACH_TRACK
-        }
-    }
-    else
-    {
-        vlog_info("Loading PPPPPP and MMMMMM blobs...");
+// #undef FOREACH_TRACK
+//         }
+//     }
+//     else
+//     {
+//         vlog_info("Loading PPPPPP and MMMMMM blobs...");
 
         mmmmmm = true;
         int index;
         SDL_RWops* rw;
 
-#define FOREACH_TRACK(blob, track_name) TRACK_LOAD_BLOB(blob, track_name)
+// #define FOREACH_TRACK(blob, track_name) TRACK_LOAD_BLOB(blob, track_name)
 
-        TRACK_NAMES(mmmmmm_blob)
+//         TRACK_NAMES(mmmmmm_blob)
 
-        num_mmmmmm_tracks += musicTracks.size();
+//         num_mmmmmm_tracks += musicTracks.size();
 
-        size_t index_ = 0;
-        while (mmmmmm_blob.nextExtra(&index_))
-        {
-            rw = SDL_RWFromConstMem(mmmmmm_blob.getAddress(index_), mmmmmm_blob.getSize(index_));
-            musicTracks.push_back(MusicTrack( rw ));
+//         size_t index_ = 0;
+//         while (mmmmmm_blob.nextExtra(&index_))
+//         {
+//             rw = SDL_RWFromConstMem(mmmmmm_blob.getAddress(index_), mmmmmm_blob.getSize(index_));
+//             musicTracks.push_back(MusicTrack( rw ));
 
-            num_mmmmmm_tracks++;
-            index_++;
-        }
+//             num_mmmmmm_tracks++;
+//             index_++;
+//         }
 
-        bool ohCrap = pppppp_blob.unPackBinary("vvvvvvmusic.vvv");
-        SDL_assert(ohCrap && "Music not found!");
+//         bool ohCrap = pppppp_blob.unPackBinary("vvvvvvmusic.vvv");
+//         SDL_assert(ohCrap && "Music not found!");
 
-    TRACK_NAMES(pppppp_blob)
+//     TRACK_NAMES(pppppp_blob)
 
-#undef FOREACH_TRACK
-#undef TRACK_LOAD_BLOB
-    }
+// #undef FOREACH_TRACK
+// #undef TRACK_LOAD_BLOB
+//     }
 
-    num_pppppp_tracks += musicTracks.size() - num_mmmmmm_tracks;
+//     num_pppppp_tracks += musicTracks.size() - num_mmmmmm_tracks;
 
-    SDL_RWops* rw;
-    size_t index_ = 0;
-    while (pppppp_blob.nextExtra(&index_))
-    {
-        rw = SDL_RWFromConstMem(pppppp_blob.getAddress(index_), pppppp_blob.getSize(index_));
-        musicTracks.push_back(MusicTrack( rw ));
+//     SDL_RWops* rw;
+//     size_t index_ = 0;
+//     while (pppppp_blob.nextExtra(&index_))
+//     {
+//         rw = SDL_RWFromConstMem(pppppp_blob.getAddress(index_), pppppp_blob.getSize(index_));
+//         musicTracks.push_back(MusicTrack( rw ));
 
-        num_pppppp_tracks++;
-        index_++;
-    }
+//         num_pppppp_tracks++;
+//         index_++;
+//     }
 }
 
 void musicclass::destroy(void)

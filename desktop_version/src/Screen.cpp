@@ -12,9 +12,7 @@
 #include "Game.h"
 #include "Graphics.h"
 #include "GraphicsUtil.h"
-#ifndef __APPLE__
 #include "GraphicsResources.h"
-#endif
 #include "InterimVersion.h"
 #include "Map.h"
 #include "Render.h"
@@ -46,49 +44,38 @@ void Screen::init(const struct ScreenSettings* settings)
     vsync = settings->useVsync;
 
     // Uncomment this next line when you need to debug -flibit
-    // SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, "software", SDL_HINT_OVERRIDE);
+    SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, "software", SDL_HINT_OVERRIDE);
 
-    m_window = SDL_CreateWindow(
-        "VVVVVV",
-        SDL_WINDOWPOS_CENTERED_DISPLAY(windowDisplay),
-        SDL_WINDOWPOS_CENTERED_DISPLAY(windowDisplay),
-        SCREEN_WIDTH_PIXELS * 2,
-        SCREEN_HEIGHT_PIXELS * 2,
-        SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI
-    );
+    SDL_CreateWindowAndRenderer(480, 272, 0, &m_window, &m_renderer);
 
-    if (m_window == NULL)
-    {
-        vlog_error("Could not create window: %s", SDL_GetError());
-        VVV_exit(1);
-    }
+    // m_window = SDL_CreateWindow(
+    //     "VVVVVV",
+    //     SDL_WINDOWPOS_CENTERED_DISPLAY(windowDisplay),
+    //     SDL_WINDOWPOS_CENTERED_DISPLAY(windowDisplay),
+    //     SCREEN_WIDTH_PIXELS * 2,
+    //     SCREEN_HEIGHT_PIXELS * 2,
+    //     SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI
+    // );
 
-    m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+    // if (m_window == NULL)
+    // {
+    //     vlog_error("Could not create window: %s", SDL_GetError());
+    //     VVV_exit(1);
+    // }
 
-    if (m_renderer == NULL)
-    {
-        vlog_error("Could not create renderer: %s", SDL_GetError());
-        VVV_exit(1);
-    }
+    // m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+
+    // if (m_renderer == NULL)
+    // {
+    //     vlog_error("Could not create renderer: %s", SDL_GetError());
+    //     VVV_exit(1);
+    // }
 
     SDL_RenderSetVSync(m_renderer, (int) vsync);
 
-#ifdef INTERIM_VERSION_EXISTS
-    /* Branch name limits are ill-defined but on GitHub it's ~256 chars
-     * ( https://stackoverflow.com/a/24014513/ ).
-     * Really though, just don't use super long branch names. */
-    char title[256];
-    SDL_snprintf(title, sizeof(title), "VVVVVV [%s]", BRANCH_NAME);
-    SDL_SetWindowTitle(m_window, title);
-#else
-    SDL_SetWindowTitle(m_window, "VVVVVV");
-#endif
+    SDL_SetWindowMinimumSize(m_window, 480, 272);
 
-    SDL_SetWindowMinimumSize(m_window, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS);
-
-    LoadIcon();
-
-    ResizeScreen(windowWidth, windowHeight);
+    ResizeScreen(480, 272);
 }
 
 void Screen::destroy(void)
@@ -116,25 +103,6 @@ void Screen::GetSettings(struct ScreenSettings* settings)
     settings->linearFilter = isFiltered;
     settings->badSignal = badSignalEffect;
 }
-
-#ifdef __APPLE__
-/* Apple doesn't like icons anymore... */
-void Screen::LoadIcon(void)
-{
-
-}
-#else
-void Screen::LoadIcon(void)
-{
-    SDL_Surface* icon = LoadImageSurface("VVVVVV.png");
-    if (icon == NULL)
-    {
-        return;
-    }
-    SDL_SetWindowIcon(m_window, icon);
-    VVV_freefunc(SDL_FreeSurface, icon);
-}
-#endif /* __APPLE__ */
 
 void Screen::ResizeScreen(int x, int y)
 {
@@ -388,9 +356,5 @@ bool Screen::isForcedFullscreen(void)
      * If you're working on a tenfoot-only build, add a def that always
      * returns true!
      */
-#ifdef __ANDROID__
-    return true;
-#else
     return SDL_GetHintBoolean("SteamTenfoot", SDL_FALSE);
-#endif
 }

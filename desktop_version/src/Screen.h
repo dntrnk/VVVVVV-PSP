@@ -13,8 +13,6 @@ public:
 
     void GetSettings(struct ScreenSettings* settings);
 
-    void LoadIcon(void);
-
     void ResizeScreen(int x, int y);
     void ResizeToNearestMultiple(void);
     void GetScreenSize(int* x, int* y);
