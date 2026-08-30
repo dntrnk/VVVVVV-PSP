@@ -960,6 +960,8 @@ static void inline deltaloop(void)
         {
             graphics.clear();
 
+            g2dClear(G2D_BLACK);
+
             graphics.set_render_target(graphics.gameTexture);
 
             implfunc->func();
