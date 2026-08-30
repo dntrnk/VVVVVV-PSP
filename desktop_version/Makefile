@@ -1,7 +1,7 @@
 TARGET = vvvvvv
 
-PSPSDK=$(shell psp-config --pspsdk-path)
-PSPDEV = $(HOME)/pspdev
+PSPSDK = $(shell psp-config --pspsdk-path)
+PSPDEV = $(shell psp-config --pspdev-path)
 
 INCDIR = \
   $(PSPSDK)/include \
@@ -102,8 +102,8 @@ ASFLAGS = $(CFLAGS) -c
 BUILD_PRX = 1
 PSP_FW_VERSION = 660
 
-LIBS = -lpspgu -lpspge -lpspdisplay -lpsppower -lpspctrl -lpspaudio -lpspatrac3 -lpspvram -lpng -lfreetype \
-  -lbz2 -lz -lphysfs -lvorbis -lvorbisidec -lSDL2main -lSDL2_image -lSDL2 -lSDL2_mixer -lstdc++ -lGL -logg -lmodplug -lpspvfpu -lpsphprm -lFAudio -ltinyxml2
+LIBS = -lpspgu -lpspge -lpspdisplay -lpsppower -lpspctrl -lpspaudio -lpspvram \
+  -lphysfs -lvorbis -lvorbisidec -lSDL2main -lSDL2 -lSDL2_mixer -lstdc++ -lGL -logg -lmodplug -lpspvfpu -lpsphprm -lFAudio -ltinyxml2
 
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = VVVVVV
