@@ -574,13 +574,13 @@ void KeyPoll::Poll(void)
     SDL_Rect rect;
     graphics.get_stretch_info(&rect);
 
-    int window_width;
-    int window_height;
-    SDL_GetWindowSizeInPixels(gameScreen.m_window, &window_width, &window_height);
+    int window_width = 480;
+    int window_height = 272;
+    // SDL_GetWindowSizeInPixels(gameScreen.m_window, &window_width, &window_height);
 
-    int scaled_window_width;
-    int scaled_window_height;
-    SDL_GetWindowSize(gameScreen.m_window, &scaled_window_width, &scaled_window_height);
+    int scaled_window_width = 480;
+    int scaled_window_height = 272;
+    // SDL_GetWindowSize(gameScreen.m_window, &scaled_window_width, &scaled_window_height);
 
     float scale_x = (float)window_width / (float)scaled_window_width;
     float scale_y = (float)window_height / (float)scaled_window_height;

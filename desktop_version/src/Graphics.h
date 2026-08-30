@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "glib2d.h"
+
 #include "Game.h"
 #include "GraphicsResources.h"
 #include "Textbox.h"
@@ -51,8 +53,8 @@ public:
 
     GraphicsResources grphx;
 
-    SDL_Color huetilegetcol();
-    SDL_Color bigchunkygetcol(int t);
+    g2dColor huetilegetcol();
+    g2dColor bigchunkygetcol(int t);
 
     void drawgravityline(int t, int x, int y, int w, int h);
 
@@ -76,7 +78,7 @@ public:
     void createtextbox(
         const std::string& t,
         int xp, int yp,
-        SDL_Color color
+        g2dColor color
     );
     void createtextbox(
         const std::string& t,
@@ -86,7 +88,7 @@ public:
     void createtextboxflipme(
         const std::string& t,
         int xp, int yp,
-        SDL_Color color
+        g2dColor color
     );
     void createtextboxflipme(
         const std::string& t,
@@ -157,7 +159,7 @@ public:
 
     void drawimage(int t, int xp, int yp, bool cent=false);
 
-    void drawimagecol(int t, int xp, int yp, SDL_Color ct, bool cent= false);
+    void drawimagecol(int t, int xp, int yp, g2dColor ct, bool cent= false);
 
     void draw_texture(SDL_Texture* image, int x, int y);
 
@@ -169,17 +171,17 @@ public:
     void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, int r, int g, int b, int a);
     void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, int r, int g, int b, int scalex, int scaley);
     void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, int r, int g, int b);
-    void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, SDL_Color color, int scalex, int scaley);
-    void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, SDL_Color color);
+    void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, g2dColor color, int scalex, int scaley);
+    void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, g2dColor color);
 
     void updatetextboxes(void);
     const char* textbox_line(char* buffer, size_t buffer_len, size_t textbox_i, size_t line_i);
     void drawgui(void);
 
     void draw_sprite(int x, int y, int t, int r, int g, int b);
-    void draw_sprite(int x, int y, int t, SDL_Color color);
+    void draw_sprite(int x, int y, int t, g2dColor color);
 
-    void draw_flipsprite(int x, int y, int t, SDL_Color color);
+    void draw_flipsprite(int x, int y, int t, g2dColor color);
 
     void scroll_texture(SDL_Texture* texture, SDL_Texture* temp, int x, int y);
 
@@ -219,23 +221,14 @@ public:
 
     int set_color(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
     int set_color(Uint8 r, Uint8 g, Uint8 b);
-    int set_color(SDL_Color color);
+    int set_color(g2dColor color);
+    
+    void fill_rect(const SDL_Rect* rect, g2dColor color);
+    void fill_rect(int x, int y, int w, int h, g2dColor color);
+    void fill_rect(g2dColor color);
 
-    void fill_rect(const SDL_Rect* rect, int r, int g, int b, int a);
-    void fill_rect(int x, int y, int w, int h, int r, int g, int b, int a);
-    void fill_rect(int x, int y, int w, int h, int r, int g, int b);
-    void fill_rect(const SDL_Rect* rect, int r, int g, int b);
-    void fill_rect(int r, int g, int b);
-    void fill_rect(const SDL_Rect* rect, SDL_Color color);
-    void fill_rect(int x, int y, int w, int h, SDL_Color color);
-    void fill_rect(SDL_Color color);
-
-    void draw_rect(const SDL_Rect* rect, int r, int g, int b, int a);
-    void draw_rect(int x, int y, int w, int h, int r, int g, int b, int a);
-    void draw_rect(int x, int y, int w, int h, int r, int g, int b);
-    void draw_rect(const SDL_Rect* rect, int r, int g, int b);
-    void draw_rect(const SDL_Rect* rect, SDL_Color color);
-    void draw_rect(int x, int y, int w, int h, SDL_Color color);
+    void draw_rect(const SDL_Rect* rect, g2dColor color);
+    void draw_rect(int x, int y, int w, int h, g2dColor color);
 
     int draw_line(int x, int y, int x2, int y2);
 
@@ -275,13 +268,9 @@ public:
 
     void drawtrophytext(void);
 
-    void drawtele(int x, int y, int t, SDL_Color c);
+    void drawtele(int x, int y, int t, g2dColor c);
 
-    SDL_Color getRGBA(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
-
-    SDL_Color getRGB(Uint8 r, Uint8 g, Uint8 b);
-
-    SDL_Color RGBf(int r, int g, int b);
+    g2dColor RGBf(int r, int g, int b);
 
     void drawbackground(int t);
     void updatebackground(int t);
@@ -321,7 +310,7 @@ public:
     void drawtowerbackground(const TowerBG& bg_obj);
     void updatetowerbackground(TowerBG& bg_obj);
 
-    SDL_Color getcol(int t);
+    g2dColor getcol(int t);
     void drawfinalmap(void);
 
     int rcol;
@@ -412,15 +401,15 @@ public:
 #endif
     float alpha;
 
-    SDL_Color col_crewred;
-    SDL_Color col_crewyellow;
-    SDL_Color col_crewgreen;
-    SDL_Color col_crewcyan;
-    SDL_Color col_crewblue;
-    SDL_Color col_crewpurple; //actually pink
-    SDL_Color col_crewinactive;
-    SDL_Color col_clock;
-    SDL_Color col_trinket;
+    g2dColor col_crewred;
+    g2dColor col_crewyellow;
+    g2dColor col_crewgreen;
+    g2dColor col_crewcyan;
+    g2dColor col_crewblue;
+    g2dColor col_crewpurple; //actually pink
+    g2dColor col_crewinactive;
+    g2dColor col_clock;
+    g2dColor col_trinket;
     int col_tr;
     int col_tg;
     int col_tb;
@@ -428,7 +417,7 @@ public:
 
     bool kludgeswnlinewidth;
 
-    SDL_Color crewcolourreal(int t);
+    g2dColor crewcolourreal(int t);
 
     void render_roomname(uint32_t font_flag, const char* roomname, int r, int g, int b);
 

@@ -421,7 +421,7 @@ static uint8_t load_font(FontContainer* container, const char* name)
                     {
                         for (int pixel_x = 0; pixel_x < f->glyph_w; pixel_x++)
                         {
-                            if (ReadPixel(temp_surface, glyph_x+pixel_x, glyph_y+pixel_y).a > 0)
+                            if (G2D_GET_A(ReadPixel(temp_surface, glyph_x+pixel_x, glyph_y+pixel_y)) > 0)
                             {
                                 found_pixel = true;
                                 goto no_more_pixels;

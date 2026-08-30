@@ -704,20 +704,20 @@ static void draw_background_grid(void)
             if (i == 19 || i == 20 || j == 14 || j == 29)
             {
                 // Major guidelines
-                graphics.draw_rect(i * 8, j * 8, 7, 7, graphics.getRGB(32, 32, 32));
+                graphics.draw_rect(i * 8, j * 8, 7, 7, G2D_RGB(32, 32, 32));
             }
             else if (i == 9 || i == 30 || j == 6 || j == 7 || j == 21 || j == 22)
             {
                 // Minor guidelines
-                graphics.draw_rect(i * 8, j * 8, 7, 7, graphics.getRGB(24, 24, 24));
+                graphics.draw_rect(i * 8, j * 8, 7, 7, G2D_RGB(24, 24, 24));
             }
             else if (i % 4 == 0 || j % 4 == 0)
             {
-                graphics.draw_rect(i * 8, j * 8, 7, 7, graphics.getRGB(16, 16, 16));
+                graphics.draw_rect(i * 8, j * 8, 7, 7, G2D_RGB(16, 16, 16));
             }
             else
             {
-                graphics.draw_rect(i * 8, j * 8, 7, 7, graphics.getRGB(8, 8, 8));
+                graphics.draw_rect(i * 8, j * 8, 7, 7, G2D_RGB(8, 8, 8));
             }
         }
     }
@@ -748,8 +748,8 @@ static void draw_background(int warpdir)
 
 static void draw_edgeguide(const TileTypes type, const int x, const int y, const bool vertical)
 {
-    static const SDL_Color white = graphics.getRGB(255 - help.glow, 255, 255);
-    static const SDL_Color red = graphics.getRGB(255 - help.glow, 127, 127);
+    static const g2dColor white = G2D_RGB(255 - help.glow, 255, 255);
+    static const g2dColor red = G2D_RGB(255 - help.glow, 127, 127);
 
     if (type != TileType_SOLID && type != TileType_SPIKE)
     {
@@ -791,7 +791,7 @@ static void draw_edgeguides(void)
         draw_edgeguide(ed.get_abs_tile_type(global_x + i, global_y + 30, true), i * 8, 238, true);
     }
 
-    static const SDL_Color green = graphics.getRGB(127, 255 - help.glow, 127);
+    static const g2dColor green = G2D_RGB(127, 255 - help.glow, 127);
 
     // Horizontal gravity line edge-guides
 
@@ -931,7 +931,7 @@ static void draw_entities(void)
                     font::print(PR_FONT_8X8, x + 4, y + 4, std::string(1, arrows[movement]), 255, 255, 255 - help.glow);
                 }
 
-                graphics.draw_rect(x, y, 16, 16, graphics.getRGB(255, 164, 255));
+                graphics.draw_rect(x, y, 16, 16, G2D_RGB(255, 164, 255));
                 break;
             }
             case 2: // Conveyors & Platforms
@@ -982,7 +982,7 @@ static void draw_entities(void)
                     font::print(PR_FONT_8X8, x + 12, y, "X", glow, 0, 0);
                 }
 
-                graphics.draw_rect(x, y, 8 * length, 8, graphics.getRGB(255, 255, 255));
+                graphics.draw_rect(x, y, 8 * length, 8, G2D_WHITE);
                 break;
             }
             case 3: // Disappearing Platforms
@@ -991,15 +991,15 @@ static void draw_entities(void)
                 }
 
                 font::print(PR_FONT_8X8, x, y, "////", 255 - help.glow, 255 - help.glow, 255 - help.glow);
-                graphics.draw_rect(x, y, 32, 8, graphics.getRGB(255, 255, 255));
+                graphics.draw_rect(x, y, 32, 8, G2D_WHITE);
                 break;
             case 9: // Shiny Trinkets
                 graphics.draw_sprite(x, y, 22, 196, 196, 196);
-                graphics.draw_rect(x, y, 16, 16, graphics.getRGB(255, 164, 164));
+                graphics.draw_rect(x, y, 16, 16, G2D_RGB(255, 164, 164));
                 break;
             case 10: // Checkpoints
                 graphics.draw_sprite(x, y, 20 + entity->p1, 196, 196, 196);
-                graphics.draw_rect(x, y, 16, 16, graphics.getRGB(255, 164, 164));
+                graphics.draw_rect(x, y, 16, 16, G2D_RGB(255, 164, 164));
                 break;
             case 11: // Gravity Lines
                 // p2 is in tiles, and p3 is in pixels
@@ -1008,23 +1008,23 @@ static void draw_entities(void)
                     // Horizontal gravity line
                     const int left = entity->p2 * 8;
                     const int width = entity->p3;
-                    graphics.fill_rect(left, y + 4, width, 1, graphics.getRGB(194, 194, 194));
+                    graphics.fill_rect(left, y + 4, width, 1, G2D_RGB(194, 194, 194));
                 }
                 else
                 {
                     // Vertical gravity line
                     const int top = entity->p2 * 8;
                     const int height = entity->p3;
-                    graphics.fill_rect(x + 3, top, 1, height, graphics.getRGB(194, 194, 194));
+                    graphics.fill_rect(x + 3, top, 1, height, G2D_RGB(194, 194, 194));
                 }
-                graphics.draw_rect(x, y, 8, 8, graphics.getRGB(164, 255, 164));
+                graphics.draw_rect(x, y, 8, 8, G2D_RGB(164, 255, 164));
                 break;
             case 13: // Warp Tokens
             {
                 std::string text;
 
                 graphics.draw_sprite(x, y, 18 + (ed.entframe % 2), 196, 196, 196);
-                graphics.draw_rect(x, y, 16, 16, graphics.getRGB(255, 164, 164));
+                graphics.draw_rect(x, y, 16, 16, G2D_RGB(255, 164, 164));
 
                 if (i == edent_under_cursor)
                 {
@@ -1040,7 +1040,7 @@ static void draw_entities(void)
             }
             case 15: // Crewmates
                 graphics.draw_sprite(x - 4, y, 144, graphics.crewcolourreal(entity->p1));
-                graphics.draw_rect(x, y, 16, 24, graphics.getRGB(164, 164, 164));
+                graphics.draw_rect(x, y, 16, 24, G2D_RGB(164, 164, 164));
                 break;
             case 16: // Start Point
             {
@@ -1055,7 +1055,7 @@ static void draw_entities(void)
                     graphics.draw_sprite(x - 4, y, 3, graphics.col_crewcyan);
                 }
 
-                graphics.draw_rect(x, y, 16, 24, graphics.getRGB(255, 255, 164));
+                graphics.draw_rect(x, y, 16, 24, G2D_RGB(255, 255, 164));
                 font::print(PR_BOR | PR_CEN | PR_CJK_HIGH, x + 8, y - 8, loc::gettext("START"), labelcol, labelcol, labelcol);
                 break;
             }
@@ -1076,7 +1076,7 @@ static void draw_entities(void)
                     // RTL. The 8 is the size of a tile, not font width!
                     rect_x -= width - 8;
                 }
-                graphics.draw_rect(rect_x, y, width, height, graphics.getRGB(96, 96, 96));
+                graphics.draw_rect(rect_x, y, width, height, G2D_RGB(96, 96, 96));
                 graphics.print_roomtext(x, y, entity->scriptname.c_str(), entity->p1);
                 break;
             }
@@ -1097,7 +1097,7 @@ static void draw_entities(void)
                 }
 
                 graphics.draw_sprite(x, corrected_y + 8, sprite + 16, 96, 96, 96);
-                graphics.draw_rect(x, y, 16, 24, graphics.getRGB(164, 164, 164));
+                graphics.draw_rect(x, y, 16, 24, G2D_RGB(164, 164, 164));
                 if (i == edent_under_cursor)
                 {
                     font::print(PR_FONT_LEVEL | PR_BOR | PR_CJK_HIGH, x, y - 8, entity->scriptname, 210, 210, 255);
@@ -1105,8 +1105,8 @@ static void draw_entities(void)
                 break;
             }
             case 19: // Script Triggers
-                graphics.draw_rect(x, y, entity->p1 * 8, entity->p2 * 8, graphics.getRGB(255, 164, 255));
-                graphics.draw_rect(x, y, 8, 8, graphics.getRGB(255, 255, 255));
+                graphics.draw_rect(x, y, entity->p1 * 8, entity->p2 * 8, G2D_RGB(255, 164, 255));
+                graphics.draw_rect(x, y, 8, 8, G2D_WHITE);
                 if (i == edent_under_cursor)
                 {
                     font::print(PR_FONT_LEVEL | PR_BOR | PR_CJK_HIGH, x, y - 8, entity->scriptname, 210, 210, 255);
@@ -1119,16 +1119,16 @@ static void draw_entities(void)
                     int left = entity->p2;
                     int right = left + entity->p3 / 8;
 
-                    graphics.draw_rect((left * 8), y + 1, (right - left) * 8, 6, graphics.getRGB(194, 255, 255));
-                    graphics.draw_rect(x, y, 8, 8, graphics.getRGB(164, 255, 255));
+                    graphics.draw_rect((left * 8), y + 1, (right - left) * 8, 6, G2D_RGB(194, 255, 255));
+                    graphics.draw_rect(x, y, 8, 8, G2D_RGB(164, 255, 255));
                 }
                 else // Vertical
                 {
                     int top = entity->p2;
                     int bottom = top + entity->p3 / 8;
 
-                    graphics.draw_rect(x + 1, (top * 8), 6, (bottom - top) * 8, graphics.getRGB(194, 255, 255));
-                    graphics.draw_rect(x, y, 8, 8, graphics.getRGB(164, 255, 255));
+                    graphics.draw_rect(x + 1, (top * 8), 6, (bottom - top) * 8, G2D_RGB(194, 255, 255));
+                    graphics.draw_rect(x, y, 8, 8, G2D_RGB(164, 255, 255));
                 }
                 break;
             }
@@ -1143,7 +1143,7 @@ static void draw_entities(void)
             std::string text;
 
             graphics.draw_sprite(x, y, 18 + (ed.entframe % 2), 64, 64, 64);
-            graphics.draw_rect((entity->p1 * 8) - (ed.levx * 40 * 8), (entity->p2 * 8) - (ed.levy * 30 * 8), 16, 16, graphics.getRGB(96, 64, 64));
+            graphics.draw_rect((entity->p1 * 8) - (ed.levx * 40 * 8), (entity->p2 * 8) - (ed.levy * 30 * 8), 16, 16, G2D_RGB(96, 64, 64));
 
             if (ed.tilex == x / 8 && ed.tiley == y / 8)
             {
@@ -1173,9 +1173,9 @@ static void draw_ghosts(void)
             if (i <= ed.current_ghosts) { // We don't want all of them to show up at once :)
                 if (ed.ghosts[i].rx != ed.levx || ed.ghosts[i].ry != ed.levy)
                     continue;
-                SDL_Color ct = ed.ghosts[i].realcol;
-                const int alpha = 3 * ct.a / 4;
-                ct.a = (Uint8)alpha;
+                g2dColor ct = ed.ghosts[i].realcol;
+                const int alpha = 3 * G2D_GET_A(ct) / 4;
+                ct = G2D_RGBA(G2D_GET_R(ct), G2D_GET_G(ct), G2D_GET_B(ct), alpha);
                 graphics.draw_sprite(ed.ghosts[i].x, ed.ghosts[i].y, ed.ghosts[i].frame, ct);
             }
         }
@@ -1220,20 +1220,20 @@ static void draw_bounds(void)
     // Draw boundaries
     if (room->enemyx1 != 0 || room->enemyy1 != 0 || room->enemyx2 != 320 || room->enemyy2 != 240)
     {
-        graphics.draw_rect(room->enemyx1, room->enemyy1, room->enemyx2 - room->enemyx1, room->enemyy2 - room->enemyy1, graphics.getRGB(255 - (help.glow / 2), 64, 64));
+        graphics.draw_rect(room->enemyx1, room->enemyy1, room->enemyx2 - room->enemyx1, room->enemyy2 - room->enemyy1, G2D_RGB(255 - (help.glow / 2), 64, 64));
     }
 
     if (room->platx1 != 0 || room->platy1 != 0 || room->platx2 != 320 || room->platy2 != 240)
     {
-        graphics.draw_rect(room->platx1, room->platy1, room->platx2 - room->platx1, room->platy2 - room->platy1, graphics.getRGB(64, 64, 255 - (help.glow / 2)));
+        graphics.draw_rect(room->platx1, room->platy1, room->platx2 - room->platx1, room->platy2 - room->platy1, G2D_RGB(64, 64, 255 - (help.glow / 2)));
     }
 
     if (ed.substate == EditorSubState_DRAW_BOX)
     {
         if (ed.box_corner == BoxCorner_FIRST)
         {
-            graphics.draw_rect(ed.tilex * 8, ed.tiley * 8, 8, 8, graphics.getRGB(210 + help.glow / 2, 191 + help.glow, 255 - help.glow / 2));
-            graphics.draw_rect((ed.tilex * 8) + 2, (ed.tiley * 8) + 2, 4, 4, graphics.getRGB(105 + help.glow / 4, 100 + help.glow / 2, 128 - help.glow / 4));
+            graphics.draw_rect(ed.tilex * 8, ed.tiley * 8, 8, 8, G2D_RGB(210 + help.glow / 2, 191 + help.glow, 255 - help.glow / 2));
+            graphics.draw_rect((ed.tilex * 8) + 2, (ed.tiley * 8) + 2, 4, 4, G2D_RGB(105 + help.glow / 4, 100 + help.glow / 2, 128 - help.glow / 4));
         }
         else
         {
@@ -1244,8 +1244,8 @@ static void draw_bounds(void)
 
             adjust_box_coordinates(ed.box_point.x, ed.box_point.y, ed.tilex * 8, ed.tiley * 8, &left, &right, &top, &bottom);
 
-            graphics.draw_rect(left, top, right - left, bottom - top, graphics.getRGB(210 + help.glow / 2, 191 + help.glow, 255 - help.glow / 2));
-            graphics.draw_rect(left + 2, top + 2, (right - left) - 4, (bottom - top) - 4, graphics.getRGB(105 + help.glow / 4, 100 + help.glow / 2, 128 - help.glow / 4));
+            graphics.draw_rect(left, top, right - left, bottom - top, G2D_RGB(210 + help.glow / 2, 191 + help.glow, 255 - help.glow / 2));
+            graphics.draw_rect(left + 2, top + 2, (right - left) - 4, (bottom - top) - 4, G2D_RGB(105 + help.glow / 4, 100 + help.glow / 2, 128 - help.glow / 4));
         }
     }
 }
@@ -1264,7 +1264,7 @@ static void draw_cursor(void)
 {
     extern editorclass ed;
 
-    static const SDL_Color blue = graphics.getRGB(32, 32, 200);
+    static const g2dColor blue = G2D_RGB(32, 32, 200);
 
     const int x = ed.tilex * 8;
     const int y = ed.tiley * 8;
@@ -1403,8 +1403,8 @@ static void draw_tile_drawer(int tileset)
 
         // Draw five lines of the editor
         const int temp = ed.direct_mode_tile - (ed.direct_mode_tile % 40) - 80;
-        graphics.fill_rect(0, -t2, 320, 40, graphics.getRGB(0, 0, 0));
-        graphics.fill_rect(0, -t2 + 40, 320, 2, graphics.getRGB(255, 255, 255));
+        graphics.fill_rect(0, -t2, 320, 40, G2D_BLACK);
+        graphics.fill_rect(0, -t2 + 40, 320, 2, G2D_WHITE);
 
         int texturewidth;
         int textureheight;
@@ -1432,8 +1432,8 @@ static void draw_tile_drawer(int tileset)
         }
 
         // Highlight our little block
-        graphics.draw_rect(((ed.direct_mode_tile % SCREEN_WIDTH_TILES) * 8) - 2, 16 - t2 - 2, 12, 12, graphics.getRGB(255 - help.glow, 196, 196));
-        graphics.draw_rect(((ed.direct_mode_tile % SCREEN_WIDTH_TILES) * 8) - 1, 16 - t2 - 1, 10, 10, graphics.getRGB(0, 0, 0));
+        graphics.draw_rect(((ed.direct_mode_tile % SCREEN_WIDTH_TILES) * 8) - 2, 16 - t2 - 2, 12, 12, G2D_RGB(255 - help.glow, 196, 196));
+        graphics.draw_rect(((ed.direct_mode_tile % SCREEN_WIDTH_TILES) * 8) - 1, 16 - t2 - 1, 10, 10, G2D_BLACK);
     }
 
     if (ed.direct_mode_drawer > 0 && t2 <= 30)
@@ -1441,8 +1441,8 @@ static void draw_tile_drawer(int tileset)
         short labellen = 2 + font::len(0, loc::gettext("Tile:"));
         font::print(PR_BOR, 2, 45 - t2, loc::gettext("Tile:"), 196, 196, 255 - help.glow);
         font::print(PR_BOR, labellen + 16, 45 - t2, help.String(ed.direct_mode_tile), 196, 196, 255 - help.glow);
-        graphics.fill_rect(labellen + 2, 44 - t2, 10, 10, graphics.getRGB(255 - help.glow, 196, 196));
-        graphics.fill_rect(labellen + 3, 45 - t2, 8, 8, graphics.getRGB(0, 0, 0));
+        graphics.fill_rect(labellen + 2, 44 - t2, 10, 10, G2D_RGB(255 - help.glow, 196, 196));
+        graphics.fill_rect(labellen + 3, 45 - t2, 8, 8, G2D_BLACK);
 
         if (tileset == 0)
         {
@@ -1460,8 +1460,8 @@ static void draw_tile_drawer(int tileset)
         y = SDL_max(y, 12);
         font::print(PR_BOR, 2, y, loc::gettext("Tile:"), 196, 196, 255 - help.glow);
         font::print(PR_BOR, labellen + 16, y, help.String(ed.direct_mode_tile), 196, 196, 255 - help.glow);
-        graphics.fill_rect(labellen + 2, y - 1, 10, 10, graphics.getRGB(255 - help.glow, 196, 196));
-        graphics.fill_rect(labellen + 3, y, 8, 8, graphics.getRGB(0, 0, 0));
+        graphics.fill_rect(labellen + 2, y - 1, 10, 10, G2D_RGB(255 - help.glow, 196, 196));
+        graphics.fill_rect(labellen + 3, y, 8, 8, G2D_BLACK);
 
         if (tileset == 0)
         {
@@ -1520,8 +1520,8 @@ static void draw_box_placer()
     message = font::string_wordwrap(0, message, 312, &lines);
     short textheight = font::height(0) * lines;
 
-    graphics.fill_rect(0, 238 - textheight, 320, 240, graphics.getRGB(32, 32, 32));
-    graphics.fill_rect(0, 239 - textheight, 320, 240, graphics.getRGB(0, 0, 0));
+    graphics.fill_rect(0, 238 - textheight, 320, 240, G2D_RGB(32, 32, 32));
+    graphics.fill_rect(0, 239 - textheight, 320, 240, G2D_BLACK);
 
     font::print_wrap(PR_RTL_XFLIP, 4, 240 - textheight, message.c_str(), 255, 255, 255, 8, 312);
 }
@@ -1538,8 +1538,8 @@ static void draw_note()
         short banner_y = 120 - textheight / 2 - 5;
 
         float alpha = graphics.lerp(ed.old_note_timer, ed.note_timer);
-        graphics.fill_rect(0, banner_y, 320, 10 + textheight, graphics.getRGB(92, 92, 92));
-        graphics.fill_rect(0, banner_y + 1, 320, 8 + textheight, graphics.getRGB(0, 0, 0));
+        graphics.fill_rect(0, banner_y, 320, 10 + textheight, G2D_RGB(92, 92, 92));
+        graphics.fill_rect(0, banner_y + 1, 320, 8 + textheight, G2D_BLACK);
         font::print_wrap(PR_CEN, -1, banner_y + 5, wrapped.c_str(), 196 - ((45.0f - alpha) * 4), 196 - ((45.0f - alpha) * 4), 196 - ((45.0f - alpha) * 4));
     }
 }
@@ -1549,8 +1549,8 @@ static void draw_toolbox(const char* coords)
     extern editorclass ed;
 
     // Draw the toolbox background
-    graphics.fill_rect(0, 207, 320, 240, graphics.getRGB(32, 32, 32));
-    graphics.fill_rect(0, 208, 320, 240, graphics.getRGB(0, 0, 0));
+    graphics.fill_rect(0, 207, 320, 240, G2D_RGB(32, 32, 32));
+    graphics.fill_rect(0, 208, 320, 240, G2D_BLACK);
 
     // Draw all tools!
     const int tool_gap = 32;
@@ -1564,13 +1564,13 @@ static void draw_toolbox(const char* coords)
         const int current_tool_id = i + (page * 10);
 
         // First, draw the background
-        graphics.fill_rect(4 + (i * tool_gap), 208, 20, 20, graphics.getRGB(32, 32, 32));
+        graphics.fill_rect(4 + (i * tool_gap), 208, 20, 20, G2D_RGB(32, 32, 32));
 
         // Draw the actual tool icon
         ed.draw_tool((EditorTools)current_tool_id, 4 + (i * tool_gap) + 2, 208 + 2);
 
         // Draw the tool outline...
-        graphics.draw_rect(4 + (i * tool_gap), 208, 20, 20, (current_tool_id == ed.current_tool) ? graphics.getRGB(200, 200, 200) : graphics.getRGB(96, 96, 96));
+        graphics.draw_rect(4 + (i * tool_gap), 208, 20, 20, (current_tool_id == ed.current_tool) ? G2D_RGB(200, 200, 200) : G2D_RGB(96, 96, 96));
 
         // ...and the hotkey
         const int col = current_tool_id == ed.current_tool ? 255 : 164;
@@ -1599,14 +1599,14 @@ static void draw_toolbox(const char* coords)
 
     int bgheight = 2 + font::height(0);
     int toolnamelen = font::len(0, toolname);
-    graphics.fill_rect(0, 206 - bgheight, toolnamelen + 8, bgheight + 1, graphics.getRGB(32, 32, 32));
-    graphics.fill_rect(0, 207 - bgheight, toolnamelen + 7, bgheight, graphics.getRGB(0, 0, 0));
+    graphics.fill_rect(0, 206 - bgheight, toolnamelen + 8, bgheight + 1, G2D_RGB(32, 32, 32));
+    graphics.fill_rect(0, 207 - bgheight, toolnamelen + 7, bgheight, G2D_BLACK);
     font::print(PR_BOR | PR_CJK_HIGH, 2, 198, toolname, 196, 196, 255 - help.glow);
 
     // And finally, draw the current room's coordinates
     int coordslen = font::len(0, coords);
-    graphics.fill_rect(319 - coordslen - 8, 206 - bgheight, coordslen + 8, bgheight + 1, graphics.getRGB(32, 32, 32));
-    graphics.fill_rect(320 - coordslen - 8, 207 - bgheight, coordslen + 8, bgheight, graphics.getRGB(0, 0, 0));
+    graphics.fill_rect(319 - coordslen - 8, 206 - bgheight, coordslen + 8, bgheight + 1, G2D_RGB(32, 32, 32));
+    graphics.fill_rect(320 - coordslen - 8, 207 - bgheight, coordslen + 8, bgheight, G2D_BLACK);
     font::print(PR_BOR | PR_CJK_HIGH | PR_RIGHT, 316, 198, coords, 196, 196, 255 - help.glow);
 }
 
@@ -1639,7 +1639,7 @@ static void draw_main_ui(void)
             graphics.footerrect.y = 240 - graphics.footerrect.h + ed.roomnamehide;
 
             graphics.set_blendmode(SDL_BLENDMODE_BLEND);
-            graphics.fill_rect(&graphics.footerrect, graphics.getRGBA(0, 0, 0, graphics.translucentroomname ? 127 : 255));
+            graphics.fill_rect(&graphics.footerrect, G2D_RGBA(0, 0, 0, graphics.translucentroomname ? 127 : 255));
             graphics.set_blendmode(SDL_BLENDMODE_NONE);
 
             font::print(PR_CEN | PR_BOR | PR_FONT_LEVEL | PR_CJK_LOW, -1, graphics.footerrect.y + 1 + ed.roomnamehide, room->roomname, 196, 196, 255 - help.glow);
@@ -1680,13 +1680,13 @@ static void draw_main_ui(void)
         lineheight = SDL_max(10, lineheight);
         int left_y = 230 - SDL_arraysize(shiftmenuoptions) * lineheight;
 
-        graphics.draw_rect(0, left_y - 3, menuwidth + 17, 240, graphics.getRGB(64, 64, 64));
-        graphics.fill_rect(0, left_y - 2, menuwidth + 16, 240, graphics.getRGB(0, 0, 0));
+        graphics.draw_rect(0, left_y - 3, menuwidth + 17, 240, G2D_RGB(64, 64, 64));
+        graphics.fill_rect(0, left_y - 2, menuwidth + 16, 240, G2D_BLACK);
         for (size_t i = 0; i < SDL_arraysize(shiftmenuoptions); i++)
             font::print(0, 4, left_y + i * lineheight, shiftmenuoptions[i], 164, 164, 164);
 
-        graphics.draw_rect(220, 207, 100, 60, graphics.getRGB(64, 64, 64));
-        graphics.fill_rect(221, 208, 160, 60, graphics.getRGB(0, 0, 0));
+        graphics.draw_rect(220, 207, 100, 60, G2D_RGB(64, 64, 64));
+        graphics.fill_rect(221, 208, 160, 60, G2D_BLACK);
         font::print(0, 224, 210, loc::gettext("S: Save Map"), 164, 164, 164);
         font::print(0, 224, 210 + lineheight, loc::gettext("L: Load Map"), 164, 164, 164);
     }
@@ -1733,7 +1733,7 @@ void editorclass::draw_tool(EditorTools tool, int x, int y)
         graphics.draw_sprite(x, y, 78 + entframe, 196, 196, 196);
         break;
     case EditorTool_GRAVITY_LINES:
-        graphics.fill_rect(x + 2, y + 8, 12, 1, graphics.getRGB(255, 255, 255));
+        graphics.fill_rect(x + 2, y + 8, 12, 1, G2D_WHITE);
         break;
     case EditorTool_ROOMTEXT:
         font::print(PR_FONT_8X8, x + 1, y, "AB", 196, 196, 255 - help.glow);
@@ -1743,13 +1743,13 @@ void editorclass::draw_tool(EditorTools tool, int x, int y)
         graphics.draw_sprite(x, y, 17, 196, 196, 196);
         break;
     case EditorTool_SCRIPTS:
-        graphics.draw_rect(x + 4, y + 4, 8, 8, graphics.getRGB(96, 96, 96));
+        graphics.draw_rect(x + 4, y + 4, 8, 8, G2D_RGB(96, 96, 96));
         break;
     case EditorTool_WARP_TOKENS:
         graphics.draw_sprite(x, y, 18 + (entframe % 2), 196, 196, 196);
         break;
     case EditorTool_WARP_LINES:
-        graphics.fill_rect(x + 6, y + 2, 4, 12, graphics.getRGB(255, 255, 255));
+        graphics.fill_rect(x + 6, y + 2, 4, 12, G2D_WHITE);
         break;
     case EditorTool_CREWMATES:
         graphics.draw_sprite(x, y, 186, graphics.col_crewblue);
@@ -1819,8 +1819,8 @@ void editorrender(void)
             std::string wrapped = font::string_wordwrap(0, loc::gettext(ed.current_text_desc.c_str()), 312, &lines);
             short textheight = font::height(0) * lines + font::height(PR_FONT_LEVEL);
 
-            graphics.fill_rect(0, 238 - textheight, 320, 240, graphics.getRGB(32, 32, 32));
-            graphics.fill_rect(0, 239 - textheight, 320, 240, graphics.getRGB(0, 0, 0));
+            graphics.fill_rect(0, 238 - textheight, 320, 240, G2D_RGB(32, 32, 32));
+            graphics.fill_rect(0, 239 - textheight, 320, 240, G2D_BLACK);
             font::print_wrap(PR_RTL_XFLIP, 4, 240 - textheight, wrapped.c_str(), 255, 255, 255, 8, 312);
             std::string input = key.keybuffer;
             if (ed.entframe < 2)
@@ -1838,8 +1838,8 @@ void editorrender(void)
         {
             // Placing warp token
             int textheight = font::height(0);
-            graphics.fill_rect(0, 237 - textheight * 2, 320, 240, graphics.getRGB(32, 32, 32));
-            graphics.fill_rect(0, 238 - textheight * 2, 320, 240, graphics.getRGB(0, 0, 0));
+            graphics.fill_rect(0, 237 - textheight * 2, 320, 240, G2D_RGB(32, 32, 32));
+            graphics.fill_rect(0, 238 - textheight * 2, 320, 240, G2D_BLACK);
             font::print(PR_CJK_LOW | PR_RTL_XFLIP, 4, 240 - textheight * 2, loc::gettext("Left click to place warp destination"), 196, 196, 255 - help.glow);
             font::print(PR_CJK_LOW | PR_RTL_XFLIP, 4, 240 - textheight, loc::gettext("Right click to cancel"), 196, 196, 255 - help.glow);
 
@@ -1853,8 +1853,8 @@ void editorrender(void)
     case EditorState_SCRIPTS:
         // Intended to look like Commodore 64's UI
 
-        graphics.fill_rect(0, 0, 320, 240, graphics.getRGB(123, 111, 218));
-        graphics.fill_rect(14, 16, 292, 208, graphics.getRGB(61, 48, 162));
+        graphics.fill_rect(0, 0, 320, 240, G2D_RGB(123, 111, 218));
+        graphics.fill_rect(14, 16, 292, 208, G2D_RGB(61, 48, 162));
 
         switch (ed.substate)
         {
@@ -1892,7 +1892,7 @@ void editorrender(void)
         case EditorSubState_SCRIPTS_EDIT:
         {
             // Draw the current script's name
-            graphics.fill_rect(14, 226, 292, 12, graphics.getRGB(61, 48, 162));
+            graphics.fill_rect(14, 226, 292, 12, G2D_RGB(61, 48, 162));
             char namebuffer[SCREEN_WIDTH_CHARS + 1];
             vformat_buf(
                 namebuffer, sizeof(namebuffer),

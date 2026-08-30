@@ -986,7 +986,7 @@ static void unfocused_run(void)
 {
     if (!game.blackout)
     {
-        graphics.fill_rect(0, 0, 0);
+        graphics.fill_rect(G2D_BLACK);
 #define FLIP(YPOS) graphics.flipmode ? 232 - YPOS : YPOS
 #define FLIP_PR_CJK_LOW (graphics.flipmode ? PR_CJK_HIGH : PR_CJK_LOW)
 #define FLIP_PR_CJK_HIGH (graphics.flipmode ? PR_CJK_LOW : PR_CJK_HIGH)

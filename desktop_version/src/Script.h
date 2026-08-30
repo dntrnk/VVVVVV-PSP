@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include "glib2d.h"
+
 #include "Textbox.h"
 
 #define filllines(lines) commands.insert(commands.end(), lines, lines + SDL_arraysize(lines))
@@ -109,7 +111,7 @@ public:
     bool running;
 
     // Textbox stuff
-    std::map<std::string, SDL_Color> textbox_colours;
+    std::map<std::string, g2dColor> textbox_colours;
     int textx;
     int texty;
     TextboxCrewmatePosition textcrewmateposition;

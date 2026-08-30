@@ -532,16 +532,16 @@ static void menurender(void)
         font::print(PR_CEN, -1, 50, loc::gettext("VVVVVV is a game by"), tr, tg, tb);
         font::print(PR_2X | PR_CEN | PR_FONT_8X8, -1, 65, "Terry Cavanagh", tr, tg, tb);
 
-        graphics.drawimagecol(IMAGE_SITE, -1, 86, graphics.getRGB(tr, tg, tb), true);
+        graphics.drawimagecol(IMAGE_SITE, -1, 86, G2D_RGB(tr, tg, tb), true);
 
         font::print(PR_CEN, -1, 120, loc::gettext("and features music by"), tr, tg, tb);
         font::print(PR_2X | PR_CEN | PR_FONT_8X8, -1, 135, "Magnus Pålsson", tr, tg, tb);
-        graphics.drawimagecol(IMAGE_SITE2, -1, 156, graphics.getRGB(tr, tg, tb), true);
+        graphics.drawimagecol(IMAGE_SITE2, -1, 156, G2D_RGB(tr, tg, tb), true);
         break;
     case Menu::credits2:
         font::print(PR_CEN, -1, 40, loc::gettext("Roomnames are by"), tr, tg, tb);
         font::print(PR_2X | PR_CEN | PR_FONT_8X8, -1, 55, "Bennett Foddy", tr, tg, tb);
-        graphics.drawimagecol(IMAGE_SITE3, -1, 76, graphics.getRGB(tr, tg, tb), true);
+        graphics.drawimagecol(IMAGE_SITE3, -1, 76, G2D_RGB(tr, tg, tb), true);
         font::print(PR_CEN, -1, 100, loc::gettext("C++ version by"), tr, tg, tb);
         font::print(PR_2X | PR_CEN | PR_FONT_8X8, -1, 115, "Simon Roth", tr, tg, tb);
         font::print(PR_2X | PR_CEN | PR_FONT_8X8, -1, 135, "Ethan Lee", tr, tg, tb);
@@ -967,7 +967,7 @@ static void menurender(void)
             font::print(PR_FONT_8X8, 10, 10, buffer, tr/2, tg/2, tb/2);
 
             int box_x = SDL_min(10, (320-overflow.max_w_px)/2);
-            graphics.fill_rect(box_x-1, 30-1, overflow.max_w_px+2, overflow.max_h_px+2, tr/3, tg/3, tb/3);
+            graphics.fill_rect(box_x-1, 30-1, overflow.max_w_px+2, overflow.max_h_px+2, G2D_RGB(tr/3, tg/3, tb/3));
 
             int wraplimit;
             if (overflow.multiline)
@@ -1299,7 +1299,7 @@ static void menurender(void)
             font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Text Outline"), tr, tg, tb);
             int next_y = font::print_wrap(PR_CEN, -1, 65, loc::gettext("Disables outline on game text."), tr, tg, tb);
 
-            graphics.fill_rect(0, next_y-4, 320, 16, tr, tg, tb);
+            graphics.fill_rect(0, next_y-4, 320, 16, G2D_RGB(tr, tg, tb));
 
             if (!graphics.notextoutline)
             {
@@ -2252,18 +2252,18 @@ void gamecompleterender2(void)
             {
                 if (i > game.creditposx)
                 {
-                    graphics.fill_rect(i * 8, j * 8, 8, 8, 0, 0, 0);
+                    graphics.fill_rect(i * 8, j * 8, 8, 8, G2D_BLACK);
                 }
             }
 
             if (j > game.creditposy)
             {
-                graphics.fill_rect(i * 8, j * 8, 8, 8, 0, 0, 0);
+                graphics.fill_rect(i * 8, j * 8, 8, 8, G2D_BLACK);
             }
         }
     }
 
-    graphics.fill_rect(graphics.lerp(game.oldcreditposx * 8, game.creditposx * 8) + 8, game.creditposy * 8, 8, 8, 0, 0, 0);
+    graphics.fill_rect(graphics.lerp(game.oldcreditposx * 8, game.creditposx * 8) + 8, game.creditposy * 8, 8, 8, G2D_BLACK);
 
     draw_skip_message();
 
@@ -2957,19 +2957,19 @@ static void rendermapcursor(const bool flashing)
         // Draw the tower specially
         if (!flashing || game.noflashingmode)
         {
-            graphics.draw_rect(40 + ((game.roomx - 100) * 12) + 2, 21 + 2, 12 - 4, 180 - 4, 16, 245 - (help.glow * 2), 245 - (help.glow * 2));
+            graphics.draw_rect(40 + ((game.roomx - 100) * 12) + 2, 21 + 2, 12 - 4, 180 - 4, G2D_RGB(16, 245 - (help.glow * 2), 245 - (help.glow * 2)));
         }
         else if (map.cursorstate == 1)
         {
             if (int(map.cursordelay / 4) % 2 == 0)
             {
-                graphics.draw_rect(40 + ((game.roomx - 100) * 12), 21, 12, 180, 255, 255, 255);
-                graphics.draw_rect(40 + ((game.roomx - 100) * 12) + 2, 21 + 2, 12 - 4, 180 - 4, 255, 255, 255);
+                graphics.draw_rect(40 + ((game.roomx - 100) * 12), 21, 12, 180, G2D_WHITE);
+                graphics.draw_rect(40 + ((game.roomx - 100) * 12) + 2, 21 + 2, 12 - 4, 180 - 4, G2D_WHITE);
             }
         }
         else if (map.cursorstate == 2 && (int(map.cursordelay / 15) % 2 == 0))
         {
-            graphics.draw_rect(40 + ((game.roomx - 100) * 12) + 2, 21 + 2, 12 - 4, 180 - 4, 16, 245 - (help.glow), 245 - (help.glow));
+            graphics.draw_rect(40 + ((game.roomx - 100) * 12) + 2, 21 + 2, 12 - 4, 180 - 4, G2D_RGB(16, 245 - (help.glow), 245 - (help.glow)));
         }
         return;
     }
@@ -2981,13 +2981,13 @@ static void rendermapcursor(const bool flashing)
             40 + ((game.roomx - 100) * 12 * data.zoom) + margin + data.xoff,
             21 + ((game.roomy - 100) * 9 * data.zoom) + margin + data.yoff,
             (12 * data.zoom) - (2 * margin), (9 * data.zoom) - (2 * margin),
-            16, 245 - (help.glow), 245 - (help.glow)
+            G2D_RGB(16, 245 - (help.glow), 245 - (help.glow))
         );
     }
     else if (map.cursorstate == 1 && int(map.cursordelay / 4) % 2 == 0)
     {
-        graphics.draw_rect(40 + ((game.roomx - 100) * 12 * data.zoom) + data.xoff, 21 + ((game.roomy - 100) * 9 * data.zoom) + data.yoff, 12 * data.zoom, 9 * data.zoom, 255, 255, 255);
-        graphics.draw_rect(40 + ((game.roomx - 100) * 12 * data.zoom) + 2 + data.xoff, 21 + ((game.roomy - 100) * 9 * data.zoom) + 2 + data.yoff, (12 * data.zoom) - 4, (9 * data.zoom) - 4, 255, 255, 255);
+        graphics.draw_rect(40 + ((game.roomx - 100) * 12 * data.zoom) + data.xoff, 21 + ((game.roomy - 100) * 9 * data.zoom) + data.yoff, 12 * data.zoom, 9 * data.zoom, G2D_WHITE);
+        graphics.draw_rect(40 + ((game.roomx - 100) * 12 * data.zoom) + 2 + data.xoff, 21 + ((game.roomy - 100) * 9 * data.zoom) + 2 + data.yoff, (12 * data.zoom) - 4, (9 * data.zoom) - 4, G2D_WHITE);
     }
 }
 
@@ -2999,7 +2999,7 @@ void maprender(void)
     draw_roomname_menu();
 
     //Background color
-    graphics.fill_rect(0, 12, 320, 240, 10, 24, 26 );
+    graphics.fill_rect(0, 12, 320, 240, G2D_RGB(10, 24, 26));
 
     //Menubar:
     graphics.drawpixeltextbox( -10, 212, 43*8, 16 + font::height(PR_FONT_INTERFACE), 65, 185, 207);
@@ -3546,7 +3546,7 @@ void teleporterrender(void)
     draw_roomname_menu();
 
     //Background color
-    graphics.fill_rect(0, 12, 320, 240, 10, 24, 26);
+    graphics.fill_rect(0, 12, 320, 240, G2D_RGB(10, 24, 26));
 
     rendermap();
     rendermapfog();
@@ -3561,8 +3561,8 @@ void teleporterrender(void)
         //Draw the chosen destination coordinate!
         //TODO
         //draw the coordinates //destination
-        graphics.draw_rect(40 + data.xoff + (telex * 12 * data.zoom) + 1, 21 + data.yoff + (teley * 9 * data.zoom) + 1, 12 * data.zoom - 2, 9 * data.zoom - 2, 245 - (help.glow * 2), 16, 16);
-        graphics.draw_rect(40 + data.xoff + (telex * 12 * data.zoom) + 3, 21 + data.yoff + (teley * 9 * data.zoom) + 3, 12 * data.zoom - 6, 9 * data.zoom - 6, 245 - (help.glow * 2), 16, 16);
+        graphics.draw_rect(40 + data.xoff + (telex * 12 * data.zoom) + 1, 21 + data.yoff + (teley * 9 * data.zoom) + 1, 12 * data.zoom - 2, 9 * data.zoom - 2, G2D_RGB(245 - (help.glow * 2), 16, 16));
+        graphics.draw_rect(40 + data.xoff + (telex * 12 * data.zoom) + 3, 21 + data.yoff + (teley * 9 * data.zoom) + 3, 12 * data.zoom - 6, 9 * data.zoom - 6, G2D_RGB(245 - (help.glow * 2), 16, 16));
     }
 
     // Draw the legend itself

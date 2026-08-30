@@ -3,6 +3,8 @@
 
 #include <SDL.h>
 
+#include "glib2d.h"
+
 #define        rn( rx,  ry) ((rx) + ((ry) * 100))
 
 class entclass
@@ -53,7 +55,7 @@ public:
     int visualonground, visualonroof;
     int yp;int xp;
 
-    SDL_Color realcol;
+    g2dColor realcol;
     int lerpoldxp, lerpoldyp;
 };
 

@@ -50,7 +50,7 @@ void blockclass::setblockcolour(const char* col)
 {
     bool exists = ::script.textbox_colours.count(col) != 0;
 
-    r = ::script.textbox_colours[exists ? col : "gray"].r;
-    g = ::script.textbox_colours[exists ? col : "gray"].g;
-    b = ::script.textbox_colours[exists ? col : "gray"].b;
+    r = G2D_GET_R(::script.textbox_colours[exists ? col : "gray"]);
+    g = G2D_GET_G(::script.textbox_colours[exists ? col : "gray"]);
+    b = G2D_GET_B(::script.textbox_colours[exists ? col : "gray"]);
 }

@@ -129,7 +129,7 @@ struct GhostInfo
     int x; // .xp
     int y; // .yp
     int col; // .colour
-    SDL_Color realcol;
+    g2dColor realcol;
     int frame; // .drawframe
 };
 
@@ -214,7 +214,7 @@ public:
     SDL_Point box_point;
 
     int entcol;
-    SDL_Color entcolreal;
+    g2dColor entcolreal;
 
     int kludgewarpdir[customlevelclass::numrooms];
 

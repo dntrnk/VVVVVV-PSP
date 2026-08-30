@@ -1332,10 +1332,7 @@ next:
 
                     if (name != NULL)
                     {
-                        SDL_Colour colour;
-                        colour.r = r;
-                        colour.g = g;
-                        colour.b = b;
+                        g2dColor colour = G2D_RGB(r, g, b);
 
                         script.textbox_colours[name] = colour;
                     }
@@ -1792,7 +1789,7 @@ void customlevelclass::generatecustomminimap(void)
 
 // Return a graphics-ready color based off of the given tileset and tilecol
 // Much kudos to Dav999 for saving me a lot of work, because I stole these colors from const.lua in Ved! -Info Teddy
-SDL_Color customlevelclass::getonewaycol(const int rx, const int ry)
+g2dColor customlevelclass::getonewaycol(const int rx, const int ry)
 {
     const RoomProperty* const room = getroomprop(rx, ry);
     switch (room->tileset) {
@@ -1800,158 +1797,158 @@ SDL_Color customlevelclass::getonewaycol(const int rx, const int ry)
     case 0: // Space Station
         switch (room->tilecol) {
         case -1:
-            return graphics.getRGB(109, 109, 109);
+            return G2D_RGB(109, 109, 109);
         case 0:
-            return graphics.getRGB(131, 141, 235);
+            return G2D_RGB(131, 141, 235);
         case 1:
-            return graphics.getRGB(227, 140, 227);
+            return G2D_RGB(227, 140, 227);
         case 2:
-            return graphics.getRGB(242, 126, 151);
+            return G2D_RGB(242, 126, 151);
         case 3:
-            return graphics.getRGB(229, 235, 133);
+            return G2D_RGB(229, 235, 133);
         case 4:
-            return graphics.getRGB(148, 238, 130);
+            return G2D_RGB(148, 238, 130);
         case 5:
-            return graphics.getRGB(140, 165, 227);
+            return G2D_RGB(140, 165, 227);
         case 6:
-            return graphics.getRGB(227, 140, 148);
+            return G2D_RGB(227, 140, 148);
         case 7:
-            return graphics.getRGB(140, 173, 228);
+            return G2D_RGB(140, 173, 228);
         case 8:
-            return graphics.getRGB(142, 235, 137);
+            return G2D_RGB(142, 235, 137);
         case 9:
-            return graphics.getRGB(137, 235, 206);
+            return G2D_RGB(137, 235, 206);
         case 10:
-            return graphics.getRGB(235, 139, 223);
+            return G2D_RGB(235, 139, 223);
         case 11:
-            return graphics.getRGB(238, 130, 138);
+            return G2D_RGB(238, 130, 138);
         case 12:
-            return graphics.getRGB(137, 235, 178);
+            return G2D_RGB(137, 235, 178);
         case 13:
-            return graphics.getRGB(125, 205, 247);
+            return G2D_RGB(125, 205, 247);
         case 14:
-            return graphics.getRGB(190, 137, 235);
+            return G2D_RGB(190, 137, 235);
         case 15:
-            return graphics.getRGB(235, 137, 206);
+            return G2D_RGB(235, 137, 206);
         case 16:
-            return graphics.getRGB(229, 247, 127);
+            return G2D_RGB(229, 247, 127);
         case 17:
-            return graphics.getRGB(127, 200, 247);
+            return G2D_RGB(127, 200, 247);
         case 18:
-            return graphics.getRGB(197, 137, 235);
+            return G2D_RGB(197, 137, 235);
         case 19:
-            return graphics.getRGB(235, 131, 175);
+            return G2D_RGB(235, 131, 175);
         case 20:
-            return graphics.getRGB(242, 210, 123);
+            return G2D_RGB(242, 210, 123);
         case 21:
-            return graphics.getRGB(131, 235, 158);
+            return G2D_RGB(131, 235, 158);
         case 22:
-            return graphics.getRGB(242, 126, 151);
+            return G2D_RGB(242, 126, 151);
         case 23:
-            return graphics.getRGB(219, 243, 123);
+            return G2D_RGB(219, 243, 123);
         case 24:
-            return graphics.getRGB(131, 234, 145);
+            return G2D_RGB(131, 234, 145);
         case 25:
-            return graphics.getRGB(131, 199, 234);
+            return G2D_RGB(131, 199, 234);
         case 26:
-            return graphics.getRGB(141, 131, 234);
+            return G2D_RGB(141, 131, 234);
         case 27:
-            return graphics.getRGB(226, 140, 144);
+            return G2D_RGB(226, 140, 144);
         case 28:
-            return graphics.getRGB(129, 236, 144);
+            return G2D_RGB(129, 236, 144);
         case 29:
-            return graphics.getRGB(235, 231, 131);
+            return G2D_RGB(235, 231, 131);
         case 30:
-            return graphics.getRGB(153, 235, 131);
+            return G2D_RGB(153, 235, 131);
         case 31:
-            return graphics.getRGB(207, 131, 235);
+            return G2D_RGB(207, 131, 235);
         }
         break;
 
     case 1: // Outside
         switch (room->tilecol) {
         case 0:
-            return graphics.getRGB(57, 86, 140);
+            return G2D_RGB(57, 86, 140);
         case 1:
-            return graphics.getRGB(156, 42, 42);
+            return G2D_RGB(156, 42, 42);
         case 2:
-            return graphics.getRGB(42, 156, 155);
+            return G2D_RGB(42, 156, 155);
         case 3:
-            return graphics.getRGB(125, 36, 162);
+            return G2D_RGB(125, 36, 162);
         case 4:
-            return graphics.getRGB(191, 198, 0);
+            return G2D_RGB(191, 198, 0);
         case 5:
-            return graphics.getRGB(0, 198, 126);
+            return G2D_RGB(0, 198, 126);
         case 6:
-            return graphics.getRGB(224, 110, 177);
+            return G2D_RGB(224, 110, 177);
         case 7:
-            return graphics.getRGB(255, 142, 87);
+            return G2D_RGB(255, 142, 87);
         }
         break;
 
     case 2: // Lab
         switch (room->tilecol) {
         case 0:
-            return graphics.getRGB(0, 165, 206);
+            return G2D_RGB(0, 165, 206);
         case 1:
-            return graphics.getRGB(206, 5, 0);
+            return G2D_RGB(206, 5, 0);
         case 2:
-            return graphics.getRGB(222, 0, 173);
+            return G2D_RGB(222, 0, 173);
         case 3:
-            return graphics.getRGB(27, 67, 255);
+            return G2D_RGB(27, 67, 255);
         case 4:
-            return graphics.getRGB(194, 206, 0);
+            return G2D_RGB(194, 206, 0);
         case 5:
-            return graphics.getRGB(0, 206, 39);
+            return G2D_RGB(0, 206, 39);
         case 6:
-            return graphics.getRGB(0, 165, 206);
+            return G2D_RGB(0, 165, 206);
         }
         break;
 
     case 3: // Warp Zone
         switch (room->tilecol) {
         case 0:
-            return graphics.getRGB(113, 178, 197);
+            return G2D_RGB(113, 178, 197);
         case 1:
-            return graphics.getRGB(197, 113, 119);
+            return G2D_RGB(197, 113, 119);
         case 2:
-            return graphics.getRGB(196, 113, 197);
+            return G2D_RGB(196, 113, 197);
         case 3:
-            return graphics.getRGB(149, 113, 197);
+            return G2D_RGB(149, 113, 197);
         case 4:
-            return graphics.getRGB(197, 182, 113);
+            return G2D_RGB(197, 182, 113);
         case 5:
-            return graphics.getRGB(141, 197, 113);
+            return G2D_RGB(141, 197, 113);
         case 6:
-            return graphics.getRGB(109, 109, 109);
+            return G2D_RGB(109, 109, 109);
         }
         break;
 
     case 4: // Ship
         switch (room->tilecol) {
         case 0:
-            return graphics.getRGB(0, 206, 39);
+            return G2D_RGB(0, 206, 39);
         case 1:
-            return graphics.getRGB(0, 165, 206);
+            return G2D_RGB(0, 165, 206);
         case 2:
-            return graphics.getRGB(194, 206, 0);
+            return G2D_RGB(194, 206, 0);
         case 3:
-            return graphics.getRGB(206, 0, 160);
+            return G2D_RGB(206, 0, 160);
         case 4:
-            return graphics.getRGB(27, 67, 255);
+            return G2D_RGB(27, 67, 255);
         case 5:
-            return graphics.getRGB(206, 5, 0);
+            return G2D_RGB(206, 5, 0);
         }
         break;
 
     }
 
     // Uh, I guess return solid white
-    return graphics.getRGB(255, 255, 255);
+    return G2D_WHITE;
 }
 
 // This version detects the room automatically
-SDL_Color customlevelclass::getonewaycol(void)
+g2dColor customlevelclass::getonewaycol(void)
 {
     if (game.gamestate == EDITORMODE)
     {
@@ -1963,7 +1960,7 @@ SDL_Color customlevelclass::getonewaycol(void)
     }
 
     // Uh, I guess return solid white
-    return graphics.getRGB(255, 255, 255);
+    return G2D_WHITE;
 }
 
 static SDL_INLINE bool inbounds(const CustomEntity* entity)

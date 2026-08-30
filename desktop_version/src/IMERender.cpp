@@ -30,8 +30,8 @@ void ime_render(void)
     imebox_border.w += 2;
     imebox_border.h += 2;
 
-    graphics.fill_rect(&imebox_border, 128, 128, 128);
-    graphics.fill_rect(&imebox, 0, 0, 0);
+    graphics.fill_rect(&imebox_border, G2D_RGB(128, 128, 128));
+    graphics.fill_rect(&imebox, G2D_BLACK);
 
     if (key.imebuffer_length > 0)
     {
@@ -77,7 +77,7 @@ void ime_render(void)
             SDL_Rect selrect = imebox;
             selrect.x += before_sel_pixels + 1;
             selrect.w = in_sel_pixels;
-            graphics.fill_rect(&selrect, 128, 64, 0);
+            graphics.fill_rect(&selrect, G2D_RGB(128, 64, 0));
         }
         SDL_free(before_sel);
         SDL_free(in_sel);

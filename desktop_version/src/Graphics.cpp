@@ -622,104 +622,49 @@ int Graphics::set_color(const Uint8 r, const Uint8 g, const Uint8 b)
     return set_color(r, g, b, 255);
 }
 
-int Graphics::set_color(const SDL_Color color)
+int Graphics::set_color(const g2dColor color)
 {
-    return set_color(color.r, color.g, color.b, color.a);
+    return set_color(G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color), G2D_GET_A(color));
 }
 
-void Graphics::fill_rect(const SDL_Rect* rect, const int r, const int g, const int b, const int a)
-{
-    g2dBeginRects(NULL);
-    g2dReset();
-    g2dSetCoordXY(rect->x, rect->y);
-    g2dSetScaleWH(rect->w, rect->h);
-    g2dSetColor(G2D_RGBA(r, g, b, a));
-    g2dAdd();
-    g2dEnd();
-}
-
-void Graphics::fill_rect(const SDL_Rect* rect, const int r, const int g, const int b)
+void Graphics::fill_rect(const SDL_Rect* rect, const g2dColor color)
 {
     g2dBeginRects(NULL);
     g2dReset();
     g2dSetCoordXY(rect->x, rect->y);
     g2dSetScaleWH(rect->w, rect->h);
-    g2dSetColor(G2D_RGB(r, g, b));
+    g2dSetColor(color);
     g2dAdd();
     g2dEnd();
 }
 
-void Graphics::fill_rect(const int r, const int g, const int b)
+void Graphics::fill_rect(const g2dColor color)
 {
     g2dBeginRects(NULL);
     g2dReset();
     g2dSetCoordXY(0, 0);
     g2dSetScaleWH(320, 240);
-    g2dSetColor(G2D_RGB(r, g, b));
+    g2dSetColor(color);
     g2dAdd();
     g2dEnd();
 }
 
-void Graphics::fill_rect(const SDL_Rect* rect, const SDL_Color color)
-{
-    g2dBeginRects(NULL);
-    g2dReset();
-    g2dSetCoordXY(rect->x, rect->y);
-    g2dSetScaleWH(rect->w, rect->h);
-    g2dSetColor(G2D_RGBA(color.r, color.g, color.b, color.a));
-    g2dAdd();
-    g2dEnd();
-}
-
-void Graphics::fill_rect(const int x, const int y, const int w, const int h, const int r, const int g, const int b, const int a)
+void Graphics::fill_rect(const int x, const int y, const int w, const int h, const g2dColor color)
 {
     g2dBeginRects(NULL);
     g2dReset();
     g2dSetCoordXY(x, y);
     g2dSetScaleWH(w, h);
-    g2dSetColor(G2D_RGBA(r, g, b, a));
+    g2dSetColor(color);
     g2dAdd();
     g2dEnd();
 }
 
-void Graphics::fill_rect(const int x, const int y, const int w, const int h, const int r, const int g, const int b)
+void Graphics::draw_rect(const SDL_Rect* rect, const g2dColor color)
 {
     g2dBeginRects(NULL);
     g2dReset();
-    g2dSetCoordXY(x, y);
-    g2dSetScaleWH(w, h);
-    g2dSetColor(G2D_RGB(r, g, b));
-    g2dAdd();
-    g2dEnd();
-}
-
-void Graphics::fill_rect(const SDL_Color color)
-{
-    g2dBeginRects(NULL);
-    g2dReset();
-    g2dSetCoordXY(0, 0);
-    g2dSetScaleWH(320, 240);
-    g2dSetColor(G2D_RGB(color.r, color.g, color.b));
-    g2dAdd();
-    g2dEnd();
-}
-
-void Graphics::fill_rect(const int x, const int y, const int w, const int h, const SDL_Color color)
-{
-    g2dBeginRects(NULL);
-    g2dReset();
-    g2dSetCoordXY(x, y);
-    g2dSetScaleWH(w, h);
-    g2dSetColor(G2D_RGBA(color.r, color.g, color.b, color.a));
-    g2dAdd();
-    g2dEnd();
-}
-
-void Graphics::draw_rect(const SDL_Rect* rect, const int r, const int g, const int b, const int a)
-{
-    g2dBeginRects(NULL);
-    g2dReset();
-    g2dSetColor(G2D_RGBA(r, g, b, a));
+    g2dSetColor(color);
     g2dSetCoordXY(rect->x, rect->y); g2dAdd();
     g2dSetCoordXY(rect->x + rect->w - 1, rect->y); g2dAdd();
     g2dSetCoordXY(rect->x + rect->w - 1, rect->y + rect->h - 1); g2dAdd();
@@ -729,67 +674,11 @@ void Graphics::draw_rect(const SDL_Rect* rect, const int r, const int g, const i
     g2dEnd();
 }
 
-void Graphics::draw_rect(const SDL_Rect* rect, const int r, const int g, const int b)
+void Graphics::draw_rect(const int x, const int y, const int w, const int h, const g2dColor color)
 {
     g2dBeginRects(NULL);
     g2dReset();
-    g2dSetColor(G2D_RGB(r, g, b));
-    g2dSetCoordXY(rect->x, rect->y); g2dAdd();
-    g2dSetCoordXY(rect->x + rect->w - 1, rect->y); g2dAdd();
-    g2dSetCoordXY(rect->x + rect->w - 1, rect->y + rect->h - 1); g2dAdd();
-    g2dSetCoordXY(rect->x, rect->y + rect->h - 1); g2dAdd();
-    g2dSetCoordXY(rect->x, rect->y); g2dAdd();
-    g2dAdd();
-    g2dEnd();
-}
-
-void Graphics::draw_rect(const SDL_Rect* rect, const SDL_Color color)
-{
-    g2dBeginRects(NULL);
-    g2dReset();
-    g2dSetColor(G2D_RGB(color.r, color.g, color.b));
-    g2dSetCoordXY(rect->x, rect->y); g2dAdd();
-    g2dSetCoordXY(rect->x + rect->w - 1, rect->y); g2dAdd();
-    g2dSetCoordXY(rect->x + rect->w - 1, rect->y + rect->h - 1); g2dAdd();
-    g2dSetCoordXY(rect->x, rect->y + rect->h - 1); g2dAdd();
-    g2dSetCoordXY(rect->x, rect->y); g2dAdd();
-    g2dAdd();
-    g2dEnd();
-}
-
-void Graphics::draw_rect(const int x, const int y, const int w, const int h, const int r, const int g, const int b, const int a)
-{
-    g2dBeginRects(NULL);
-    g2dReset();
-    g2dSetColor(G2D_RGBA(r, g, b, a));
-    g2dSetCoordXY(x, y); g2dAdd();
-    g2dSetCoordXY(x + w - 1, y); g2dAdd();
-    g2dSetCoordXY(x + w - 1, y + h - 1); g2dAdd();
-    g2dSetCoordXY(x, y + h - 1); g2dAdd();
-    g2dSetCoordXY(x, y); g2dAdd();
-    g2dAdd();
-    g2dEnd();
-}
-
-void Graphics::draw_rect(const int x, const int y, const int w, const int h, const int r, const int g, const int b)
-{
-    g2dBeginRects(NULL);
-    g2dReset();
-    g2dSetColor(G2D_RGB(r, g, b));
-    g2dSetCoordXY(x, y); g2dAdd();
-    g2dSetCoordXY(x + w - 1, y); g2dAdd();
-    g2dSetCoordXY(x + w - 1, y + h - 1); g2dAdd();
-    g2dSetCoordXY(x, y + h - 1); g2dAdd();
-    g2dSetCoordXY(x, y); g2dAdd();
-    g2dAdd();
-    g2dEnd();
-}
-
-void Graphics::draw_rect(const int x, const int y, const int w, const int h, const SDL_Color color)
-{
-    g2dBeginRects(NULL);
-    g2dReset();
-    g2dSetColor(G2D_RGBA(color.r, color.g, color.b, color.a));
+    g2dSetColor(color);
     g2dSetCoordXY(x, y); g2dAdd();
     g2dSetCoordXY(x + w - 1, y); g2dAdd();
     g2dSetCoordXY(x + w - 1, y + h - 1); g2dAdd();
@@ -830,12 +719,12 @@ void Graphics::draw_sprite(const int x, const int y, const int t, const int r, c
     draw_grid_tile(grphx.im_sprites, t, x, y, sprites_rect.w, sprites_rect.h, r, g, b);
 }
 
-void Graphics::draw_sprite(const int x, const int y, const int t, const SDL_Color color)
+void Graphics::draw_sprite(const int x, const int y, const int t, const g2dColor color)
 {
     draw_grid_tile(grphx.im_sprites, t, x, y, sprites_rect.w, sprites_rect.h, color);
 }
 
-void Graphics::draw_flipsprite(const int x, const int y, const int t, const SDL_Color color)
+void Graphics::draw_flipsprite(const int x, const int y, const int t, const g2dColor color)
 {
     draw_grid_tile(grphx.im_flipsprites, t, x, y, sprites_rect.w, sprites_rect.h, color);
 }
@@ -1083,8 +972,8 @@ void Graphics::drawgui(void)
                 {
                     y = 240 - y - 8 * sc;
                 }
-                SDL_Color color = TEXT_COLOUR("cyan");
-                font::print((sc == 2 ? PR_2X : PR_1X) | PR_CEN, -1, y, translation, color.r, color.g, color.b);
+                g2dColor color = TEXT_COLOUR("cyan");
+                font::print((sc == 2 ? PR_2X : PR_1X) | PR_CEN, -1, y, translation, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color));
             }
             else
             {
@@ -1185,7 +1074,7 @@ void Graphics::updatetextboxes(void)
     }
 }
 
-void Graphics::drawimagecol( int t, int xp, int yp, const SDL_Color ct, bool cent/*= false*/ )
+void Graphics::drawimagecol( int t, int xp, int yp, const g2dColor ct, bool cent/*= false*/ )
 {
     if (!INBOUNDS_ARR(t, images) || images[t] == NULL)
     {
@@ -1206,7 +1095,7 @@ void Graphics::drawimagecol( int t, int xp, int yp, const SDL_Color ct, bool cen
         trect.x = (int) ((SCREEN_WIDTH_PIXELS - trect.w) / 2);
     }
 
-    set_texture_color_mod(images[t], ct.r, ct.g, ct.b);
+    set_texture_color_mod(images[t], G2D_GET_R(ct), G2D_GET_G(ct), G2D_GET_B(ct));
     draw_texture(images[t], trect.x, trect.y);
     set_texture_color_mod(images[t], 255, 255, 255);
 }
@@ -1341,16 +1230,16 @@ void Graphics::draw_grid_tile(
 void Graphics::draw_grid_tile(
     SDL_Texture* texture, const int t,
     const int x, const int y, const int width, const int height,
-    const SDL_Color color,
+    const g2dColor color,
     const int scalex, const int scaley
 ) {
-    draw_grid_tile(texture, t, x, y, width, height, color.r, color.g, color.b, color.a, scalex, scaley);
+    draw_grid_tile(texture, t, x, y, width, height, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color), G2D_GET_A(color), scalex, scaley);
 }
 
 void Graphics::draw_grid_tile(
     SDL_Texture* texture, const int t,
     const int x, const int y, const int width, const int height,
-    const SDL_Color color
+    const g2dColor color
 ) {
     draw_grid_tile(texture, t, x, y, width, height, color, 1, 1);
 }
@@ -1360,14 +1249,14 @@ void Graphics::cutscenebars(void)
     const int usethispos = lerp(oldcutscenebarspos, cutscenebarspos);
     if (showcutscenebars)
     {
-        fill_rect(0, 0, usethispos, 16, 0, 0, 0);
-        fill_rect(360 - usethispos, 224, usethispos, 16, 0, 0, 0);
+        fill_rect(0, 0, usethispos, 16, G2D_BLACK);
+        fill_rect(360 - usethispos, 224, usethispos, 16, G2D_BLACK);
     }
     else if (cutscenebarspos > 0) //disappearing
     {
         //draw
-        fill_rect(0, 0, usethispos, 16, 0, 0, 0);
-        fill_rect(360 - usethispos, 224, usethispos, 16, 0, 0, 0);
+        fill_rect(0, 0, usethispos, 16, G2D_BLACK);
+        fill_rect(360 - usethispos, 224, usethispos, 16, G2D_BLACK);
     }
 }
 
@@ -1461,7 +1350,7 @@ void Graphics::drawpixeltextbox(
 ) {
     int k;
 
-    fill_rect(x, y, w, h, r / 6, g / 6, b / 6);
+    fill_rect(x, y, w, h, G2D_RGB(r / 6, g / 6, b / 6));
 
     /* Horizontal tiles */
     for (k = 0; k < w / 8 - 2; ++k)
@@ -1646,9 +1535,9 @@ void Graphics::createtextboxreal(
 void Graphics::createtextbox(
     const std::string& t,
     int xp, int yp,
-    SDL_Color color
+    g2dColor color
 ) {
-    createtextboxreal(t, xp, yp, color.r, color.g, color.b, false);
+    createtextboxreal(t, xp, yp, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color), false);
 }
 
 void Graphics::createtextbox(
@@ -1662,9 +1551,9 @@ void Graphics::createtextbox(
 void Graphics::createtextboxflipme(
     const std::string& t,
     int xp, int yp,
-    SDL_Color color
+    g2dColor color
 ) {
-    createtextboxreal(t, xp, yp, color.r, color.g, color.b, true);
+    createtextboxreal(t, xp, yp, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color), true);
 }
 
 void Graphics::createtextboxflipme(
@@ -1682,18 +1571,18 @@ void Graphics::drawfade(void)
     {
     case FADE_FULLY_BLACK:
     case FADE_START_FADEIN:
-        fill_rect(0, 0, 0);
+        fill_rect(G2D_BLACK);
         break;
     case FADE_FADING_OUT:
         for (size_t i = 0; i < SDL_arraysize(fadebars); i++)
         {
-            fill_rect(fadebars[i], i * 16, usethisamount, 16, 0, 0, 0);
+            fill_rect(fadebars[i], i * 16, usethisamount, 16, G2D_BLACK);
         }
         break;
     case FADE_FADING_IN:
         for (size_t i = 0; i < SDL_arraysize(fadebars); i++)
         {
-            fill_rect(fadebars[i] - usethisamount, i * 16, 500, 16, 0, 0, 0);
+            fill_rect(fadebars[i] - usethisamount, i * 16, 500, 16, G2D_BLACK);
         }
         break;
     case FADE_NONE:
@@ -1896,12 +1785,12 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
         {
             for(int y = r3_bottom; y < r3_top; y++)
             {
-                const SDL_Color pixel1 = ReadPixel(surface1, x - p1.x, y - p1.y);
-                const SDL_Color pixel2 = ReadPixel(surface2, x - p2.x, y - p2.y);
+                const g2dColor pixel1 = ReadPixel(surface1, x - p1.x, y - p1.y);
+                const g2dColor pixel2 = ReadPixel(surface2, x - p2.x, y - p2.y);
                 /* INTENTIONAL BUG! In previous versions, the game mistakenly
                  * checked the red channel, not the alpha channel.
                  * We preserve it here because some people abuse this. */
-                if (pixel1.r != 0 && pixel2.r != 0)
+                if (G2D_GET_R(pixel1) != 0 && G2D_GET_R(pixel2) != 0)
                 {
                     return true;
                 }
@@ -2154,7 +2043,7 @@ void Graphics::drawentity(const int i, const int yoff)
         // Sprites
         tpoint.x = xp;
         tpoint.y = yp - yoff;
-        const SDL_Color ct = obj.entities[i].realcol;
+        const g2dColor ct = obj.entities[i].realcol;
 
         drawRect = sprites_rect;
         drawRect.x += tpoint.x;
@@ -2259,8 +2148,8 @@ void Graphics::drawentity(const int i, const int yoff)
         break;
     case 4: // Small pickups
     {
-        const SDL_Color color = obj.entities[i].realcol;
-        drawcoloredtile(xp, yp - yoff, obj.entities[i].tile, color.r, color.g, color.b);
+        const g2dColor color = obj.entities[i].realcol;
+        drawcoloredtile(xp, yp - yoff, obj.entities[i].tile, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color));
         break;
     }
     case 5: // Horizontal Line
@@ -2285,7 +2174,7 @@ void Graphics::drawentity(const int i, const int yoff)
         break;
     case 9: // Really Big Sprite! (2x2)
     {
-        const SDL_Color ct = obj.entities[i].realcol;
+        const g2dColor ct = obj.entities[i].realcol;
 
         tpoint.x = xp;
         tpoint.y = yp - yoff;
@@ -2326,7 +2215,7 @@ void Graphics::drawentity(const int i, const int yoff)
     }
     case 10: // 2x1 Sprite
     {
-        const SDL_Color ct = obj.entities[i].realcol;
+        const g2dColor ct = obj.entities[i].realcol;
 
         tpoint.x = xp;
         tpoint.y = yp - yoff;
@@ -2354,7 +2243,7 @@ void Graphics::drawentity(const int i, const int yoff)
     {
         tpoint.x = xp;
         tpoint.y = yp - yoff;
-        const SDL_Color ct = obj.entities[i].realcol;
+        const g2dColor ct = obj.entities[i].realcol;
 
         drawRect = sprites_rect;
         drawRect.x += tpoint.x;
@@ -2421,25 +2310,25 @@ void Graphics::drawbackground( int t )
     {
     case 1:
         // Starfield
-        fill_rect(0, 0, 0);
+        fill_rect(G2D_BLACK);
         for (int i = 0; i < numstars; i++)
         {
             SDL_Rect star_rect = stars[i];
             star_rect.x = lerp(star_rect.x + starsspeed[i], star_rect.x);
             if (starsspeed[i] <= 6)
             {
-                fill_rect(&star_rect, getRGB(0x22,0x22,0x22));
+                fill_rect(&star_rect, G2D_RGB(0x22,0x22,0x22));
             }
             else
             {
-                fill_rect(&star_rect, getRGB(0x55,0x55,0x55));
+                fill_rect(&star_rect, G2D_RGB(0x55,0x55,0x55));
             }
         }
         break;
     case 2:
     {
-        SDL_Color bcol;
-        SDL_Color bcol2;
+        g2dColor bcol;
+        g2dColor bcol2;
         SDL_zero(bcol);
         SDL_zero(bcol2);
 
@@ -2448,62 +2337,62 @@ void Graphics::drawbackground( int t )
         {
             // Akward ordering to match tileset
         case 0:
-            bcol2 = getRGB(0, 16 * backboxmult, 16 * backboxmult);
+            bcol2 = G2D_RGB(0, 16 * backboxmult, 16 * backboxmult);
             break; // Cyan
         case 1:
-            bcol2 = getRGB(16 * backboxmult, 0, 0);
+            bcol2 = G2D_RGB(16 * backboxmult, 0, 0);
             break; // Red
         case 2:
-            bcol2 = getRGB(16 * backboxmult, 0, 16 * backboxmult);
+            bcol2 = G2D_RGB(16 * backboxmult, 0, 16 * backboxmult);
             break; // Purple
         case 3:
-            bcol2 = getRGB(0, 0, 16 * backboxmult);
+            bcol2 = G2D_RGB(0, 0, 16 * backboxmult);
             break; // Blue
         case 4:
-            bcol2 = getRGB(16 * backboxmult, 16 * backboxmult, 0);
+            bcol2 = G2D_RGB(16 * backboxmult, 16 * backboxmult, 0);
             break; // Yellow
         case 5:
-            bcol2 = getRGB(0, 16 * backboxmult, 0);
+            bcol2 = G2D_RGB(0, 16 * backboxmult, 0);
             break; // Green
         case 6:
             // crazy case
             switch (spcol)
             {
             case 0:
-                bcol2 = getRGB(0, 16 * backboxmult, 16 * backboxmult);
+                bcol2 = G2D_RGB(0, 16 * backboxmult, 16 * backboxmult);
                 break; // Cyan
             case 1:
-                bcol2 = getRGB(0, (spcoldel + 1) * backboxmult, 16 * backboxmult);
+                bcol2 = G2D_RGB(0, (spcoldel + 1) * backboxmult, 16 * backboxmult);
                 break; // Cyan
             case 2:
-                bcol2 = getRGB(0, 0, 16 * backboxmult);
+                bcol2 = G2D_RGB(0, 0, 16 * backboxmult);
                 break; // Blue
             case 3:
-                bcol2 = getRGB((16 - spcoldel) * backboxmult, 0, 16 * backboxmult);
+                bcol2 = G2D_RGB((16 - spcoldel) * backboxmult, 0, 16 * backboxmult);
                 break; // Blue
             case 4:
-                bcol2 = getRGB(16 * backboxmult, 0, 16 * backboxmult);
+                bcol2 = G2D_RGB(16 * backboxmult, 0, 16 * backboxmult);
                 break; // Purple
             case 5:
-                bcol2 = getRGB(16 * backboxmult, 0, (spcoldel + 1) * backboxmult);
+                bcol2 = G2D_RGB(16 * backboxmult, 0, (spcoldel + 1) * backboxmult);
                 break; // Purple
             case 6:
-                bcol2 = getRGB(16 * backboxmult, 0, 0);
+                bcol2 = G2D_RGB(16 * backboxmult, 0, 0);
                 break; // Red
             case 7:
-                bcol2 = getRGB(16 * backboxmult, (16 - spcoldel) * backboxmult, 0);
+                bcol2 = G2D_RGB(16 * backboxmult, (16 - spcoldel) * backboxmult, 0);
                 break; // Red
             case 8:
-                bcol2 = getRGB(16 * backboxmult, 16 * backboxmult, 0);
+                bcol2 = G2D_RGB(16 * backboxmult, 16 * backboxmult, 0);
                 break; // Yellow
             case 9:
-                bcol2 = getRGB((spcoldel + 1) * backboxmult, 16 * backboxmult, 0);
+                bcol2 = G2D_RGB((spcoldel + 1) * backboxmult, 16 * backboxmult, 0);
                 break; // Yellow
             case 10:
-                bcol2 = getRGB(0, 16 * backboxmult, 0);
+                bcol2 = G2D_RGB(0, 16 * backboxmult, 0);
                 break; // Green
             case 11:
-                bcol2 = getRGB(0, 16 * backboxmult, (16 - spcoldel) * backboxmult);
+                bcol2 = G2D_RGB(0, 16 * backboxmult, (16 - spcoldel) * backboxmult);
                 break; // Green
             }
             break;
@@ -2516,62 +2405,62 @@ void Graphics::drawbackground( int t )
             {
                 // Akward ordering to match tileset
             case 0:
-                bcol = getRGB(16, 128 * backboxmult, 128 * backboxmult);
+                bcol = G2D_RGB(16, 128 * backboxmult, 128 * backboxmult);
                 break; // Cyan
             case 1:
-                bcol = getRGB(128 * backboxmult, 16, 16);
+                bcol = G2D_RGB(128 * backboxmult, 16, 16);
                 break; // Red
             case 2:
-                bcol = getRGB(128 * backboxmult, 16, 128 * backboxmult);
+                bcol = G2D_RGB(128 * backboxmult, 16, 128 * backboxmult);
                 break; // Purple
             case 3:
-                bcol = getRGB(16, 16, 128 * backboxmult);
+                bcol = G2D_RGB(16, 16, 128 * backboxmult);
                 break; // Blue
             case 4:
-                bcol = getRGB(128 * backboxmult, 128 * backboxmult, 16);
+                bcol = G2D_RGB(128 * backboxmult, 128 * backboxmult, 16);
                 break; // Yellow
             case 5:
-                bcol = getRGB(16, 128 * backboxmult, 16);
+                bcol = G2D_RGB(16, 128 * backboxmult, 16);
                 break; // Green
             case 6:
                 // crazy case
                 switch (spcol)
                 {
                 case 0:
-                    bcol = getRGB(16, 128 * backboxmult, 128 * backboxmult);
+                    bcol = G2D_RGB(16, 128 * backboxmult, 128 * backboxmult);
                     break; // Cyan
                 case 1:
-                    bcol = getRGB(16, ((spcoldel + 1) * 8) * backboxmult, 128 * backboxmult);
+                    bcol = G2D_RGB(16, ((spcoldel + 1) * 8) * backboxmult, 128 * backboxmult);
                     break; // Cyan
                 case 2:
-                    bcol = getRGB(16, 16, 128 * backboxmult);
+                    bcol = G2D_RGB(16, 16, 128 * backboxmult);
                     break; // Blue
                 case 3:
-                    bcol = getRGB((128 - (spcoldel * 8)) * backboxmult, 16, 128 * backboxmult);
+                    bcol = G2D_RGB((128 - (spcoldel * 8)) * backboxmult, 16, 128 * backboxmult);
                     break; // Blue
                 case 4:
-                    bcol = getRGB(128 * backboxmult, 16, 128 * backboxmult);
+                    bcol = G2D_RGB(128 * backboxmult, 16, 128 * backboxmult);
                     break; // Purple
                 case 5:
-                    bcol = getRGB(128 * backboxmult, 16, ((spcoldel + 1) * 8) * backboxmult);
+                    bcol = G2D_RGB(128 * backboxmult, 16, ((spcoldel + 1) * 8) * backboxmult);
                     break; // Purple
                 case 6:
-                    bcol = getRGB(128 * backboxmult, 16, 16);
+                    bcol = G2D_RGB(128 * backboxmult, 16, 16);
                     break; // Red
                 case 7:
-                    bcol = getRGB(128 * backboxmult, (128 - (spcoldel * 8)) * backboxmult, 16);
+                    bcol = G2D_RGB(128 * backboxmult, (128 - (spcoldel * 8)) * backboxmult, 16);
                     break; // Red
                 case 8:
-                    bcol = getRGB(128 * backboxmult, 128 * backboxmult, 16);
+                    bcol = G2D_RGB(128 * backboxmult, 128 * backboxmult, 16);
                     break; // Yellow
                 case 9:
-                    bcol = getRGB(((spcoldel + 1) * 8) * backboxmult, 128 * backboxmult, 16);
+                    bcol = G2D_RGB(((spcoldel + 1) * 8) * backboxmult, 128 * backboxmult, 16);
                     break; // Yellow
                 case 10:
-                    bcol = getRGB(16, 128 * backboxmult, 16);
+                    bcol = G2D_RGB(16, 128 * backboxmult, 16);
                     break; // Green
                 case 11:
-                    bcol = getRGB(16, 128 * backboxmult, (128 - (spcoldel * 8)) * backboxmult);
+                    bcol = G2D_RGB(16, 128 * backboxmult, (128 - (spcoldel * 8)) * backboxmult);
                     break; // Green
                 }
                 break;
@@ -2613,43 +2502,43 @@ void Graphics::drawbackground( int t )
     case 5:
     {
         // Warp zone, central
-        SDL_Color warpbcol;
-        SDL_Color warpfcol;
+        g2dColor warpbcol;
+        g2dColor warpfcol;
 
         switch(rcol)
         {
             // Akward ordering to match tileset
         case 0:
-            warpbcol = getRGB(0x0A, 0x10, 0x0E);
-            warpfcol = getRGB(0x10, 0x22, 0x21);
+            warpbcol = G2D_RGB(0x0A, 0x10, 0x0E);
+            warpfcol = G2D_RGB(0x10, 0x22, 0x21);
             break; // Cyan
         case 1:
-            warpbcol = getRGB(0x11, 0x09, 0x0B);
-            warpfcol = getRGB(0x22, 0x10, 0x11);
+            warpbcol = G2D_RGB(0x11, 0x09, 0x0B);
+            warpfcol = G2D_RGB(0x22, 0x10, 0x11);
             break; // Red
         case 2:
-            warpbcol = getRGB(0x0F, 0x0A, 0x10);
-            warpfcol = getRGB(0x22,0x10,0x22);
+            warpbcol = G2D_RGB(0x0F, 0x0A, 0x10);
+            warpfcol = G2D_RGB(0x22,0x10,0x22);
             break; // Purple
         case 3:
-            warpbcol = getRGB(0x0A, 0x0B, 0x10);
-            warpfcol = getRGB(0x10, 0x10, 0x22);
+            warpbcol = G2D_RGB(0x0A, 0x0B, 0x10);
+            warpfcol = G2D_RGB(0x10, 0x10, 0x22);
             break; // Blue
         case 4:
-            warpbcol = getRGB(0x10, 0x0D, 0x0A);
-            warpfcol = getRGB(0x22, 0x1E, 0x10);
+            warpbcol = G2D_RGB(0x10, 0x0D, 0x0A);
+            warpfcol = G2D_RGB(0x22, 0x1E, 0x10);
             break; // Yellow
         case 5:
-            warpbcol = getRGB(0x0D, 0x10, 0x0A);
-            warpfcol = getRGB(0x14, 0x22, 0x10);
+            warpbcol = G2D_RGB(0x0D, 0x10, 0x0A);
+            warpfcol = G2D_RGB(0x14, 0x22, 0x10);
             break; // Green
         case 6:
-            warpbcol = getRGB(0x0A, 0x0A, 0x0A);
-            warpfcol = getRGB(0x12, 0x12, 0x12);
+            warpbcol = G2D_RGB(0x0A, 0x0A, 0x0A);
+            warpfcol = G2D_RGB(0x12, 0x12, 0x12);
             break; // Gray
         default:
-            warpbcol = getRGB(0xFF, 0xFF, 0xFF);
-            warpfcol = getRGB(0xFF, 0xFF, 0xFF);
+            warpbcol = G2D_RGB(0xFF, 0xFF, 0xFF);
+            warpfcol = G2D_RGB(0xFF, 0xFF, 0xFF);
         }
 
         for (int i = 10; i >= 0; i--)
@@ -2669,18 +2558,18 @@ void Graphics::drawbackground( int t )
     }
     case 6:
         // Final Starfield
-        fill_rect(0, 0, 0);
+        fill_rect(G2D_BLACK);
         for (int i = 0; i < numstars; i++)
         {
             SDL_Rect star_rect = stars[i];
             star_rect.y = lerp(star_rect.y + starsspeed[i], star_rect.y);
             if (starsspeed[i] <= 8)
             {
-                fill_rect(&star_rect, getRGB(0x22, 0x22, 0x22));
+                fill_rect(&star_rect, G2D_RGB(0x22, 0x22, 0x22));
             }
             else
             {
-                fill_rect(&star_rect, getRGB(0x55, 0x55, 0x55));
+                fill_rect(&star_rect, G2D_RGB(0x55, 0x55, 0x55));
             }
         }
         break;
@@ -2715,7 +2604,7 @@ void Graphics::drawbackground( int t )
         }
         break;
     default:
-        fill_rect(0, 0, 0);
+        fill_rect(G2D_BLACK);
         break;
     }
 }
@@ -3065,20 +2954,20 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
 }
 
 #define GETCOL_RANDOM (game.noflashingmode ? 0.5 : fRandom())
-SDL_Color Graphics::getcol( int t )
+g2dColor Graphics::getcol( int t )
 {
     // Setup predefinied colours as per our zany palette
     switch(t)
     {
         // Player Normal
     case 0:
-        return getRGB(160 - help.glow/2 - (int) (GETCOL_RANDOM * 20), 200 - help.glow/2, 220 - help.glow);
+        return G2D_RGB(160 - help.glow/2 - (int) (GETCOL_RANDOM * 20), 200 - help.glow/2, 220 - help.glow);
         // Player Hurt
     case 1:
-        return getRGB(196 - (GETCOL_RANDOM * 64), 10, 10);
+        return G2D_RGB(196 - (GETCOL_RANDOM * 64), 10, 10);
         // Enemies and stuff
     case 2:
-        return getRGB(225 - (help.glow / 2), 75, 30);
+        return G2D_RGB(225 - (help.glow / 2), 75, 30);
     case 3: // Trinket
         if (!trinketcolset)
         {
@@ -3087,58 +2976,58 @@ SDL_Color Graphics::getcol( int t )
             trinketb = 164 + (GETCOL_RANDOM * 60);
             trinketcolset = true;
         }
-        return getRGB(trinketr, trinketg, trinketb);
+        return G2D_RGB(trinketr, trinketg, trinketb);
     case 4: // Inactive savepoint
     {
         const int temp = (help.glow / 2) + (int) (GETCOL_RANDOM * 8);
-        return getRGB(80 + temp, 80 + temp, 80 + temp);
+        return G2D_RGB(80 + temp, 80 + temp, 80 + temp);
     }
     case 5: // Active savepoint
-        return getRGB(164 + (GETCOL_RANDOM * 64), 164 + (GETCOL_RANDOM * 64), 255 - (GETCOL_RANDOM * 64));
+        return G2D_RGB(164 + (GETCOL_RANDOM * 64), 164 + (GETCOL_RANDOM * 64), 255 - (GETCOL_RANDOM * 64));
     case 6: // Enemy : Red
-        return getRGB(250 - help.glow / 2, 60 - help.glow / 2, 60 - help.glow / 2);
+        return G2D_RGB(250 - help.glow / 2, 60 - help.glow / 2, 60 - help.glow / 2);
     case 7: // Enemy : Green
-        return getRGB(100 - help.glow / 2 - (int) (GETCOL_RANDOM * 30), 250 - help.glow / 2, 100 - help.glow / 2 - (int) (GETCOL_RANDOM * 30));
+        return G2D_RGB(100 - help.glow / 2 - (int) (GETCOL_RANDOM * 30), 250 - help.glow / 2, 100 - help.glow / 2 - (int) (GETCOL_RANDOM * 30));
     case 8: // Enemy : Purple
-        return getRGB(250 - help.glow / 2, 20, 128 - help.glow / 2 + (int) (GETCOL_RANDOM * 30));
+        return G2D_RGB(250 - help.glow / 2, 20, 128 - help.glow / 2 + (int) (GETCOL_RANDOM * 30));
     case 9: // Enemy : Yellow
-        return getRGB(250 - help.glow / 2, 250 - help.glow / 2, 20);
+        return G2D_RGB(250 - help.glow / 2, 250 - help.glow / 2, 20);
     case 10: // Warp point (white)
-        return getRGB(255 - (GETCOL_RANDOM * 64), 255 - (GETCOL_RANDOM * 64), 255 - (GETCOL_RANDOM * 64));
+        return G2D_RGB(255 - (GETCOL_RANDOM * 64), 255 - (GETCOL_RANDOM * 64), 255 - (GETCOL_RANDOM * 64));
     case 11: // Enemy : Cyan
-        return getRGB(20, 250 - help.glow / 2, 250 - help.glow / 2);
+        return G2D_RGB(20, 250 - help.glow / 2, 250 - help.glow / 2);
     case 12: // Enemy : Blue
-        return getRGB(90 - help.glow / 2, 90 - help.glow / 2, 250 - help.glow / 2);
+        return G2D_RGB(90 - help.glow / 2, 90 - help.glow / 2, 250 - help.glow / 2);
         // Crew Members
         // green
     case 13:
-        return getRGB(120 - help.glow / 4 - (int) (GETCOL_RANDOM * 20), 220 - help.glow / 4, 120 - help.glow / 4);
+        return G2D_RGB(120 - help.glow / 4 - (int) (GETCOL_RANDOM * 20), 220 - help.glow / 4, 120 - help.glow / 4);
         // Yellow
     case 14:
-        return getRGB(220 - help.glow / 4 - (int) (GETCOL_RANDOM * 20), 210 - help.glow / 4, 120 - help.glow / 4);
+        return G2D_RGB(220 - help.glow / 4 - (int) (GETCOL_RANDOM * 20), 210 - help.glow / 4, 120 - help.glow / 4);
         // pink
     case 15:
-        return getRGB(255 - help.glow / 8, 70 - help.glow / 4, 70 - help.glow / 4);
+        return G2D_RGB(255 - help.glow / 8, 70 - help.glow / 4, 70 - help.glow / 4);
         // Blue
     case 16:
-        return getRGB(75, 75, 255 - help.glow / 4 - (int) (GETCOL_RANDOM * 20));
+        return G2D_RGB(75, 75, 255 - help.glow / 4 - (int) (GETCOL_RANDOM * 20));
 
     case 17: // Enemy : Orange
-        return getRGB(250 - help.glow / 2, 130 - help.glow / 2, 20);
+        return G2D_RGB(250 - help.glow / 2, 130 - help.glow / 2, 20);
     case 18: // Enemy : Gray
-        return getRGB(130 - help.glow / 2, 130 - help.glow / 2, 130 - help.glow / 2);
+        return G2D_RGB(130 - help.glow / 2, 130 - help.glow / 2, 130 - help.glow / 2);
     case 19: // Enemy : Dark gray
-        return getRGB(60 - help.glow / 8, 60 - help.glow / 8, 60 - help.glow / 8);
+        return G2D_RGB(60 - help.glow / 8, 60 - help.glow / 8, 60 - help.glow / 8);
         // Purple
     case 20:
-        return getRGB(220 - help.glow / 4 - (int) (GETCOL_RANDOM * 20), 120 - help.glow/4, 210 - help.glow/4);
+        return G2D_RGB(220 - help.glow / 4 - (int) (GETCOL_RANDOM * 20), 120 - help.glow/4, 210 - help.glow/4);
 
     case 21: // Enemy : Light Gray
-        return getRGB(180 - help.glow/2, 180 - help.glow/2, 180 - help.glow/2);
+        return G2D_RGB(180 - help.glow/2, 180 - help.glow/2, 180 - help.glow/2);
     case 22: // Enemy : Indicator Gray
-        return getRGB(230 - help.glow/2, 230 - help.glow/2, 230 - help.glow/2);
+        return G2D_RGB(230 - help.glow/2, 230 - help.glow/2, 230 - help.glow/2);
     case 23: // Enemy : Indicator Gray
-        return getRGB(255 - help.glow / 2 - (int) (GETCOL_RANDOM * 40), 255 - help.glow/2 - (int) (GETCOL_RANDOM * 40), 255 - help.glow/2 - (int) (GETCOL_RANDOM * 40));
+        return G2D_RGB(255 - help.glow / 2 - (int) (GETCOL_RANDOM * 40), 255 - help.glow/2 - (int) (GETCOL_RANDOM * 40), 255 - help.glow/2 - (int) (GETCOL_RANDOM * 40));
 
         // Trophies
         // cyan
@@ -3161,7 +3050,7 @@ SDL_Color Graphics::getcol( int t )
         return RGBf(75, 75, 255);
         // Gold
     case 36:
-        return getRGB(180, 120, 20);
+        return G2D_RGB(180, 120, 20);
     case 37: // Trinket
         if (!trinketcolset)
         {
@@ -3182,7 +3071,7 @@ SDL_Color Graphics::getcol( int t )
     {
         if (game.noflashingmode)
         {
-            return getRGB(196, 196, 223);
+            return G2D_RGB(196, 196, 223);
         }
 
         const int temp = GETCOL_RANDOM * 150;
@@ -3207,38 +3096,38 @@ SDL_Color Graphics::getcol( int t )
     case 100: // Inactive Teleporter
     {
         const int temp = (help.glow / 2) + (GETCOL_RANDOM * 8);
-        return getRGB(42 + temp, 42 + temp, 42 + temp);
+        return G2D_RGB(42 + temp, 42 + temp, 42 + temp);
     }
     case 101: // Active Teleporter
-        return getRGB(164 + (GETCOL_RANDOM * 64), 164 + (GETCOL_RANDOM * 64), 255 - (GETCOL_RANDOM * 64));
+        return G2D_RGB(164 + (GETCOL_RANDOM * 64), 164 + (GETCOL_RANDOM * 64), 255 - (GETCOL_RANDOM * 64));
     case 102: // Teleporter in action!
     {
         if (game.noflashingmode)
         {
-            return getRGB(196, 196, 223);
+            return G2D_RGB(196, 196, 223);
         }
 
         const int temp = GETCOL_RANDOM * 150;
         if (temp < 33)
         {
-            return getRGB(255 - (GETCOL_RANDOM * 64), 64 + (GETCOL_RANDOM * 64), 64 + (GETCOL_RANDOM * 64));
+            return G2D_RGB(255 - (GETCOL_RANDOM * 64), 64 + (GETCOL_RANDOM * 64), 64 + (GETCOL_RANDOM * 64));
         }
         else if (temp < 66)
         {
-            return getRGB(64 + (GETCOL_RANDOM * 64), 255 - (GETCOL_RANDOM * 64), 64 + (GETCOL_RANDOM * 64));
+            return G2D_RGB(64 + (GETCOL_RANDOM * 64), 255 - (GETCOL_RANDOM * 64), 64 + (GETCOL_RANDOM * 64));
         }
         else if (temp < 100)
         {
-            return getRGB(64 + (GETCOL_RANDOM * 64), 64 + (GETCOL_RANDOM * 64), 255 - (GETCOL_RANDOM * 64));
+            return G2D_RGB(64 + (GETCOL_RANDOM * 64), 64 + (GETCOL_RANDOM * 64), 255 - (GETCOL_RANDOM * 64));
         }
         else
         {
-            return getRGB(164 + (GETCOL_RANDOM * 64), 164 + (GETCOL_RANDOM * 64), 255 - (GETCOL_RANDOM * 64));
+            return G2D_RGB(164 + (GETCOL_RANDOM * 64), 164 + (GETCOL_RANDOM * 64), 255 - (GETCOL_RANDOM * 64));
         }
     }
     }
 
-    return getRGB(255, 255, 255);
+    return G2D_WHITE;
 }
 #undef GETCOL_RANDOM
 
@@ -3258,17 +3147,17 @@ void Graphics::menuoffrender(void)
     }
 }
 
-SDL_Color Graphics::huetilegetcol()
+g2dColor Graphics::huetilegetcol()
 {
     if (game.noflashingmode)
     {
-        return getRGB(234, 234, 10);
+        return G2D_RGB(234, 234, 10);
     }
 
-    return getRGB(250 - (int) (fRandom() * 32), 250 - (int) (fRandom() * 32), 10);
+    return G2D_RGB(250 - (int) (fRandom() * 32), 250 - (int) (fRandom() * 32), 10);
 }
 
-SDL_Color Graphics::bigchunkygetcol(int t)
+g2dColor Graphics::bigchunkygetcol(int t)
 {
     // A seperate index of colours, for simplicity
     float random = game.noflashingmode ? 0.5 : fRandom();
@@ -3276,11 +3165,11 @@ SDL_Color Graphics::bigchunkygetcol(int t)
     switch (t)
     {
     case 1:
-        return getRGB(random * 64, 10, 10);
+        return G2D_RGB(random * 64, 10, 10);
     case 2:
-        return getRGB(160 - help.glow / 2 - (int) (random * 20), 200 - help.glow / 2, 220 - help.glow);
+        return G2D_RGB(160 - help.glow / 2 - (int) (random * 20), 200 - help.glow / 2, 220 - help.glow);
     }
-    const SDL_Color color = {0, 0, 0, 0};
+    const g2dColor color = G2D_RGBA(0, 0, 0, 0);
     return color;
 }
 
@@ -3517,7 +3406,7 @@ void Graphics::flashlight(void)
 {
     set_blendmode(SDL_BLENDMODE_NONE);
 
-    fill_rect(NULL, 0xBB, 0xBB, 0xBB, 0xBB);
+    fill_rect(NULL, G2D_RGBA(0xBB, 0xBB, 0xBB, 0xBB));
 }
 
 void Graphics::screenshake(void)
@@ -3710,20 +3599,20 @@ void Graphics::draw_screenshot_border(void)
     if (game.screenshot_saved_success)
     {
         set_blendmode(SDL_BLENDMODE_BLEND);
-        draw_rect(0, 0, 320, 240, 196, 196, 20, border_alpha);
-        draw_rect(1, 1, width - 2, height - 2, 196, 196, 20, border_alpha);
+        draw_rect(0, 0, 320, 240, G2D_RGBA(196, 196, 20, border_alpha));
+        draw_rect(1, 1, width - 2, height - 2, G2D_RGBA(196, 196, 20, border_alpha));
         set_blendmode(SDL_BLENDMODE_NONE);
     }
     else
     {
         set_blendmode(SDL_BLENDMODE_BLEND);
-        draw_rect(0, 0, 320, 240, 196, 20, 20, border_alpha);
-        draw_rect(1, 1, width - 2, height - 2, 196, 20, 20, border_alpha);
+        draw_rect(0, 0, 320, 240, G2D_RGBA(196, 20, 20, border_alpha));
+        draw_rect(1, 1, width - 2, height - 2, G2D_RGBA(196, 20, 20, border_alpha));
         set_blendmode(SDL_BLENDMODE_NONE);
     }
 }
 
-void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
+void Graphics::drawtele(int x, int y, int t, const g2dColor color)
 {
     SDL_Rect telerect;
     setRect(telerect, x, y, tele_rect.w, tele_rect.h);
@@ -3736,24 +3625,12 @@ void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
     draw_grid_tile(grphx.im_teleporter, t, x, y, tele_rect.w, tele_rect.h, color);
 }
 
-SDL_Color Graphics::getRGBA(const Uint8 r, const Uint8 g, const Uint8 b, const Uint8 a)
-{
-    const SDL_Color color = {r, g, b, a};
-    return color;
-}
-
-SDL_Color Graphics::getRGB(const Uint8 r, const Uint8 g, const Uint8 b)
-{
-    const SDL_Color color = {r, g, b, 255};
-    return color;
-}
-
-SDL_Color Graphics::RGBf(int r, int g, int b)
+g2dColor Graphics::RGBf(int r, int g, int b)
 {
     r = (r + 128) / 3;
     g = (g + 128) / 3;
     b = (b + 128) / 3;
-    const SDL_Color color = {(Uint8) r, (Uint8) g, (Uint8) b, 255};
+    const g2dColor color = G2D_RGB((Uint8) r, (Uint8) g, (Uint8) b);
     return color;
 }
 
@@ -3864,7 +3741,7 @@ fail:
     return false;
 }
 
-SDL_Color Graphics::crewcolourreal(int t)
+g2dColor Graphics::crewcolourreal(int t)
 {
     switch (t)
     {
@@ -3898,7 +3775,7 @@ void Graphics::render_roomname(uint32_t font_flag, const char* roomname, int r, 
     footerrect.y = 240 - footerrect.h;
 
     set_blendmode(SDL_BLENDMODE_BLEND);
-    fill_rect(&footerrect, getRGBA(0, 0, 0, translucentroomname ? 127 : 255));
+    fill_rect(&footerrect, G2D_RGBA(0, 0, 0, translucentroomname ? 127 : 255));
     font::print(font_flag | PR_CEN | PR_BOR | PR_CJK_LOW, -1, footerrect.y+1, roomname, r, g, b);
     set_blendmode(SDL_BLENDMODE_NONE);
 }

@@ -79,7 +79,7 @@ SDL_Surface* GetSubSurface( SDL_Surface* metaSurface, int x, int y, int width, i
     return preSurface;
 }
 
-void DrawPixel(SDL_Surface* surface, const int x, const int y, const SDL_Color color)
+void DrawPixel(SDL_Surface* surface, const int x, const int y, const g2dColor color)
 {
     const SDL_Point point = {x, y};
     const SDL_Rect rect = {0, 0, surface->w, surface->h};
@@ -109,7 +109,7 @@ void DrawPixel(SDL_Surface* surface, const int x, const int y, const SDL_Color c
 
     case 3:
     {
-        const Uint32 single = SDL_MapRGB(fmt, color.r, color.g, color.b);
+        const Uint32 single = SDL_MapRGB(fmt, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color));
         pixel[0] = (single & 0xFF0000) >> 16;
         pixel[1] = (single & 0x00FF00) >> 8;
         pixel[2] = (single & 0x0000FF) >> 0;
@@ -117,13 +117,13 @@ void DrawPixel(SDL_Surface* surface, const int x, const int y, const SDL_Color c
     }
 
     case 4:
-        *pixel32 = SDL_MapRGBA(fmt, color.r, color.g, color.b, color.a);
+        *pixel32 = SDL_MapRGBA(fmt, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color), G2D_GET_A(color));
     }
 }
 
-SDL_Color ReadPixel(const SDL_Surface* surface, const int x, const int y)
+g2dColor ReadPixel(const SDL_Surface* surface, const int x, const int y)
 {
-    SDL_Color color = {0, 0, 0, 0};
+    Uint8 color[4] = {0, 0, 0, 0};
     const SDL_Point point = {x, y};
     const SDL_Rect rect = {0, 0, surface->w, surface->h};
     const bool inbounds = SDL_PointInRect(&point, &rect);
@@ -135,7 +135,7 @@ SDL_Color ReadPixel(const SDL_Surface* surface, const int x, const int y)
             x, y, surface->w, surface->h
         ));
         SDL_assert(0 && "Pixel read is not inbounds!");
-        return color;
+        return G2D_RGBA(color[0], color[1], color[2], color[3]);
     }
 
     const SDL_PixelFormat* fmt = surface->format;
@@ -153,16 +153,16 @@ SDL_Color ReadPixel(const SDL_Surface* surface, const int x, const int y)
     case 3:
     {
         const Uint32 single = (pixel[0] << 16) | (pixel[1] << 8) | (pixel[2] << 0);
-        SDL_GetRGB(single, fmt, &color.r, &color.g, &color.b);
-        color.a = 255;
+        SDL_GetRGB(single, fmt, &color[0], &color[1], &color[2]);
+        color[3] = 255;
         break;
     }
 
     case 4:
-        SDL_GetRGBA(*pixel32, fmt, &color.r, &color.g, &color.b, &color.a);
+        SDL_GetRGBA(*pixel32, fmt, &color[0], &color[1], &color[2], &color[3]);
     }
 
-    return color;
+    return G2D_RGBA(color[0], color[1], color[2], color[3]);
 }
 
 static int oldscrollamount = 0;
@@ -227,13 +227,13 @@ void ApplyFilter(SDL_Surface** src, SDL_Surface** dest)
         {
             const int sampley = (y + (int) graphics.lerp(oldscrollamount, scrollamount)) % 240;
 
-            const SDL_Color pixel = ReadPixel(*src, x, sampley);
+            const g2dColor pixel = ReadPixel(*src, x, sampley);
 
-            Uint8 green = pixel.g;
-            Uint8 blue = pixel.b;
+            Uint8 green = G2D_GET_G(pixel);
+            Uint8 blue = G2D_GET_B(pixel);
 
-            const SDL_Color pixel_offset = ReadPixel(*src, SDL_min(x + red_offset, 319), sampley);
-            Uint8 red = pixel_offset.r;
+            const g2dColor pixel_offset = ReadPixel(*src, SDL_min(x + red_offset, 319), sampley);
+            Uint8 red = G2D_GET_R(pixel_offset);
 
             double mult;
             int tmp; /* needed to avoid char overflow */
@@ -267,7 +267,7 @@ void ApplyFilter(SDL_Surface** src, SDL_Surface** dest)
             green = SDL_max(green - (distX + distY), 0);
             blue = SDL_max(blue - (distX + distY), 0);
 
-            const SDL_Color color = {red, green, blue, pixel.a};
+            const g2dColor color = G2D_RGBA(red, green, blue, G2D_GET_A(pixel));
             DrawPixel(*dest, x, y, color);
         }
     }
@@ -336,8 +336,8 @@ bool TakeScreenshot(SDL_Surface** surface)
         {
             for (int y = 0; y < (*surface)->h / 2; y++)
             {
-                const SDL_Color upper = ReadPixel(*surface, x, y);
-                const SDL_Color lower = ReadPixel(*surface, x, (*surface)->h - 1 - y);
+                const g2dColor upper = ReadPixel(*surface, x, y);
+                const g2dColor lower = ReadPixel(*surface, x, (*surface)->h - 1 - y);
                 DrawPixel(*surface, x, y, lower);
                 DrawPixel(*surface, x, (*surface)->h - 1 - y, upper);
             }

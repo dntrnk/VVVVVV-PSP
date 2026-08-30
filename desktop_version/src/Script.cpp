@@ -57,17 +57,17 @@ scriptclass::scriptclass(void)
 
 void scriptclass::add_default_colours(void)
 {
-    textbox_colours["player"] = graphics.getRGB(164, 164, 255);
-    textbox_colours["cyan"] = graphics.getRGB(164, 164, 255);
-    textbox_colours["red"] = graphics.getRGB(255, 60, 60);
-    textbox_colours["green"] = graphics.getRGB(144, 255, 144);
-    textbox_colours["yellow"] = graphics.getRGB(255, 255, 134);
-    textbox_colours["blue"] = graphics.getRGB(95, 95, 255);
-    textbox_colours["purple"] = graphics.getRGB(255, 134, 255);
-    textbox_colours["white"] = graphics.getRGB(244, 244, 244);
-    textbox_colours["gray"] = graphics.getRGB(174, 174, 174);
-    textbox_colours["orange"] = graphics.getRGB(255, 130, 20);
-    textbox_colours["transparent"] = graphics.getRGB(0, 0, 0);
+    textbox_colours["player"] = G2D_RGB(164, 164, 255);
+    textbox_colours["cyan"] = G2D_RGB(164, 164, 255);
+    textbox_colours["red"] = G2D_RGB(255, 60, 60);
+    textbox_colours["green"] = G2D_RGB(144, 255, 144);
+    textbox_colours["yellow"] = G2D_RGB(255, 255, 134);
+    textbox_colours["blue"] = G2D_RGB(95, 95, 255);
+    textbox_colours["purple"] = G2D_RGB(255, 134, 255);
+    textbox_colours["white"] = G2D_RGB(244, 244, 244);
+    textbox_colours["gray"] = G2D_RGB(174, 174, 174);
+    textbox_colours["orange"] = G2D_RGB(255, 130, 20);
+    textbox_colours["transparent"] = G2D_BLACK;
 }
 
 void scriptclass::clearcustom(void)
@@ -523,9 +523,9 @@ void scriptclass::run(void)
                     words[1] = "gray";
                 }
 
-                r = textbox_colours[words[1]].r;
-                g = textbox_colours[words[1]].g;
-                b = textbox_colours[words[1]].b;
+                r = G2D_GET_R(textbox_colours[words[1]]);
+                g = G2D_GET_G(textbox_colours[words[1]]);
+                b = G2D_GET_B(textbox_colours[words[1]]);
 
                 //next are the x,y coordinates
                 textx = ss_toi(words[2]);

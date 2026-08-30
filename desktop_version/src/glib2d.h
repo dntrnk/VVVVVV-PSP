@@ -130,7 +130,7 @@ extern "C" {
            * This macro creates a g2dColor from 4 values, red, green, blue and alpha.
            * Input range is from 0 to 255.
            */
-#define G2D_RGBA(r,g,b,a) ((r)|((g)<<8)|((b)<<16)|((a)<<24))
+#define G2D_RGBA(r,g,b,a) ((g2dColor)((Uint8)(r)|((Uint8)(g)<<8)|((Uint8)(b)<<16)|((Uint8)(a)<<24)))
 
            /**
             * \def G2D_GET_R(color)
@@ -148,7 +148,7 @@ extern "C" {
                * \def G2D_GET_A(color)
                * \brief Get alpha channel value from a g2dColor.
                */
-#define G2D_RGB(r,g,b) ((r)|((g)<<8)|((b)<<16)|((255)<<24))
+#define G2D_RGB(r,g,b) ((g2dColor)((Uint8)(r)|((Uint8)(g)<<8)|((Uint8)(b)<<16)|((255)<<24)))
 
            /**
             * \def G2D_GET_R(color)

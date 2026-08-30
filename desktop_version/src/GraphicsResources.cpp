@@ -128,10 +128,8 @@ static SDL_Texture* LoadTextureFromRaw(const char* filename, SDL_Surface* loaded
         {
             for (int x = 0; x < loadedImage->w; x++)
             {
-                SDL_Color color = ReadPixel(loadedImage, x, y);
-                color.r = 255;
-                color.g = 255;
-                color.b = 255;
+                g2dColor color = ReadPixel(loadedImage, x, y);
+                color = G2D_WHITE;
                 DrawPixel(loadedImage, x, y, color);
             }
         }
@@ -143,19 +141,16 @@ static SDL_Texture* LoadTextureFromRaw(const char* filename, SDL_Surface* loaded
         {
             for (int x = 0; x < loadedImage->w; x++)
             {
-                SDL_Color color = ReadPixel(loadedImage, x, y);
+                g2dColor color = ReadPixel(loadedImage, x, y);
 
                 // Magic numbers used for grayscaling (eyes perceive certain colors brighter than others)
-                Uint8 r = color.r * 0.299;
-                Uint8 g = color.g * 0.587;
-                Uint8 b = color.b * 0.114;
+                Uint8 r = G2D_GET_R(color) * 0.299;
+                Uint8 g = G2D_GET_G(color) * 0.587;
+                Uint8 b = G2D_GET_B(color) * 0.114;
 
                 const double gray = SDL_floor(r + g + b + 0.5);
 
-                color.r = gray;
-                color.g = gray;
-                color.b = gray;
-
+                color = G2D_RGB(gray, gray, gray);
                 DrawPixel(loadedImage, x, y, color);
             }
         }

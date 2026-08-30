@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "glib2d.h"
+
 class CustomEntity
 {
 public:
@@ -166,8 +168,8 @@ public:
 
     int version;
 
-    SDL_Color getonewaycol(int rx, int ry);
-    SDL_Color getonewaycol(void);
+    g2dColor getonewaycol(int rx, int ry);
+    g2dColor getonewaycol(void);
     bool onewaycol_override;
 };
 
