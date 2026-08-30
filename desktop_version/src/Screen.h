@@ -3,6 +3,8 @@
 
 #include <SDL.h>
 
+#include "glib2d.h"
+
 #include "ScreenSettings.h"
 
 class Screen

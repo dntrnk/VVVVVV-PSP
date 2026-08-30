@@ -44,9 +44,9 @@ void Screen::init(const struct ScreenSettings* settings)
     vsync = settings->useVsync;
 
     // Uncomment this next line when you need to debug -flibit
-    SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, "software", SDL_HINT_OVERRIDE);
+    // SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, "software", SDL_HINT_OVERRIDE);
 
-    SDL_CreateWindowAndRenderer(480, 272, 0, &m_window, &m_renderer);
+    // SDL_CreateWindowAndRenderer(480, 272, 0, &m_window, &m_renderer);
 
     // m_window = SDL_CreateWindow(
     //     "VVVVVV",
@@ -71,18 +71,22 @@ void Screen::init(const struct ScreenSettings* settings)
     //     VVV_exit(1);
     // }
 
-    SDL_RenderSetVSync(m_renderer, (int) vsync);
+    // SDL_RenderSetVSync(m_renderer, (int) vsync);
 
-    SDL_SetWindowMinimumSize(m_window, 480, 272);
+    // SDL_SetWindowMinimumSize(m_window, 480, 272);
 
-    ResizeScreen(480, 272);
+    // ResizeScreen(480, 272);
+
+    g2dInit();
 }
 
 void Screen::destroy(void)
 {
     /* Order matters! */
-    VVV_freefunc(SDL_DestroyRenderer, m_renderer);
-    VVV_freefunc(SDL_DestroyWindow, m_window);
+    // VVV_freefunc(SDL_DestroyRenderer, m_renderer);
+    // VVV_freefunc(SDL_DestroyWindow, m_window);
+
+    g2dTerm();
 }
 
 void Screen::GetSettings(struct ScreenSettings* settings)
@@ -252,6 +256,7 @@ void Screen::RenderPresent(void)
 {
     SDL_RenderPresent(m_renderer);
     graphics.clear();
+    g2dFlip(G2D_VSYNC);
 }
 
 void Screen::toggleFullScreen(void)

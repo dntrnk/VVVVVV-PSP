@@ -507,14 +507,20 @@ int Graphics::set_blendmode(SDL_Texture* texture, const SDL_BlendMode blendmode)
 
 int Graphics::clear(const int r, const int g, const int b, const int a)
 {
-    set_color(r, g, b, a);
+    // set_color(r, g, b, a);
 
-    const int result = SDL_RenderClear(gameScreen.m_renderer);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not clear current render target: %s", SDL_GetError()));
-    }
-    return result;
+    // const int result = SDL_RenderClear(gameScreen.m_renderer);
+    // if (result != 0)
+    // {
+    //     WHINE_ONCE_ARGS(("Could not clear current render target: %s", SDL_GetError()));
+    // }
+    // return result;
+
+    // g2dClear(G2D_RGBA(r, g, b, a));
+
+    // Not now
+
+    return 0;
 }
 
 int Graphics::clear(void)
@@ -633,8 +639,18 @@ int Graphics::fill_rect(const SDL_Rect* rect)
 
 int Graphics::fill_rect(const SDL_Rect* rect, const int r, const int g, const int b, const int a)
 {
-    set_color(r, g, b, a);
-    return fill_rect(rect);
+    // set_color(r, g, b, a);
+    // return fill_rect(rect);
+
+    g2dBeginRects(NULL);
+    g2dReset();
+    g2dSetCoordXY(rect->x, rect->y);
+    g2dSetScaleWH(rect->w, rect->h);
+    g2dSetColor(G2D_RGBA(r, g, b, a));
+    g2dAdd();
+    g2dEnd();
+
+    return 0;
 }
 
 int Graphics::fill_rect(const SDL_Rect* rect, const int r, const int g, const int b)
