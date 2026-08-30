@@ -13,6 +13,7 @@ INCDIR = \
   ../third_party/physfs/extras \
 
 OBJS = \
+  src/glib2d.o \
   src/BinaryBlob.o \
   src/BlockV.o \
   src/ButtonGlyphs.o \
@@ -103,7 +104,7 @@ BUILD_PRX = 1
 PSP_FW_VERSION = 660
 
 LIBS = -lpspgu -lpspge -lpspdisplay -lpsppower -lpspctrl -lpspaudio -lpspvram \
-  -lphysfs -lvorbis -lvorbisidec -lSDL2main -lSDL2 -lSDL2_mixer -lstdc++ -lGL -logg -lmodplug -lpspvfpu -lpsphprm -lFAudio -ltinyxml2
+  -lz -lpng -lphysfs -lvorbis -lvorbisidec -lSDL2main -lSDL2 -lSDL2_mixer -lstdc++ -lGL -logg -lmodplug -lpspvfpu -lpsphprm -lFAudio -ltinyxml2
 
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = VVVVVV
