@@ -221,23 +221,21 @@ public:
     int set_color(Uint8 r, Uint8 g, Uint8 b);
     int set_color(SDL_Color color);
 
-    int fill_rect(const SDL_Rect* rect);
-    int fill_rect(const SDL_Rect* rect, int r, int g, int b, int a);
-    int fill_rect(int x, int y, int w, int h, int r, int g, int b, int a);
-    int fill_rect(int x, int y, int w, int h, int r, int g, int b);
-    int fill_rect(const SDL_Rect* rect, int r, int g, int b);
-    int fill_rect(int r, int g, int b);
-    int fill_rect(const SDL_Rect* rect, SDL_Color color);
-    int fill_rect(int x, int y, int w, int h, SDL_Color color);
-    int fill_rect(SDL_Color color);
+    void fill_rect(const SDL_Rect* rect, int r, int g, int b, int a);
+    void fill_rect(int x, int y, int w, int h, int r, int g, int b, int a);
+    void fill_rect(int x, int y, int w, int h, int r, int g, int b);
+    void fill_rect(const SDL_Rect* rect, int r, int g, int b);
+    void fill_rect(int r, int g, int b);
+    void fill_rect(const SDL_Rect* rect, SDL_Color color);
+    void fill_rect(int x, int y, int w, int h, SDL_Color color);
+    void fill_rect(SDL_Color color);
 
-    int draw_rect(const SDL_Rect* rect);
-    int draw_rect(const SDL_Rect* rect, int r, int g, int b, int a);
-    int draw_rect(int x, int y, int w, int h, int r, int g, int b, int a);
-    int draw_rect(int x, int y, int w, int h, int r, int g, int b);
-    int draw_rect(const SDL_Rect* rect, int r, int g, int b);
-    int draw_rect(const SDL_Rect* rect, SDL_Color color);
-    int draw_rect(int x, int y, int w, int h, SDL_Color color);
+    void draw_rect(const SDL_Rect* rect, int r, int g, int b, int a);
+    void draw_rect(int x, int y, int w, int h, int r, int g, int b, int a);
+    void draw_rect(int x, int y, int w, int h, int r, int g, int b);
+    void draw_rect(const SDL_Rect* rect, int r, int g, int b);
+    void draw_rect(const SDL_Rect* rect, SDL_Color color);
+    void draw_rect(int x, int y, int w, int h, SDL_Color color);
 
     int draw_line(int x, int y, int x2, int y2);
 

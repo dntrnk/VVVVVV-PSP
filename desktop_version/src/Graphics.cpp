@@ -627,21 +627,8 @@ int Graphics::set_color(const SDL_Color color)
     return set_color(color.r, color.g, color.b, color.a);
 }
 
-int Graphics::fill_rect(const SDL_Rect* rect)
+void Graphics::fill_rect(const SDL_Rect* rect, const int r, const int g, const int b, const int a)
 {
-    const int result = SDL_RenderFillRect(gameScreen.m_renderer, rect);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not draw filled rectangle: %s", SDL_GetError()));
-    }
-    return result;
-}
-
-int Graphics::fill_rect(const SDL_Rect* rect, const int r, const int g, const int b, const int a)
-{
-    // set_color(r, g, b, a);
-    // return fill_rect(rect);
-
     g2dBeginRects(NULL);
     g2dReset();
     g2dSetCoordXY(rect->x, rect->y);
@@ -649,86 +636,167 @@ int Graphics::fill_rect(const SDL_Rect* rect, const int r, const int g, const in
     g2dSetColor(G2D_RGBA(r, g, b, a));
     g2dAdd();
     g2dEnd();
-
-    return 0;
 }
 
-int Graphics::fill_rect(const SDL_Rect* rect, const int r, const int g, const int b)
+void Graphics::fill_rect(const SDL_Rect* rect, const int r, const int g, const int b)
 {
-    return fill_rect(rect, r, g, b, 255);
+    g2dBeginRects(NULL);
+    g2dReset();
+    g2dSetCoordXY(rect->x, rect->y);
+    g2dSetScaleWH(rect->w, rect->h);
+    g2dSetColor(G2D_RGB(r, g, b));
+    g2dAdd();
+    g2dEnd();
 }
 
-int Graphics::fill_rect(const int r, const int g, const int b)
+void Graphics::fill_rect(const int r, const int g, const int b)
 {
-    return fill_rect(NULL, r, g, b, 255);
+    g2dBeginRects(NULL);
+    g2dReset();
+    g2dSetCoordXY(0, 0);
+    g2dSetScaleWH(320, 240);
+    g2dSetColor(G2D_RGB(r, g, b));
+    g2dAdd();
+    g2dEnd();
 }
 
-int Graphics::fill_rect(const SDL_Rect* rect, const SDL_Color color)
+void Graphics::fill_rect(const SDL_Rect* rect, const SDL_Color color)
 {
-    return fill_rect(rect, color.r, color.g, color.b, color.a);
+    g2dBeginRects(NULL);
+    g2dReset();
+    g2dSetCoordXY(rect->x, rect->y);
+    g2dSetScaleWH(rect->w, rect->h);
+    g2dSetColor(G2D_RGBA(color.r, color.g, color.b, color.a));
+    g2dAdd();
+    g2dEnd();
 }
 
-int Graphics::fill_rect(const int x, const int y, const int w, const int h, const int r, const int g, const int b, const int a)
+void Graphics::fill_rect(const int x, const int y, const int w, const int h, const int r, const int g, const int b, const int a)
 {
-    const SDL_Rect rect = {x, y, w, h};
-    return fill_rect(&rect, r, g, b, a);
+    g2dBeginRects(NULL);
+    g2dReset();
+    g2dSetCoordXY(x, y);
+    g2dSetScaleWH(w, h);
+    g2dSetColor(G2D_RGBA(r, g, b, a));
+    g2dAdd();
+    g2dEnd();
 }
 
-int Graphics::fill_rect(const int x, const int y, const int w, const int h, const int r, const int g, const int b)
+void Graphics::fill_rect(const int x, const int y, const int w, const int h, const int r, const int g, const int b)
 {
-    return fill_rect(x, y, w, h, r, g, b, 255);
+    g2dBeginRects(NULL);
+    g2dReset();
+    g2dSetCoordXY(x, y);
+    g2dSetScaleWH(w, h);
+    g2dSetColor(G2D_RGB(r, g, b));
+    g2dAdd();
+    g2dEnd();
 }
 
-int Graphics::fill_rect(const SDL_Color color)
+void Graphics::fill_rect(const SDL_Color color)
 {
-    return fill_rect(NULL, color);
+    g2dBeginRects(NULL);
+    g2dReset();
+    g2dSetCoordXY(0, 0);
+    g2dSetScaleWH(320, 240);
+    g2dSetColor(G2D_RGB(color.r, color.g, color.b));
+    g2dAdd();
+    g2dEnd();
 }
 
-int Graphics::fill_rect(const int x, const int y, const int w, const int h, const SDL_Color color)
+void Graphics::fill_rect(const int x, const int y, const int w, const int h, const SDL_Color color)
 {
-    return fill_rect(x, y, w, h, color.r, color.g, color.b, color.a);
+    g2dBeginRects(NULL);
+    g2dReset();
+    g2dSetCoordXY(x, y);
+    g2dSetScaleWH(w, h);
+    g2dSetColor(G2D_RGBA(color.r, color.g, color.b, color.a));
+    g2dAdd();
+    g2dEnd();
 }
 
-int Graphics::draw_rect(const SDL_Rect* rect)
+void Graphics::draw_rect(const SDL_Rect* rect, const int r, const int g, const int b, const int a)
 {
-    const int result = SDL_RenderDrawRect(gameScreen.m_renderer, rect);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not draw rectangle: %s", SDL_GetError()));
-    }
-    return result;
+    g2dBeginRects(NULL);
+    g2dReset();
+    g2dSetColor(G2D_RGBA(r, g, b, a));
+    g2dSetCoordXY(rect->x, rect->y); g2dAdd();
+    g2dSetCoordXY(rect->x + rect->w - 1, rect->y); g2dAdd();
+    g2dSetCoordXY(rect->x + rect->w - 1, rect->y + rect->h - 1); g2dAdd();
+    g2dSetCoordXY(rect->x, rect->y + rect->h - 1); g2dAdd();
+    g2dSetCoordXY(rect->x, rect->y); g2dAdd();
+    g2dAdd();
+    g2dEnd();
 }
 
-int Graphics::draw_rect(const SDL_Rect* rect, const int r, const int g, const int b, const int a)
+void Graphics::draw_rect(const SDL_Rect* rect, const int r, const int g, const int b)
 {
-    set_color(r, g, b, a);
-    return draw_rect(rect);
+    g2dBeginRects(NULL);
+    g2dReset();
+    g2dSetColor(G2D_RGB(r, g, b));
+    g2dSetCoordXY(rect->x, rect->y); g2dAdd();
+    g2dSetCoordXY(rect->x + rect->w - 1, rect->y); g2dAdd();
+    g2dSetCoordXY(rect->x + rect->w - 1, rect->y + rect->h - 1); g2dAdd();
+    g2dSetCoordXY(rect->x, rect->y + rect->h - 1); g2dAdd();
+    g2dSetCoordXY(rect->x, rect->y); g2dAdd();
+    g2dAdd();
+    g2dEnd();
 }
 
-int Graphics::draw_rect(const SDL_Rect* rect, const int r, const int g, const int b)
+void Graphics::draw_rect(const SDL_Rect* rect, const SDL_Color color)
 {
-    return draw_rect(rect, r, g, b, 255);
+    g2dBeginRects(NULL);
+    g2dReset();
+    g2dSetColor(G2D_RGB(color.r, color.g, color.b));
+    g2dSetCoordXY(rect->x, rect->y); g2dAdd();
+    g2dSetCoordXY(rect->x + rect->w - 1, rect->y); g2dAdd();
+    g2dSetCoordXY(rect->x + rect->w - 1, rect->y + rect->h - 1); g2dAdd();
+    g2dSetCoordXY(rect->x, rect->y + rect->h - 1); g2dAdd();
+    g2dSetCoordXY(rect->x, rect->y); g2dAdd();
+    g2dAdd();
+    g2dEnd();
 }
 
-int Graphics::draw_rect(const SDL_Rect* rect, const SDL_Color color)
+void Graphics::draw_rect(const int x, const int y, const int w, const int h, const int r, const int g, const int b, const int a)
 {
-    return draw_rect(rect, color.r, color.g, color.b, color.a);
+    g2dBeginRects(NULL);
+    g2dReset();
+    g2dSetColor(G2D_RGBA(r, g, b, a));
+    g2dSetCoordXY(x, y); g2dAdd();
+    g2dSetCoordXY(x + w - 1, y); g2dAdd();
+    g2dSetCoordXY(x + w - 1, y + h - 1); g2dAdd();
+    g2dSetCoordXY(x, y + h - 1); g2dAdd();
+    g2dSetCoordXY(x, y); g2dAdd();
+    g2dAdd();
+    g2dEnd();
 }
 
-int Graphics::draw_rect(const int x, const int y, const int w, const int h, const int r, const int g, const int b, const int a)
+void Graphics::draw_rect(const int x, const int y, const int w, const int h, const int r, const int g, const int b)
 {
-    const SDL_Rect rect = {x, y, w, h};
-    return draw_rect(&rect, r, g, b, a);
+    g2dBeginRects(NULL);
+    g2dReset();
+    g2dSetColor(G2D_RGB(r, g, b));
+    g2dSetCoordXY(x, y); g2dAdd();
+    g2dSetCoordXY(x + w - 1, y); g2dAdd();
+    g2dSetCoordXY(x + w - 1, y + h - 1); g2dAdd();
+    g2dSetCoordXY(x, y + h - 1); g2dAdd();
+    g2dSetCoordXY(x, y); g2dAdd();
+    g2dAdd();
+    g2dEnd();
 }
 
-int Graphics::draw_rect(const int x, const int y, const int w, const int h, const int r, const int g, const int b)
+void Graphics::draw_rect(const int x, const int y, const int w, const int h, const SDL_Color color)
 {
-    return draw_rect(x, y, w, h, r, g, b, 255);
-}
-
-int Graphics::draw_rect(const int x, const int y, const int w, const int h, const SDL_Color color)
-{
-    return draw_rect(x, y, w, h, color.r, color.g, color.b, color.a);
+    g2dBeginRects(NULL);
+    g2dReset();
+    g2dSetColor(G2D_RGBA(color.r, color.g, color.b, color.a));
+    g2dSetCoordXY(x, y); g2dAdd();
+    g2dSetCoordXY(x + w - 1, y); g2dAdd();
+    g2dSetCoordXY(x + w - 1, y + h - 1); g2dAdd();
+    g2dSetCoordXY(x, y + h - 1); g2dAdd();
+    g2dSetCoordXY(x, y); g2dAdd();
+    g2dAdd();
+    g2dEnd();
 }
 
 int Graphics::draw_line(const int x, const int y, const int x2, const int y2)
@@ -3639,21 +3707,20 @@ void Graphics::draw_screenshot_border(void)
         return;
     }
 
-    const SDL_Rect rect_inner = {1, 1, width - 2, height - 2};
-
     if (game.screenshot_saved_success)
     {
-        set_color(196, 196, 20, border_alpha);
+        set_blendmode(SDL_BLENDMODE_BLEND);
+        draw_rect(0, 0, 320, 240, 196, 196, 20, border_alpha);
+        draw_rect(1, 1, width - 2, height - 2, 196, 196, 20, border_alpha);
+        set_blendmode(SDL_BLENDMODE_NONE);
     }
     else
     {
-        set_color(196, 20, 20, border_alpha);
+        set_blendmode(SDL_BLENDMODE_BLEND);
+        draw_rect(0, 0, 320, 240, 196, 20, 20, border_alpha);
+        draw_rect(1, 1, width - 2, height - 2, 196, 20, 20, border_alpha);
+        set_blendmode(SDL_BLENDMODE_NONE);
     }
-
-    set_blendmode(SDL_BLENDMODE_BLEND);
-    draw_rect(NULL);
-    draw_rect(&rect_inner);
-    set_blendmode(SDL_BLENDMODE_NONE);
 }
 
 void Graphics::drawtele(int x, int y, int t, const SDL_Color color)
