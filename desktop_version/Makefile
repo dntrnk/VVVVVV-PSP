@@ -93,7 +93,6 @@ OBJS = \
   ../third_party/SheenBidi/Source/ScriptStack.o \
   ../third_party/SheenBidi/Source/SheenBidi.o \
   ../third_party/SheenBidi/Source/StatusStack.o \
-  ../third_party/tinyxml2/tinyxml2.o \
 
 CFLAGS = -G0 -O3 -fomit-frame-pointer -fsingle-precision-constant -fno-math-errno -ffast-math -Wall -Wno-trigraphs
 # CFLAGS = -g3 -Wl,-Map,EBOOT.map
@@ -104,7 +103,7 @@ BUILD_PRX = 1
 PSP_FW_VERSION = 660
 
 LIBS = -lpspgu -lpspge -lpspdisplay -lpsppower -lpspctrl -lpspaudio -lpspatrac3 -lpspvram -lpng -lfreetype \
-  -lbz2 -lz -lphysfs -lvorbis -lvorbisidec -lSDL2main -lSDL2_image -lSDL2 -lSDL2_mixer -lstdc++ -lGL -logg -lmodplug -lpspvfpu -lpsphprm -lFAudio
+  -lbz2 -lz -lphysfs -lvorbis -lvorbisidec -lSDL2main -lSDL2_image -lSDL2 -lSDL2_mixer -lstdc++ -lGL -logg -lmodplug -lpspvfpu -lpsphprm -lFAudio -ltinyxml2
 
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = VVVVVV
