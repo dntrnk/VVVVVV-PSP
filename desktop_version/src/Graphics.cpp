@@ -3406,7 +3406,7 @@ void Graphics::flashlight(void)
 {
     set_blendmode(SDL_BLENDMODE_NONE);
 
-    fill_rect(NULL, G2D_RGBA(0xBB, 0xBB, 0xBB, 0xBB));
+    fill_rect(G2D_RGBA(0xBB, 0xBB, 0xBB, 0xBB));
 }
 
 void Graphics::screenshake(void)
