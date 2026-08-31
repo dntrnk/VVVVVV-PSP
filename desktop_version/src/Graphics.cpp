@@ -3411,45 +3411,48 @@ void Graphics::flashlight(void)
 
 void Graphics::screenshake(void)
 {
-    if (gameScreen.badSignalEffect)
-    {
-        ApplyFilter(&tempFilterSrc, &tempFilterDest);
-    }
+    // if (gameScreen.badSignalEffect)
+    // {
+    //     ApplyFilter(&tempFilterSrc, &tempFilterDest);
+    // }
 
-    set_render_target(tempShakeTexture);
-    set_blendmode(SDL_BLENDMODE_NONE);
-    clear();
+    // set_render_target(tempShakeTexture);
+    // set_blendmode(SDL_BLENDMODE_NONE);
+    // clear();
 
-    const SDL_Rect shake = {screenshake_x, screenshake_y, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS};
+    // const SDL_Rect shake = {screenshake_x, screenshake_y, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS};
 
-    copy_texture(gameTexture, NULL, &shake);
+    // copy_texture(gameTexture, NULL, &shake);
 
-    draw_screenshot_border();
+    // draw_screenshot_border();
 
-    set_render_target(gameTexture);
-    clear();
+    // set_render_target(gameTexture);
+    // clear();
 
-    // Clear the gameplay texture so blackout() is actually black after a screenshake
-    if (game.gamestate == GAMEMODE && game.blackout)
-    {
-        set_render_target(gameplayTexture);
-        clear();
-    }
+    // // Clear the gameplay texture so blackout() is actually black after a screenshake
+    // if (game.gamestate == GAMEMODE && game.blackout)
+    // {
+    //     set_render_target(gameplayTexture);
+    //     clear();
+    // }
 
-    set_render_target(NULL);
-    set_blendmode(SDL_BLENDMODE_NONE);
-    draw_window_background();
+    // set_render_target(NULL);
+    // set_blendmode(SDL_BLENDMODE_NONE);
+    // draw_window_background();
 
-    SDL_Rect rect;
-    get_stretch_info(&rect);
+    // SDL_Rect rect;
+    // get_stretch_info(&rect);
 
-    copy_texture(tempShakeTexture, NULL, &rect, 0, NULL, flipmode ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE);
+    // copy_texture(tempShakeTexture, NULL, &rect, 0, NULL, flipmode ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE);
+
+    g2dScreenOffsetX = screenshake_x;
+    g2dScreenOffsetY = screenshake_y;
 }
 
 void Graphics::updatescreenshake(void)
 {
-    screenshake_x =  static_cast<Sint32>((fRandom() * 7) - 4);
-    screenshake_y =  static_cast<Sint32>((fRandom() * 7) - 4);
+    screenshake_x = 80 + static_cast<Sint32>((fRandom() * 7) - 4);
+    screenshake_y = 16 + static_cast<Sint32>((fRandom() * 7) - 4);
 }
 
 void Graphics::draw_window_background(void)

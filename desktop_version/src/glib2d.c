@@ -98,6 +98,9 @@ static g2dImage *obj_tex;
 static int obj_camera_x, obj_camera_y;
 static bool obj_use_camera = false;
 
+float g2dScreenOffsetX = 80.0f;
+float g2dScreenOffsetY = 16.0f;
+
 g2dImage g2d_draw_buffer = { 512, 512, G2D_SCR_W, G2D_SCR_H,
                              (float)G2D_SCR_W / G2D_SCR_H, false, false,
                              (g2dColor *)FRAMEBUFFER_SIZE },
@@ -138,8 +141,8 @@ void *_g2dSetVertex(void *vp, int i, float vx, float vy) {
     // Coord
     v_p_float = (float *)v_p_color;
 
-    v_p_float[0] = I_OBJ.x + (obj_type == RECTS ? vx * I_OBJ.scale_w : 0.f);
-    v_p_float[1] = I_OBJ.y + (obj_type == RECTS ? vy * I_OBJ.scale_h : 0.f);
+    v_p_float[0] = I_OBJ.x + (obj_type == RECTS ? vx * I_OBJ.scale_w : 0.f) + g2dScreenOffsetX;
+    v_p_float[1] = I_OBJ.y + (obj_type == RECTS ? vy * I_OBJ.scale_h : 0.f) + g2dScreenOffsetY;
 
     // Then apply the rotation
     if (obj_use_rot && obj_type == RECTS) {

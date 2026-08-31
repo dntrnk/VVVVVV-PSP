@@ -58,7 +58,10 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <psptypes.h>
+
+extern float g2dScreenOffsetX, g2dScreenOffsetY;
 
     /**
      * \def USE_PNG
@@ -130,7 +133,7 @@ extern "C" {
            * This macro creates a g2dColor from 4 values, red, green, blue and alpha.
            * Input range is from 0 to 255.
            */
-#define G2D_RGBA(r,g,b,a) ((g2dColor)((Uint8)(r)|((Uint8)(g)<<8)|((Uint8)(b)<<16)|((Uint8)(a)<<24)))
+#define G2D_RGBA(r,g,b,a) ((g2dColor)((uint8_t)(r)|((uint8_t)(g)<<8)|((uint8_t)(b)<<16)|((uint8_t)(a)<<24)))
 
            /**
             * \def G2D_GET_R(color)
@@ -148,7 +151,7 @@ extern "C" {
                * \def G2D_GET_A(color)
                * \brief Get alpha channel value from a g2dColor.
                */
-#define G2D_RGB(r,g,b) ((g2dColor)((Uint8)(r)|((Uint8)(g)<<8)|((Uint8)(b)<<16)|((255)<<24)))
+#define G2D_RGB(r,g,b) ((g2dColor)((uint8_t)(r)|((uint8_t)(g)<<8)|((uint8_t)(b)<<16)|((255)<<24)))
 
            /**
             * \def G2D_GET_R(color)
