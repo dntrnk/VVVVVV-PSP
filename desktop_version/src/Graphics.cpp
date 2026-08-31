@@ -2311,19 +2311,26 @@ void Graphics::drawbackground( int t )
     case 1:
         // Starfield
         fill_rect(G2D_BLACK);
+
+        g2dBeginRects(NULL);
+        g2dReset();
+
         for (int i = 0; i < numstars; i++)
         {
             SDL_Rect star_rect = stars[i];
             star_rect.x = lerp(star_rect.x + starsspeed[i], star_rect.x);
+
             if (starsspeed[i] <= 6)
-            {
-                fill_rect(&star_rect, G2D_RGB(0x22,0x22,0x22));
-            }
+                g2dSetColor(G2D_RGB(0x22,0x22,0x22));
             else
-            {
-                fill_rect(&star_rect, G2D_RGB(0x55,0x55,0x55));
-            }
+                g2dSetColor(G2D_RGB(0x55,0x55,0x55));
+
+            g2dSetCoordXY(star_rect.x, star_rect.y);
+            g2dSetScaleWH(star_rect.w, star_rect.h);
+            g2dAdd();
         }
+        g2dEnd();
+        
         break;
     case 2:
     {
