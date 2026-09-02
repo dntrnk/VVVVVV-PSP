@@ -304,6 +304,8 @@ public:
     bool flipgamecomplete_mounted;
     bool fliplevelcomplete_mounted;
 
+    g2dImage* g2d_tiles;
+    g2dImage* g2d_tiles2;
 
     void menuoffrender(void);
 

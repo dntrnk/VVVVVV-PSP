@@ -150,6 +150,15 @@ void Graphics::init(void)
     levelcomplete_mounted = false;
     flipgamecomplete_mounted = false;
     fliplevelcomplete_mounted = false;
+
+    // NOTE: "graphics" folder from "data.zip" file must be moved to root game folder (which contains EBOOT.PBP)
+    // I'll fix this later
+
+    // Also: original "tiles.png / tiles2.png" file seems to be broken
+    // most likely, original files are containing mipmaps and because of that they should be re-exported in some pixel art editor
+    // I'll also try to fix this a bit later
+    g2d_tiles = g2dTexLoad("graphics/tiles.png", NULL, 0, (g2dTex_Mode) ((g2dTexFormat) G2D_CLUT8 | (g2dTex_Mode) G2D_SWIZZLE));
+    g2d_tiles2 = g2dTexLoad("graphics/tiles2.png", NULL, 0, (g2dTex_Mode) ((g2dTexFormat) G2D_CLUT8 | (g2dTex_Mode) G2D_SWIZZLE));
 }
 
 void Graphics::destroy(void)
@@ -754,6 +763,21 @@ bool Graphics::shouldrecoloroneway(const int tilenum, const bool mounted)
 
 void Graphics::drawtile(int x, int y, int t)
 {
+    // Just for test
+    const int tex_width = 320;
+    const int x2 = (t % (tex_width / tiles_rect.w)) * tiles_rect.w;
+    const int y2 = (t / (tex_width / tiles_rect.w)) * tiles_rect.h;
+
+    g2dBeginRects(g2d_tiles);
+    g2dReset();
+    g2dSetCoordMode(G2D_UP_LEFT);
+    g2dSetCoordXY(x, y);
+    g2dSetCropXY(x2, y2);
+    g2dSetCropWH(tiles_rect.w, tiles_rect.h);
+    g2dSetScaleWH(tiles_rect.w, tiles_rect.h);
+    g2dAdd();
+    g2dEnd();
+
     if (shouldrecoloroneway(t, tiles1_mounted))
     {
         draw_grid_tile(grphx.im_tiles_tint, t, x, y, tiles_rect.w, tiles_rect.h, cl.getonewaycol());
@@ -767,6 +791,21 @@ void Graphics::drawtile(int x, int y, int t)
 
 void Graphics::drawtile2(int x, int y, int t)
 {
+    // Just for test
+    const int tex_width = 320;
+    const int x2 = (t % (tex_width / tiles_rect.w)) * tiles_rect.w;
+    const int y2 = (t / (tex_width / tiles_rect.w)) * tiles_rect.h;
+
+    g2dBeginRects(g2d_tiles2);
+    g2dReset();
+    g2dSetCoordMode(G2D_UP_LEFT);
+    g2dSetCoordXY(x, y);
+    g2dSetCropXY(x2, y2);
+    g2dSetCropWH(tiles_rect.w, tiles_rect.h);
+    g2dSetScaleWH(tiles_rect.w, tiles_rect.h);
+    g2dAdd();
+    g2dEnd();
+
     if (shouldrecoloroneway(t, tiles2_mounted))
     {
         draw_grid_tile(grphx.im_tiles2_tint, t, x, y, tiles_rect.w, tiles_rect.h, cl.getonewaycol());
@@ -2830,7 +2869,7 @@ void Graphics::drawmap(void)
         }
 
         set_render_target(target);
-        foregrounddrawn = true;
+        // foregrounddrawn = true;
     }
 
     copy_texture(foregroundTexture, NULL, NULL);
