@@ -230,7 +230,7 @@ public:
     void draw_rect(const SDL_Rect* rect, g2dColor color);
     void draw_rect(int x, int y, int w, int h, g2dColor color);
 
-    int draw_line(int x, int y, int x2, int y2);
+    void draw_line(int x, int y, int x2, int y2, g2dColor color);
 
     int draw_points(const SDL_Point* points, int count);
     int draw_points(const SDL_Point* points, int count, int r, int g, int b);

@@ -697,14 +697,16 @@ void Graphics::draw_rect(const int x, const int y, const int w, const int h, con
     g2dEnd();
 }
 
-int Graphics::draw_line(const int x, const int y, const int x2, const int y2)
+void Graphics::draw_line(const int x, const int y, const int x2, const int y2, const g2dColor color)
 {
-    const int result = SDL_RenderDrawLine(gameScreen.m_renderer, x, y, x2, y2);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not draw line: %s", SDL_GetError()));
-    }
-    return result;
+    g2dBeginLines(G2D_STRIP);
+    g2dReset();
+    g2dSetColor(color);
+    g2dSetCoordXY(x, y);
+    g2dAdd();
+    g2dSetCoordXY(x2, y2);
+    g2dAdd();
+    g2dEnd();
 }
 
 int Graphics::draw_points(const SDL_Point* points, const int count)
@@ -1857,51 +1859,48 @@ void Graphics::drawgravityline(const int t, const int x, const int y, const int 
     {
         if (game.noflashingmode)
         {
-            set_color(200 - 20, 200 - 20, 200 - 20);
-            draw_line(x, y, x + w, y + h);
+            draw_line(x, y, x + w, y + h, G2D_RGB(200 - 20, 200 - 20, 200 - 20));
             return;
         }
 
         switch(linestate)
         {
         case 0:
-            set_color(200 - 20, 200 - 20, 200 - 20);
+            draw_line(x, y, x + w, y + h, G2D_RGB(200 - 20, 200 - 20, 200 - 20));
             break;
         case 1:
-            set_color(245 - 30, 245 - 30, 225 - 30);
+            draw_line(x, y, x + w, y + h, G2D_RGB(245 - 30, 245 - 30, 225 - 30));
             break;
         case 2:
-            set_color(225 - 30, 245 - 30, 245 - 30);
+            draw_line(x, y, x + w, y + h, G2D_RGB(225 - 30, 245 - 30, 245 - 30));
             break;
         case 3:
-            set_color(200 - 20, 200 - 20, 164 - 10);
+            draw_line(x, y, x + w, y + h, G2D_RGB(200 - 20, 200 - 20, 164 - 10));
             break;
         case 4:
-            set_color(196 - 20, 255 - 30, 224 - 20);
+            draw_line(x, y, x + w, y + h, G2D_RGB(196 - 20, 255 - 30, 224 - 20));
             break;
         case 5:
-            set_color(196 - 20, 235 - 30, 205 - 20);
+            draw_line(x, y, x + w, y + h, G2D_RGB(196 - 20, 235 - 30, 205 - 20));
             break;
         case 6:
-            set_color(164 - 10, 164 - 10, 164 - 10);
+            draw_line(x, y, x + w, y + h, G2D_RGB(164 - 10, 164 - 10, 164 - 10));
             break;
         case 7:
-            set_color(205 - 20, 245 - 30, 225 - 30);
+            draw_line(x, y, x + w, y + h, G2D_RGB(205 - 20, 245 - 30, 225 - 30));
             break;
         case 8:
-            set_color(225 - 30, 255 - 30, 205 - 20);
+            draw_line(x, y, x + w, y + h, G2D_RGB(225 - 30, 255 - 30, 205 - 20));
             break;
         case 9:
-            set_color(245 - 30, 245 - 30, 245 - 30);
+            draw_line(x, y, x + w, y + h, G2D_RGB(245 - 30, 245 - 30, 245 - 30));
             break;
         }
     }
     else
     {
-        set_color(96, 96, 96);
+        draw_line(x, y, x + w, y + h, G2D_RGB(96, 96, 96));
     }
-
-    draw_line(x, y, x + w, y + h);
 }
 
 void Graphics::drawtrophytext(void)
