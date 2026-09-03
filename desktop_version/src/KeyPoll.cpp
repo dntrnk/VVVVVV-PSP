@@ -571,8 +571,7 @@ void KeyPoll::Poll(void)
         toggleFullscreen();
     }
 
-    SDL_Rect rect;
-    graphics.get_stretch_info(&rect);
+    SDL_Rect rect = {0, 0, 480, 272};
 
     int window_width = 480;
     int window_height = 272;

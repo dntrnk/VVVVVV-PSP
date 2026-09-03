@@ -3423,8 +3423,7 @@ void Graphics::screenshake(void)
     // set_blendmode(SDL_BLENDMODE_NONE);
     // draw_window_background();
 
-    // SDL_Rect rect;
-    // get_stretch_info(&rect);
+    // SDL_Rect rect = {0, 0, 480, 272};
 
     // copy_texture(tempShakeTexture, NULL, &rect, 0, NULL, flipmode ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE);
 
@@ -3443,56 +3442,6 @@ void Graphics::draw_window_background(void)
     clear();
 }
 
-void Graphics::get_stretch_info(SDL_Rect* rect)
-{
-    int width;
-    int height;
-    gameScreen.GetScreenSize(&width, &height);
-
-    switch (gameScreen.scalingMode)
-    {
-    case SCALING_INTEGER:
-    {
-        int scale = SDL_min(width / SCREEN_WIDTH_PIXELS, height / SCREEN_HEIGHT_PIXELS);
-        rect->x = (width - SCREEN_WIDTH_PIXELS * scale) / 2;
-        rect->y = (height - SCREEN_HEIGHT_PIXELS * scale) / 2;
-        rect->w = SCREEN_WIDTH_PIXELS * scale;
-        rect->h = SCREEN_HEIGHT_PIXELS * scale;
-        break;
-    }
-    case SCALING_LETTERBOX:
-        if (width * SCREEN_HEIGHT_PIXELS > height * SCREEN_WIDTH_PIXELS)
-        {
-            rect->x = (width - height * SCREEN_WIDTH_PIXELS / SCREEN_HEIGHT_PIXELS) / 2;
-            rect->y = 0;
-            rect->w = height * SCREEN_WIDTH_PIXELS / SCREEN_HEIGHT_PIXELS;
-            rect->h = height;
-        }
-        else
-        {
-            rect->x = 0;
-            rect->y = (height - width * SCREEN_HEIGHT_PIXELS / SCREEN_WIDTH_PIXELS) / 2;
-            rect->w = width;
-            rect->h = width * SCREEN_HEIGHT_PIXELS / SCREEN_WIDTH_PIXELS;
-        }
-        break;
-    case SCALING_STRETCH:
-        /* Could pass NULL to copy_texture instead, but this feels better */
-        rect->x = 0;
-        rect->y = 0;
-        rect->w = width;
-        rect->h = height;
-        break;
-    default:
-        SDL_assert(0 && "Invalid scaling mode!");
-        /* Width and height should be nonzero to avoid division by zero. */
-        rect->x = 0;
-        rect->y = 0;
-        rect->w = width;
-        rect->h = height;
-    }
-}
-
 void Graphics::render(void)
 {
     ime_render();
@@ -3508,8 +3457,7 @@ void Graphics::render(void)
 
     draw_window_background();
 
-    SDL_Rect stretch_info;
-    get_stretch_info(&stretch_info);
+    SDL_Rect stretch_info = {0, 0, 480, 272};
 
     ime_set_rect(&stretch_info);
 
