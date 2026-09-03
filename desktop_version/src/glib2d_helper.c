@@ -66,6 +66,7 @@ void g2dHelperDrawRect(int x, int y, int w, int h, g2dColor color) {
 void g2dHelperDrawImage(g2dImage* tex, int x, int y, int w, int h, g2dColor color, int srcx, int srcy, int srcw, int srch) {
     _check_batch(tex);
     g2dReset();
+    g2dSetColor(color);
     g2dSetCoordXY(x, y);
     g2dSetCropXY(srcx, srcy);
     g2dSetCropWH(srcw, srch);
