@@ -87,20 +87,6 @@ bool KeyPoll::textentry(void)
     return SDL_IsTextInputActive() == SDL_TRUE;
 }
 
-void KeyPoll::toggleFullscreen(void)
-{
-    gameScreen.toggleFullScreen();
-
-    keymap.clear(); /* we lost the input due to a new window. */
-    if (GlitchrunnerMode_less_than_or_equal(Glitchrunner2_2))
-    {
-        game.press_left = false;
-        game.press_right = false;
-        game.press_action = true;
-        game.press_map = false;
-    }
-}
-
 static int changemousestate(
     int timeout,
     const bool show,
@@ -566,20 +552,13 @@ void KeyPoll::Poll(void)
         hidemouse
     );
 
-    if (fullscreenkeybind)
-    {
-        toggleFullscreen();
-    }
-
     SDL_Rect rect = {0, 0, 480, 272};
 
     int window_width = 480;
     int window_height = 272;
-    // SDL_GetWindowSizeInPixels(gameScreen.m_window, &window_width, &window_height);
 
     int scaled_window_width = 480;
     int scaled_window_height = 272;
-    // SDL_GetWindowSize(gameScreen.m_window, &scaled_window_width, &scaled_window_height);
 
     float scale_x = (float)window_width / (float)scaled_window_width;
     float scale_y = (float)window_height / (float)scaled_window_height;

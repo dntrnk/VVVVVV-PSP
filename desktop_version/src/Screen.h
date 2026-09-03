@@ -15,16 +15,9 @@ public:
 
     void GetSettings(struct ScreenSettings* settings);
 
-    void ResizeScreen(int x, int y);
-    void ResizeToNearestMultiple(void);
-    void GetScreenSize(int* x, int* y);
-
     void RenderPresent(void);
-
-    void toggleFullScreen(void);
-    void toggleScalingMode(void);
+    
     void toggleLinearFilter(void);
-    void toggleVSync(void);
 
     void recacheTextures(void);
 

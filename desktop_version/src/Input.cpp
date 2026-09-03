@@ -688,7 +688,7 @@ static void menuactionpress(void)
         {
             processed = true;
             music.playef(Sound_VIRIDIAN);
-            gameScreen.toggleFullScreen();
+            // gameScreen.toggleFullScreen();
         }
         if (gameScreen.isForcedFullscreen())
         {
@@ -698,7 +698,7 @@ static void menuactionpress(void)
         {
             processed = true;
             music.playef(Sound_VIRIDIAN);
-            gameScreen.toggleScalingMode();
+            // gameScreen.toggleScalingMode();
             game.savestatsandsettings_menu();
         }
         if (game.currentmenuoption == offset + 2 && !gameScreen.isForcedFullscreen())
@@ -708,7 +708,7 @@ static void menuactionpress(void)
             if (gameScreen.isWindowed)
             {
                 music.playef(Sound_VIRIDIAN);
-                gameScreen.ResizeToNearestMultiple();
+                // gameScreen.ResizeToNearestMultiple();
                 game.savestatsandsettings_menu();
             }
             else
@@ -740,7 +740,7 @@ static void menuactionpress(void)
             processed = true;
             //toggle vsync
             music.playef(Sound_VIRIDIAN);
-            gameScreen.toggleVSync();
+            // gameScreen.toggleVSync();
             game.savestatsandsettings_menu();
         }
         if (!processed)

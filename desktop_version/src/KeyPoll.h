@@ -38,8 +38,6 @@ public:
 
     bool resetWindow;
 
-    void toggleFullscreen(void);
-
     int sensitivity;
 
     int inline getThreshold(void);

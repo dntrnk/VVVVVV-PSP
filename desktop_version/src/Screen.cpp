@@ -75,8 +75,6 @@ void Screen::init(const struct ScreenSettings* settings)
 
     // SDL_SetWindowMinimumSize(m_window, 480, 272);
 
-    // ResizeScreen(480, 272);
-
     g2dInit();
 }
 
@@ -108,50 +106,6 @@ void Screen::GetSettings(struct ScreenSettings* settings)
     settings->badSignal = badSignalEffect;
 }
 
-void Screen::ResizeScreen(int x, int y)
-{
-    windowDisplay = SDL_GetWindowDisplayIndex(m_window);
-    if (windowDisplay < 0)
-    {
-        vlog_error("Error: could not get display index: %s", SDL_GetError());
-        windowDisplay = 0;
-    }
-
-    if (x != -1 && y != -1)
-    {
-        // This is a user resize!
-        windowWidth = x;
-        windowHeight = y;
-    }
-
-    if (!isWindowed || isForcedFullscreen())
-    {
-        int result = SDL_SetWindowFullscreen(m_window, SDL_WINDOW_FULLSCREEN_DESKTOP);
-        if (result != 0)
-        {
-            vlog_error("Error: could not set the game to fullscreen mode: %s", SDL_GetError());
-            return;
-        }
-    }
-    else
-    {
-        int result = SDL_SetWindowFullscreen(m_window, 0);
-        if (result != 0)
-        {
-            vlog_error("Error: could not set the game to windowed mode: %s", SDL_GetError());
-        }
-        else if (x != -1 && y != -1)
-        {
-            SDL_SetWindowSize(m_window, windowWidth, windowHeight);
-            SDL_SetWindowPosition(
-                m_window,
-                SDL_WINDOWPOS_CENTERED_DISPLAY(windowDisplay),
-                SDL_WINDOWPOS_CENTERED_DISPLAY(windowDisplay)
-            );
-        }
-    }
-}
-
 static void constrain_to_desktop(int display_index, int* width, int* height)
 {
     SDL_DisplayMode display_mode = {};
@@ -171,113 +125,15 @@ static void constrain_to_desktop(int display_index, int* width, int* height)
     }
 }
 
-void Screen::ResizeToNearestMultiple(void)
-{
-    int w, h;
-    GetScreenSize(&w, &h);
-
-    // Check aspect ratio first
-    bool using_width;
-    int usethisdimension, usethisratio;
-
-    if ((float) w / (float) h > 4.0 / 3.0)
-    {
-        // Width is bigger, so it's limited by height
-        usethisdimension = h;
-        usethisratio = SCREEN_HEIGHT_PIXELS;
-        using_width = false;
-    }
-    else
-    {
-        // Height is bigger, so it's limited by width. Or we're exactly 4:3 already
-        usethisdimension = w;
-        usethisratio = SCREEN_WIDTH_PIXELS;
-        using_width = true;
-    }
-
-    int floor = (usethisdimension / usethisratio) * usethisratio;
-    int ceiling = floor + usethisratio;
-
-    int final_dimension;
-
-    if (usethisdimension - floor < ceiling - usethisdimension)
-    {
-        // Floor is nearest
-        final_dimension = floor;
-    }
-    else
-    {
-        // Ceiling is nearest. Or we're exactly on a multiple already
-        final_dimension = ceiling;
-    }
-
-    if (final_dimension == 0)
-    {
-        // We're way too small!
-        ResizeScreen(SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS);
-        return;
-    }
-
-    if (using_width)
-    {
-        w = final_dimension;
-        h = final_dimension / 4 * 3;
-    }
-    else
-    {
-        w = final_dimension * 4 / 3;
-        h = final_dimension;
-    }
-
-    windowDisplay = SDL_GetWindowDisplayIndex(m_window);
-    if (windowDisplay < 0)
-    {
-        vlog_error("Could not get display index: %s", SDL_GetError());
-        windowDisplay = 0;
-    }
-
-    constrain_to_desktop(windowDisplay, &w, &h);
-
-    ResizeScreen(w, h);
-}
-
-void Screen::GetScreenSize(int* x, int* y)
-{
-    if (SDL_GetRendererOutputSize(m_renderer, x, y) != 0)
-    {
-        vlog_error("Could not get window size: %s", SDL_GetError());
-        /* Initialize to safe defaults */
-        *x = SCREEN_WIDTH_PIXELS;
-        *y = SCREEN_HEIGHT_PIXELS;
-    }
-}
-
 void Screen::RenderPresent(void)
 {
-    SDL_RenderPresent(m_renderer);
+    // SDL_RenderPresent(m_renderer);
     graphics.clear();
     graphics.fill_rect(-80, -16, 480, 16, G2D_BLACK);
     graphics.fill_rect(-80, 240, 480, 16, G2D_BLACK);
     graphics.fill_rect(-80, 0, 80, 240, G2D_BLACK);
     graphics.fill_rect(320, 0, 80, 240, G2D_BLACK);
     g2dHelperFlip();
-}
-
-void Screen::toggleFullScreen(void)
-{
-    isWindowed = !isWindowed;
-    ResizeScreen(windowWidth, windowHeight);
-
-    if (game.currentmenuname == Menu::graphicoptions)
-    {
-        /* Recreate menu to update "resize to nearest" */
-        game.createmenu(game.currentmenuname, true);
-    }
-}
-
-void Screen::toggleScalingMode(void)
-{
-    scalingMode = (scalingMode + 1) % NUM_SCALING_MODES;
 }
 
 void Screen::toggleLinearFilter(void)
@@ -324,12 +180,6 @@ void Screen::toggleLinearFilter(void)
         graphics.tempShakeTexture,
         isFiltered ? SDL_ScaleModeLinear : SDL_ScaleModeNearest
     );
-}
-
-void Screen::toggleVSync(void)
-{
-    vsync = !vsync;
-    SDL_RenderSetVSync(m_renderer, (int) vsync);
 }
 
 void Screen::recacheTextures(void)

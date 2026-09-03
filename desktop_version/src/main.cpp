@@ -1069,7 +1069,6 @@ static enum LoopCode loop_end(void)
     if (key.resetWindow)
     {
         key.resetWindow = false;
-        gameScreen.ResizeScreen(-1, -1);
     }
 
     return Loop_continue;
