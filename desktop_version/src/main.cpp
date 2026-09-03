@@ -36,6 +36,8 @@
 #include "UtilityClass.h"
 #include "Vlogging.h"
 
+#include "controls.h"
+
 scriptclass script;
 
 std::vector<CustomEntity> customentities;
@@ -303,6 +305,7 @@ static enum LoopCode loop_run_active_funcs(void)
         if (implfunc->type == Func_input && !game.inputdelay)
         {
             key.Poll();
+            controls_read();
         }
 
         if (implfunc->type != Func_null && implfunc->func != NULL)
@@ -621,6 +624,8 @@ int main(int argc, char *argv[])
     {
         SDL_StopTextInput();
     }
+
+    controls_init();
 
     NETWORK_init();
 
@@ -978,6 +983,7 @@ static enum LoopCode loop_begin(void)
     if (game.inputdelay)
     {
         key.Poll();
+        controls_read();
     }
 
     // Update network per frame.

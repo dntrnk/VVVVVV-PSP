@@ -15,6 +15,7 @@ INCDIR = \
 OBJS = \
   src/glib2d.o \
   src/glib2d_helper.o \
+  src/controls.o \
   src/BinaryBlob.o \
   src/BlockV.o \
   src/ButtonGlyphs.o \
