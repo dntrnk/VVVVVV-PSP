@@ -150,15 +150,6 @@ void Graphics::init(void)
     levelcomplete_mounted = false;
     flipgamecomplete_mounted = false;
     fliplevelcomplete_mounted = false;
-
-    // NOTE: "graphics" folder from "data.zip" file must be moved to root game folder (which contains EBOOT.PBP)
-    // I'll fix this later
-
-    // Also: original "tiles.png / tiles2.png" file seems to be broken
-    // most likely, original files are containing mipmaps and because of that they should be re-exported in some pixel art editor
-    // I'll also try to fix this a bit later
-    g2d_tiles = g2dTexLoad("graphics/tiles.png", NULL, 0, (g2dTex_Mode) ((g2dTexFormat) G2D_CLUT8 | (g2dTex_Mode) G2D_SWIZZLE));
-    g2d_tiles2 = g2dTexLoad("graphics/tiles2.png", NULL, 0, (g2dTex_Mode) ((g2dTexFormat) G2D_CLUT8 | (g2dTex_Mode) G2D_SWIZZLE));
 }
 
 void Graphics::destroy(void)
@@ -734,7 +725,7 @@ void Graphics::drawtile(int x, int y, int t)
     const int x2 = (t % (tex_width / tiles_rect.w)) * tiles_rect.w;
     const int y2 = (t / (tex_width / tiles_rect.w)) * tiles_rect.h;
 
-    g2dHelperDrawImage(g2d_tiles, x, y, tiles_rect.w, tiles_rect.h, G2D_WHITE, x2, y2, tiles_rect.w, tiles_rect.h);
+    g2dHelperDrawImage(grphx.g2d_tiles, x, y, tiles_rect.w, tiles_rect.h, G2D_WHITE, x2, y2, tiles_rect.w, tiles_rect.h);
 
     if (shouldrecoloroneway(t, tiles1_mounted))
     {
@@ -754,7 +745,7 @@ void Graphics::drawtile2(int x, int y, int t)
     const int x2 = (t % (tex_width / tiles_rect.w)) * tiles_rect.w;
     const int y2 = (t / (tex_width / tiles_rect.w)) * tiles_rect.h;
 
-    g2dHelperDrawImage(g2d_tiles2, x, y, tiles_rect.w, tiles_rect.h, G2D_WHITE, x2, y2, tiles_rect.w, tiles_rect.h);
+    g2dHelperDrawImage(grphx.g2d_tiles2, x, y, tiles_rect.w, tiles_rect.h, G2D_WHITE, x2, y2, tiles_rect.w, tiles_rect.h);
 
     if (shouldrecoloroneway(t, tiles2_mounted))
     {
@@ -781,6 +772,9 @@ void Graphics::drawtile3(int x, int y, int t, int off, int height_subtract /*= 0
     const int x2 = (t % (width / 8)) * 8;
     const int y2 = (t / (width / 8)) * 8;
     draw_texture_part(grphx.im_tiles3, x, y, x2, y2, 8, 8 - height_subtract, 1, 1);
+
+    // Just for test
+    g2dHelperDrawImage(grphx.g2d_tiles3, x, y, 8, 8, G2D_WHITE, x2, y2, 8, 8);
 }
 
 const char* Graphics::textbox_line(
@@ -2035,7 +2029,11 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+        draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct); 
+        
+        const int x2 = (obj.entities[i].drawframe % (384 / 32)) * 32;
+        const int y2 = (obj.entities[i].drawframe / (384 / 32)) * 32;
+        g2dHelperDrawImage(grphx.g2d_sprites, drawRect.x, drawRect.y, 32, 32, ct, x2, y2, 32, 32);
 
         // screenwrapping!
         SDL_Point wrappedPoint;

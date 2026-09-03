@@ -3,6 +3,8 @@
 
 #include <SDL.h>
 
+#include "glib2d_helper.h"
+
 enum TextureLoadType
 {
     TEX_COLOR,
@@ -48,6 +50,11 @@ public:
 
     SDL_Texture* im_sprites_translated;
     SDL_Texture* im_flipsprites_translated;
+
+    g2dImage* g2d_tiles;
+    g2dImage* g2d_tiles2;
+    g2dImage* g2d_tiles3;
+    g2dImage* g2d_sprites;
 };
 
 SDL_Surface* LoadImageSurface(const char* filename);

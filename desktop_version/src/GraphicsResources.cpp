@@ -401,6 +401,17 @@ void GraphicsResources::init_translations(void)
 
 void GraphicsResources::init(void)
 {
+    // NOTE: "graphics" folder from "data.zip" file must be moved to root game folder (which contains EBOOT.PBP)
+    // I'll fix this later
+
+    // Also: original "tiles.png / tiles2.png" file seems to be broken
+    // most likely, original files are containing mipmaps and because of that they should be re-exported in some pixel art editor
+    // I'll also try to fix this a bit later
+    g2d_tiles = g2dTexLoad("graphics/tiles.png", NULL, 0, (g2dTex_Mode) ((g2dTexFormat) G2D_CLUT8 | (g2dTex_Mode) G2D_SWIZZLE));
+    g2d_tiles2 = g2dTexLoad("graphics/tiles2.png", NULL, 0, (g2dTex_Mode) ((g2dTexFormat) G2D_CLUT8 | (g2dTex_Mode) G2D_SWIZZLE));
+    g2d_tiles3 = g2dTexLoad("graphics/tiles3.png", NULL, 0, (g2dTex_Mode) ((g2dTexFormat) G2D_CLUT8 | (g2dTex_Mode) G2D_SWIZZLE));
+    g2d_sprites = g2dTexLoad("graphics/sprites.png", NULL, 0, (g2dTex_Mode) ((g2dTexFormat) G2D_CLUT8 | (g2dTex_Mode) G2D_SWIZZLE));
+    
     LoadVariants("graphics/tiles.png", &im_tiles, &im_tiles_white, &im_tiles_tint);
     LoadVariants("graphics/tiles2.png", &im_tiles2, NULL, &im_tiles2_tint);
     LoadVariants("graphics/entcolours.png", &im_entcolours, NULL, &im_entcolours_tint);
@@ -437,6 +448,7 @@ void GraphicsResources::init(void)
         SDL_assert(0 && "Failed to create minimap texture! See stderr.");
         return;
     }
+
 }
 
 
