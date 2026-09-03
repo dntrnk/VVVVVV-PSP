@@ -218,10 +218,6 @@ public:
 
     int copy_texture(SDL_Texture* texture, const SDL_Rect* src, const SDL_Rect* dest);
     int copy_texture(SDL_Texture* texture, const SDL_Rect* src, const SDL_Rect* dest, double angle, const SDL_Point* center, SDL_RendererFlip flip);
-
-    int set_color(Uint8 r, Uint8 g, Uint8 b, Uint8 a);
-    int set_color(Uint8 r, Uint8 g, Uint8 b);
-    int set_color(g2dColor color);
     
     void fill_rect(const SDL_Rect* rect, g2dColor color);
     void fill_rect(int x, int y, int w, int h, g2dColor color);

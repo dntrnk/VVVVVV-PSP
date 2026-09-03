@@ -1289,8 +1289,6 @@ static void draw_cursor(void)
 
             ed.get_tile_fill(ed.tilex, ed.tiley, cl.gettile(ed.levx, ed.levy, ed.tilex, ed.tiley), connected);
 
-            graphics.set_color(blue);
-
             for (int i = 0; i < SCREEN_WIDTH_TILES * SCREEN_HEIGHT_TILES; i++)
             {
                 const int x = i % SCREEN_WIDTH_TILES;
@@ -1308,35 +1306,35 @@ static void draw_cursor(void)
                 {
                     top_left = false;
                     bottom_left = false;
-                    SDL_RenderDrawLine(gameScreen.m_renderer, x * 8, y * 8, x * 8, y * 8 + 7);
+                    graphics.draw_line(x * 8, y * 8, x * 8, y * 8 + 7, blue);
                 }
                 if (!check_point(connected, x + 1, y))
                 {
                     top_right = false;
                     bottom_right = false;
-                    SDL_RenderDrawLine(gameScreen.m_renderer, x * 8 + 7, y * 8, x * 8 + 7, y * 8 + 7);
+                    graphics.draw_line(x * 8 + 7, y * 8, x * 8 + 7, y * 8 + 7, blue);
                 }
                 if (!check_point(connected, x, y - 1))
                 {
                     top_left = false;
                     top_right = false;
-                    SDL_RenderDrawLine(gameScreen.m_renderer, x * 8, y * 8, x * 8 + 7, y * 8);
+                    graphics.draw_line(x * 8, y * 8, x * 8 + 7, y * 8, blue);
                 }
                 if (!check_point(connected, x, y + 1))
                 {
                     bottom_left = false;
                     bottom_right = false;
-                    SDL_RenderDrawLine(gameScreen.m_renderer, x * 8, y * 8 + 7, x * 8 + 7, y * 8 + 7);
+                    graphics.draw_line(x * 8, y * 8 + 7, x * 8 + 7, y * 8 + 7, blue);
                 }
 
                 if (!check_point(connected, x - 1, y - 1) && top_left)
-                    SDL_RenderDrawPoint(gameScreen.m_renderer, x * 8, y * 8);
+                    graphics.fill_rect(x * 8, y * 8, 1, 1, blue);
                 if (!check_point(connected, x - 1, y + 1) && top_right)
-                    SDL_RenderDrawPoint(gameScreen.m_renderer, x * 8, y * 8 + 7);
+                    graphics.fill_rect(x * 8, y * 8 + 7, 1, 1, blue);
                 if (!check_point(connected, x + 1, y - 1) && bottom_left)
-                    SDL_RenderDrawPoint(gameScreen.m_renderer, x * 8 + 7, y * 8);
+                    graphics.fill_rect(x * 8 + 7, y * 8, 1, 1, blue);
                 if (!check_point(connected, x + 1, y + 1) && bottom_right)
-                    SDL_RenderDrawPoint(gameScreen.m_renderer, x * 8 + 7, y * 8 + 7);
+                    graphics.fill_rect(x * 8 + 7, y * 8 + 7, 1, 1, blue);
             }
         }
         else if (ed.b_modifier) graphics.draw_rect(x, 0, 8, 240, blue); // Vertical

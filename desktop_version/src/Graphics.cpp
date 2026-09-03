@@ -507,8 +507,6 @@ int Graphics::set_blendmode(SDL_Texture* texture, const SDL_BlendMode blendmode)
 
 int Graphics::clear(const int r, const int g, const int b, const int a)
 {
-    // set_color(r, g, b, a);
-
     // const int result = SDL_RenderClear(gameScreen.m_renderer);
     // if (result != 0)
     // {
@@ -607,26 +605,6 @@ int Graphics::copy_texture(SDL_Texture* texture, const SDL_Rect* src, const SDL_
     return result;
 }
 
-int Graphics::set_color(const Uint8 r, const Uint8 g, const Uint8 b, const Uint8 a)
-{
-    const int result = SDL_SetRenderDrawColor(gameScreen.m_renderer, r, g, b, a);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not set draw color: %s", SDL_GetError()));
-    }
-    return result;
-}
-
-int Graphics::set_color(const Uint8 r, const Uint8 g, const Uint8 b)
-{
-    return set_color(r, g, b, 255);
-}
-
-int Graphics::set_color(const g2dColor color)
-{
-    return set_color(G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color), G2D_GET_A(color));
-}
-
 void Graphics::fill_rect(const SDL_Rect* rect, const g2dColor color)
 {
     g2dHelperFillRect(rect->x, rect->y, rect->w, rect->h, color);
@@ -676,7 +654,7 @@ int Graphics::draw_points(const SDL_Point* points, const int count)
 
 int Graphics::draw_points(const SDL_Point* points, const int count, const int r, const int g, const int b)
 {
-    set_color(r, g, b);
+    g2dColor color = G2D_RGB(r, g, b);
     return draw_points(points, count);
 }
 
