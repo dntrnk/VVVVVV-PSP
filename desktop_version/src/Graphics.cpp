@@ -742,17 +742,10 @@ void Graphics::drawtile3(int x, int y, int t, int off, int height_subtract /*= 0
     // Can't use drawgridtile because we want to draw a slice of the tile,
     // so do the logic ourselves (except include height_subtract in the final call)
 
-    int width;
-    if (query_texture(grphx.im_tiles3, NULL, NULL, &width, NULL) != 0)
-    {
-        return;
-    }
-    const int x2 = (t % (width / 8)) * 8;
-    const int y2 = (t / (width / 8)) * 8;
-    draw_texture_part(grphx.im_tiles3, x, y, x2, y2, 8, 8 - height_subtract, 1, 1);
+    const int x2 = (t % (grphx.im_tiles3->w / 8)) * 8;
+    const int y2 = (t / (grphx.im_tiles3->w / 8)) * 8;
 
-    // Just for test
-    g2dHelperDrawImage(grphx.g2d_tiles3, x, y, 8, 8, G2D_WHITE, x2, y2, 8, 8);
+    draw_texture_part(grphx.im_tiles3, x, y, x2, y2, 8, 8 - height_subtract, 1, 1, G2D_WHITE);
 }
 
 const char* Graphics::textbox_line(
@@ -1127,6 +1120,20 @@ void Graphics::draw_texture_part(SDL_Texture* image, const int x, const int y, c
     const SDL_Rect dstrect = {x, y, w * SDL_abs(scalex), h * SDL_abs(scaley)};
 
     copy_texture(image, &srcrect, &dstrect, 0, NULL, (SDL_RendererFlip) flip);
+}
+
+void Graphics::draw_texture_part(g2dImage* image, const int x, const int y, const int x2, const int y2, const int w, const int h, const int scalex, const int scaley, const g2dColor color)
+{
+    // if (scalex < 0)
+    // {
+    //     flip |= SDL_FLIP_HORIZONTAL;
+    // }
+    // if (scaley < 0)
+    // {
+    //     flip |= SDL_FLIP_VERTICAL;
+    // }
+    
+    g2dHelperDrawImage(image, x, y, w * SDL_abs(scalex), h * SDL_abs(scaley), color, x2, y2, w, h);
 }
 
 void Graphics::draw_grid_tile(SDL_Texture* texture, const int t, const int x, const int y, const int width, const int height, const int scalex, const int scaley)
@@ -3571,6 +3578,27 @@ bool Graphics::checktexturesize(
         );
         return true;
     }
+
+    const bool valid = texturewidth % tilewidth == 0 && textureheight % tileheight == 0;
+    if (!valid)
+    {
+        FILESYSTEM_setLevelDirError(
+            loc::gettext("{filename} dimensions not exact multiples of {width} by {height}!"),
+            "filename:str, width:int, height:int",
+            filename, tilewidth, tileheight
+        );
+        return false;
+    }
+
+    return true;
+}
+
+bool Graphics::checktexturesize(
+    const char* filename, g2dImage* texture,
+    const int tilewidth, const int tileheight
+) {
+    int texturewidth = texture->w;
+    int textureheight = texture->h;
 
     const bool valid = texturewidth % tilewidth == 0 && textureheight % tileheight == 0;
     if (!valid)
