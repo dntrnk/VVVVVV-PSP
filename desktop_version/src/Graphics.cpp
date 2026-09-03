@@ -525,7 +525,7 @@ int Graphics::clear(const int r, const int g, const int b, const int a)
     // }
     // return result;
 
-    // g2dClear(G2D_RGBA(r, g, b, a));
+    // g2dHelperClear(G2D_RGBA(r, g, b, a));
 
     // Not now
 
@@ -638,63 +638,27 @@ int Graphics::set_color(const g2dColor color)
 
 void Graphics::fill_rect(const SDL_Rect* rect, const g2dColor color)
 {
-    g2dBeginRects(NULL);
-    g2dReset();
-    g2dSetCoordXY(rect->x, rect->y);
-    g2dSetScaleWH(rect->w, rect->h);
-    g2dSetColor(color);
-    g2dAdd();
-    g2dEnd();
+    g2dHelperFillRect(rect->x, rect->y, rect->w, rect->h, color);
 }
 
 void Graphics::fill_rect(const g2dColor color)
 {
-    g2dBeginRects(NULL);
-    g2dReset();
-    g2dSetCoordXY(0, 0);
-    g2dSetScaleWH(320, 240);
-    g2dSetColor(color);
-    g2dAdd();
-    g2dEnd();
+    g2dHelperFillRect(0, 0, 320, 240, color);
 }
 
 void Graphics::fill_rect(const int x, const int y, const int w, const int h, const g2dColor color)
 {
-    g2dBeginRects(NULL);
-    g2dReset();
-    g2dSetCoordXY(x, y);
-    g2dSetScaleWH(w, h);
-    g2dSetColor(color);
-    g2dAdd();
-    g2dEnd();
+    g2dHelperFillRect(x, y, w, h, color);
 }
 
 void Graphics::draw_rect(const SDL_Rect* rect, const g2dColor color)
 {
-    g2dBeginRects(NULL);
-    g2dReset();
-    g2dSetColor(color);
-    g2dSetCoordXY(rect->x, rect->y); g2dAdd();
-    g2dSetCoordXY(rect->x + rect->w - 1, rect->y); g2dAdd();
-    g2dSetCoordXY(rect->x + rect->w - 1, rect->y + rect->h - 1); g2dAdd();
-    g2dSetCoordXY(rect->x, rect->y + rect->h - 1); g2dAdd();
-    g2dSetCoordXY(rect->x, rect->y); g2dAdd();
-    g2dAdd();
-    g2dEnd();
+    g2dHelperDrawRect(rect->x, rect->y, rect->w, rect->h, color);
 }
 
 void Graphics::draw_rect(const int x, const int y, const int w, const int h, const g2dColor color)
 {
-    g2dBeginRects(NULL);
-    g2dReset();
-    g2dSetColor(color);
-    g2dSetCoordXY(x, y); g2dAdd();
-    g2dSetCoordXY(x + w - 1, y); g2dAdd();
-    g2dSetCoordXY(x + w - 1, y + h - 1); g2dAdd();
-    g2dSetCoordXY(x, y + h - 1); g2dAdd();
-    g2dSetCoordXY(x, y); g2dAdd();
-    g2dAdd();
-    g2dEnd();
+    g2dHelperDrawRect(x, y, w, h, color);
 }
 
 void Graphics::draw_line(const int x, const int y, const int x2, const int y2, const g2dColor color)
@@ -770,15 +734,7 @@ void Graphics::drawtile(int x, int y, int t)
     const int x2 = (t % (tex_width / tiles_rect.w)) * tiles_rect.w;
     const int y2 = (t / (tex_width / tiles_rect.w)) * tiles_rect.h;
 
-    g2dBeginRects(g2d_tiles);
-    g2dReset();
-    g2dSetCoordMode(G2D_UP_LEFT);
-    g2dSetCoordXY(x, y);
-    g2dSetCropXY(x2, y2);
-    g2dSetCropWH(tiles_rect.w, tiles_rect.h);
-    g2dSetScaleWH(tiles_rect.w, tiles_rect.h);
-    g2dAdd();
-    g2dEnd();
+    g2dHelperDrawImage(g2d_tiles, x, y, tiles_rect.w, tiles_rect.h, G2D_WHITE, x2, y2, tiles_rect.w, tiles_rect.h);
 
     if (shouldrecoloroneway(t, tiles1_mounted))
     {
@@ -798,15 +754,7 @@ void Graphics::drawtile2(int x, int y, int t)
     const int x2 = (t % (tex_width / tiles_rect.w)) * tiles_rect.w;
     const int y2 = (t / (tex_width / tiles_rect.w)) * tiles_rect.h;
 
-    g2dBeginRects(g2d_tiles2);
-    g2dReset();
-    g2dSetCoordMode(G2D_UP_LEFT);
-    g2dSetCoordXY(x, y);
-    g2dSetCropXY(x2, y2);
-    g2dSetCropWH(tiles_rect.w, tiles_rect.h);
-    g2dSetScaleWH(tiles_rect.w, tiles_rect.h);
-    g2dAdd();
-    g2dEnd();
+    g2dHelperDrawImage(g2d_tiles2, x, y, tiles_rect.w, tiles_rect.h, G2D_WHITE, x2, y2, tiles_rect.w, tiles_rect.h);
 
     if (shouldrecoloroneway(t, tiles2_mounted))
     {
@@ -2350,24 +2298,16 @@ void Graphics::drawbackground( int t )
         // Starfield
         fill_rect(G2D_BLACK);
 
-        g2dBeginRects(NULL);
-        g2dReset();
-
         for (int i = 0; i < numstars; i++)
         {
             SDL_Rect star_rect = stars[i];
             star_rect.x = lerp(star_rect.x + starsspeed[i], star_rect.x);
 
             if (starsspeed[i] <= 6)
-                g2dSetColor(G2D_RGB(0x22,0x22,0x22));
+                fill_rect(&star_rect, G2D_RGB(0x22,0x22,0x22));
             else
-                g2dSetColor(G2D_RGB(0x55,0x55,0x55));
-
-            g2dSetCoordXY(star_rect.x, star_rect.y);
-            g2dSetScaleWH(star_rect.w, star_rect.h);
-            g2dAdd();
+                fill_rect(&star_rect, G2D_RGB(0x55,0x55,0x55));
         }
-        g2dEnd();
         
         break;
     case 2:

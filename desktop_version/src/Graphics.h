@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "glib2d.h"
+#include "glib2d_helper.h"
 
 #include "Game.h"
 #include "GraphicsResources.h"

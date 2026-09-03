@@ -960,7 +960,7 @@ static void inline deltaloop(void)
         {
             graphics.clear();
 
-            g2dClear(G2D_BLACK);
+            g2dHelperClear(G2D_BLACK);
 
             g2dSetScissor(80, 16, 320, 240);
 

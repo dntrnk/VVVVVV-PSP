@@ -256,7 +256,7 @@ void Screen::RenderPresent(void)
 {
     SDL_RenderPresent(m_renderer);
     graphics.clear();
-    g2dFlip(G2D_VSYNC);
+    g2dHelperFlip();
 }
 
 void Screen::toggleFullScreen(void)

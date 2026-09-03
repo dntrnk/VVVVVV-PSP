@@ -3,7 +3,7 @@
 
 #include <SDL.h>
 
-#include "glib2d.h"
+#include "glib2d_helper.h"
 
 #define        rn( rx,  ry) ((rx) + ((ry) * 100))
 
