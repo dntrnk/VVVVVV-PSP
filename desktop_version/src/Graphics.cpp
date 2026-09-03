@@ -3483,7 +3483,7 @@ void Graphics::renderfixedpost(void)
     {
         --game.screenshake;
 
-        if (game.screenshake == 0) {
+        if (game.screenshake <= 0) {
             g2dScreenOffsetX = 80;
             g2dScreenOffsetY = 16;
         }
