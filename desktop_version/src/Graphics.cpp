@@ -3482,6 +3482,11 @@ void Graphics::renderfixedpost(void)
     if (game.screenshake > 0)
     {
         --game.screenshake;
+
+        if (game.screenshake == 0) {
+            g2dScreenOffsetX = 80;
+            g2dScreenOffsetY = 16;
+        }
     }
 
     game.old_screenshot_border_timer = game.screenshot_border_timer;
