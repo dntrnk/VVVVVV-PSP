@@ -106,25 +106,6 @@ void Screen::GetSettings(struct ScreenSettings* settings)
     settings->badSignal = badSignalEffect;
 }
 
-static void constrain_to_desktop(int display_index, int* width, int* height)
-{
-    SDL_DisplayMode display_mode = {};
-    int success = SDL_GetDesktopDisplayMode(display_index, &display_mode);
-    if (success != 0)
-    {
-        vlog_error("Could not get desktop display mode: %s", SDL_GetError());
-        return;
-    }
-
-    while ((*width > display_mode.w || *height > display_mode.h)
-    && *width > SCREEN_WIDTH_PIXELS && *height > SCREEN_HEIGHT_PIXELS)
-    {
-        // We are too big, take away one multiple
-        *width -= SCREEN_WIDTH_PIXELS;
-        *height -= SCREEN_HEIGHT_PIXELS;
-    }
-}
-
 void Screen::RenderPresent(void)
 {
     // SDL_RenderPresent(m_renderer);
