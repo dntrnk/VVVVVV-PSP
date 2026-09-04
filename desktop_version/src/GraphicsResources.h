@@ -52,31 +52,8 @@ public:
     SDL_Texture* im_flipsprites_translated;
 
     g2dImage* g2d_tiles;
-    g2dImage* g2d_tiles_white;
-    g2dImage* g2d_tiles_tint;
     g2dImage* g2d_tiles2;
-    g2dImage* g2d_tiles2_tint;
-    g2dImage* g2d_entcolours;
-    g2dImage* g2d_entcolours_tint;
     g2dImage* g2d_sprites;
-    g2dImage* g2d_flipsprites;
-    g2dImage* g2d_teleporter;
-    g2dImage* g2d_image0;
-    g2dImage* g2d_image1;
-    g2dImage* g2d_image2;
-    g2dImage* g2d_image3;
-    g2dImage* g2d_image4;
-    g2dImage* g2d_image5;
-    g2dImage* g2d_image6;
-    g2dImage* g2d_image7;
-    g2dImage* g2d_image8;
-    g2dImage* g2d_image9;
-    g2dImage* g2d_image10;
-    g2dImage* g2d_image11;
-    g2dImage* g2d_image12;
-
-    g2dImage* g2d_sprites_translated;
-    g2dImage* g2d_flipsprites_translated;
 };
 
 SDL_Surface* LoadImageSurface(const char* filename);

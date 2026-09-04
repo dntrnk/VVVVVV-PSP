@@ -1,5 +1,9 @@
 #include "GraphicsResources.h"
 
+#include <pspkernel.h>
+#include <pspgu.h>
+#include <malloc.h>
+
 #include <time.h>
 #include <tinyxml2.h>
 
@@ -11,6 +15,137 @@
 #include "Vlogging.h"
 #include "Screen.h"
 #include "XMLUtils.h"
+
+// Copy+Paste from glib2d.c
+static int _get_or_add_palette_color(g2dColor color, g2dColor *palette, int *pal_count, int max_colors) {
+    for (int i = 0; i < *pal_count; i++) {
+        if (palette[i] == color) return i;
+    }
+    if (*pal_count < max_colors) {
+        palette[*pal_count] = color;
+        return (*pal_count)++;
+    }
+    return 0; // Возвращаем 0, если палитра переполнена
+}
+
+static void _g2dApplyFormat(g2dImage *tex, g2dColor *rgba_buffer, int target_hw_format) {
+    int total_pixels = tex->tw * tex->th;
+    tex->format = target_hw_format;
+
+    // Освобождаем старые данные tex->data и сразу зануляем указатель
+    if (tex->data) {
+        free(tex->data);
+        tex->data = NULL;
+    }
+    
+    // НЕ ОСВОБОЖДАЕМ rgba_buffer здесь, он нам еще нужен!
+
+    if (target_hw_format == GU_PSM_8888) {
+        tex->data = malloc(total_pixels * 4);
+        if (!tex->data) {
+            free(rgba_buffer);
+            rgba_buffer = NULL;
+            return;
+        }
+        // Теперь rgba_buffer точно существует и мы можем его копировать
+        memcpy(tex->data, rgba_buffer, total_pixels * 4);
+        tex->palette = NULL;
+        // Освобождаем rgba_buffer после использования
+        free(rgba_buffer);
+        rgba_buffer = NULL;
+    } 
+    else {
+        // Палитра ОБЯЗАТЕЛЬНО выровнена по 16 байт
+        tex->palette = (g2dColor *)memalign(16, 256 * sizeof(g2dColor));
+        if (!tex->palette) {
+            free(rgba_buffer);
+            rgba_buffer = NULL;
+            return;
+        }
+        memset(tex->palette, 0, 256 * sizeof(g2dColor));
+        
+        int pal_count = 0;
+        if (target_hw_format == GU_PSM_T8) {
+            unsigned char *indices = (unsigned char *)malloc(total_pixels);
+            if (!indices) {
+                free(tex->palette);
+                tex->palette = NULL;
+                free(rgba_buffer);
+                rgba_buffer = NULL;
+                return;
+            }
+            for (int i = 0; i < total_pixels; i++) {
+                indices[i] = (unsigned char)_get_or_add_palette_color(rgba_buffer[i], tex->palette, &pal_count, 256);
+            }
+            tex->data = (void *)indices;
+        } 
+        else if (target_hw_format == GU_PSM_T4) {
+            unsigned char *indices = (unsigned char *)malloc(total_pixels / 2);
+            if (!indices) {
+                free(tex->palette);
+                tex->palette = NULL;
+                free(rgba_buffer);
+                rgba_buffer = NULL;
+                return;
+            }
+            memset(indices, 0, total_pixels / 2);
+            for (int i = 0; i < total_pixels; i++) {
+                int idx = _get_or_add_palette_color(rgba_buffer[i], tex->palette, &pal_count, 16);
+                if (i % 2 == 0) indices[i/2] |= (idx & 0x0F);
+                else            indices[i/2] |= (idx << 4);
+            }
+            tex->data = (void *)indices;
+        }
+        
+        // Освобождаем rgba_buffer после использования для CLUT форматов
+        free(rgba_buffer);
+        rgba_buffer = NULL;
+    }
+    
+    // Сбрасываем кэш сразу после изменения данных
+    sceKernelDcacheWritebackAll();
+}
+
+static void _g2dSwizzle(g2dImage *tex) {
+    int width_in_bytes = 0;
+    if (tex->format == GU_PSM_8888) {
+        width_in_bytes = tex->tw * 4;
+    } else if (tex->format == GU_PSM_T8) {
+        width_in_bytes = tex->tw;
+    } else if (tex->format == GU_PSM_T4) {
+        width_in_bytes = tex->tw / 2;
+    } else {
+        return; // Неизвестный формат
+    }
+
+    if (width_in_bytes < 16) return; // Слишком узкая для свайзла
+
+    unsigned char *tmp = (unsigned char *)malloc(width_in_bytes * tex->th);
+    if (!tmp) {
+        // Логируем ошибку, но не прерываем выполнение
+        #ifdef DEBUG
+        printf("_g2dSwizzle: Failed to allocate memory\n");
+        #endif
+        return;
+    }
+
+    unsigned char *in = (unsigned char *)tex->data;
+    int row_blocks = width_in_bytes / 16;
+
+    for (int j = 0; j < tex->th; j++) {
+        for (int i = 0; i < row_blocks; i++) {
+            int blockx = i;
+            int blocky = j / 8;
+            int y = j % 8;
+            unsigned char *dest = tmp + (blocky * row_blocks * 128) + (blockx * 128) + (y * 16);
+            memcpy(dest, in + (j * width_in_bytes) + (i * 16), 16);
+        }
+    }
+
+    free(tex->data);
+    tex->data = (g2dColor *)tmp;
+    tex->swizzled = true;
+}
 
 // Used to load PNG data
 extern "C"
@@ -197,6 +332,144 @@ SDL_Texture* LoadImage(const char *filename, const TextureLoadType loadtype)
 static SDL_Texture* LoadImage(const char* filename)
 {
     return LoadImage(filename, TEX_COLOR);
+}
+
+static g2dImage* G2DLoadImage(const char* filename, const TextureLoadType loadtype, g2dTexFormat format)
+{
+    // Load Image
+    unsigned int width, height;
+    unsigned int error;
+
+    unsigned char* fileIn;
+    size_t length;
+    FILESYSTEM_loadAssetToMemory(filename, &fileIn, &length);
+    if (fileIn == NULL)
+    {
+        SDL_assert(0 && "Image file missing!");
+        return NULL;
+    }
+
+    unsigned char* rgbaData = NULL;
+    error = lodepng_decode32(&rgbaData, &width, &height, fileIn, length);
+    VVV_free(fileIn);
+
+    if (error != 0)
+    {
+        vlog_error("Could not load %s: %s", filename, lodepng_error_text(error));
+        return NULL;
+    }
+
+    g2dImage* tempTex = _g2dTexCreate(width, height, true);
+    if (tempTex == NULL)
+    {
+        free(rgbaData);
+        return NULL;
+    }
+
+    int bytesPerPixel = 4;
+    int srcRowSize = width * bytesPerPixel;
+    int dstRowSize = tempTex->tw * bytesPerPixel;
+
+    for (unsigned int y = 0; y < height; y++)
+    {
+        memcpy((char*) tempTex->data + y * dstRowSize, rgbaData + y * srcRowSize, srcRowSize);
+    }
+
+    // Apply Format
+    int curwidth = tempTex->w;
+    int curheight = tempTex->h;
+
+    switch (loadtype)
+    {
+    case TEX_WHITE:
+        for (int y = 0; y < curheight; y++)
+        {
+            for (int x = 0; x < curwidth; x++)
+            {
+                g2dColor color = get_pixel(tempTex, x, y);
+                set_pixel(tempTex, x, y, G2D_RGBA(255, 255, 255, G2D_GET_A(color)));
+            }
+        }
+        break;
+    case TEX_GRAYSCALE:
+        for (int y = 0; y < curheight; y++)
+        {
+            for (int x = 0; x < curwidth; x++)
+            {
+                g2dColor color = get_pixel(tempTex, x, y);
+
+                // Magic numbers used for grayscaling (eyes perceive certain colors brighter than others)
+                Uint8 r = G2D_GET_R(color) * 0.299;
+                Uint8 g = G2D_GET_G(color) * 0.587;
+                Uint8 b = G2D_GET_B(color) * 0.114;
+
+                const double gray = SDL_floor(r + g + b + 0.5);
+
+                set_pixel(tempTex, x, y, G2D_RGBA(gray, gray, gray, G2D_GET_A(color)));
+            }
+        }
+        break;
+    default:
+        break;
+    }
+
+    // Pallete Apply
+    g2dImage* resultTex = NULL;
+
+    if (loadtype == TEX_WHITE)
+    {
+        format = G2D_CLUT4;
+    }
+
+    if (format == G2D_RGBA8888)
+    {
+        resultTex = tempTex;
+    }
+    else
+    {
+        resultTex = (g2dImage*)calloc(1, sizeof(g2dImage));
+        if (resultTex == NULL)
+        {
+            g2dTexFree(&tempTex);
+            free(rgbaData);
+            return NULL;
+        }
+
+        resultTex->w = tempTex->w;
+        resultTex->h = tempTex->h;
+        resultTex->tw = tempTex->tw;
+        resultTex->th = tempTex->th;
+        resultTex->ratio = tempTex->ratio;
+        resultTex->can_blend = tempTex->can_blend;
+        resultTex->swizzled = false;
+
+        int hw_format = (format == G2D_CLUT8) ? GU_PSM_T8 : GU_PSM_T4;
+        _g2dApplyFormat(resultTex, (g2dColor*) tempTex->data, hw_format);
+
+        tempTex->data = NULL;
+        g2dTexFree(&tempTex);
+
+        free(rgbaData);
+    }
+
+    _g2dSwizzle(resultTex);
+
+    sceKernelDcacheWritebackAll();
+
+    return resultTex;
+}
+
+static g2dImage* G2DLoadImage(const char* filename, g2dTexFormat format)
+{
+    return G2DLoadImage(filename, TEX_COLOR, format);
+}
+
+/* Any unneeded variants can be NULL */
+static void G2DLoadVariants(const char* filename, g2dTexFormat format, g2dImage** colored, g2dImage** white, g2dImage** grayscale)
+{
+    if (colored != NULL) *colored = G2DLoadImage(filename, TEX_COLOR, format);
+    if (white != NULL) *white = G2DLoadImage(filename, TEX_WHITE, G2D_CLUT4);
+    if (grayscale != NULL) *grayscale = G2DLoadImage(filename, TEX_GRAYSCALE, format);
 }
 
 /* Any unneeded variants can be NULL */
@@ -401,23 +674,9 @@ void GraphicsResources::init_translations(void)
 
 void GraphicsResources::init(void)
 {
-    // NOTE: "graphics" folder from "data.zip" file must be moved to root game folder (which contains EBOOT.PBP)
-    // I'll fix this later
-
-    // Also: original "tiles.png / tiles2.png" file seems to be broken
-    // most likely, original files are containing mipmaps and because of that they should be re-exported in some pixel art editor
-    // I'll also try to fix this a bit later
-    g2d_tiles = g2dTexLoad("graphics/tiles.png", NULL, 0, (g2dTex_Mode) ((g2dTexFormat) G2D_CLUT8 | (g2dTex_Mode) G2D_SWIZZLE));
-    g2d_tiles2 = g2dTexLoad("graphics/tiles2.png", NULL, 0, (g2dTex_Mode) ((g2dTexFormat) G2D_CLUT8 | (g2dTex_Mode) G2D_SWIZZLE));
-    // entcolours
-
-    g2d_sprites = g2dTexLoad("graphics/sprites.png", NULL, 0, (g2dTex_Mode) ((g2dTexFormat) G2D_CLUT8 | (g2dTex_Mode) G2D_SWIZZLE));
-    // flipsprites
-
-    // teleporter
-    g2d_image0 = g2dTexLoad("graphics/levelcomplete.png", NULL, 0, (g2dTex_Mode) ((g2dTexFormat) G2D_CLUT4 | (g2dTex_Mode) G2D_SWIZZLE));
-    g2d_image1 = g2dTexLoad("graphics/minimap.png", NULL, 0, (g2dTex_Mode) ((g2dTexFormat) G2D_CLUT8 | (g2dTex_Mode) G2D_SWIZZLE));
-    g2d_image2 = g2dTexLoad("graphics/covered.png", NULL, 0, (g2dTex_Mode) ((g2dTexFormat) G2D_CLUT4 | (g2dTex_Mode) G2D_SWIZZLE));
+    g2d_tiles = G2DLoadImage("graphics/tiles.png", G2D_CLUT8);
+    g2d_tiles2 = G2DLoadImage("graphics/tiles2.png", G2D_CLUT8);
+    g2d_sprites = G2DLoadImage("graphics/sprites.png", TEX_WHITE, G2D_CLUT4);
 
     LoadVariants("graphics/tiles.png", &im_tiles, &im_tiles_white, &im_tiles_tint);
     LoadVariants("graphics/tiles2.png", &im_tiles2, NULL, &im_tiles2_tint);
@@ -426,7 +685,7 @@ void GraphicsResources::init(void)
     LoadSprites("graphics/sprites.png", &im_sprites, &im_sprites_surf);
     LoadSprites("graphics/flipsprites.png", &im_flipsprites, &im_flipsprites_surf);
 
-    im_tiles3 = g2dTexLoad("graphics/tiles3.png", NULL, 0, (g2dTex_Mode) ((g2dTexFormat) G2D_CLUT8 | (g2dTex_Mode) G2D_SWIZZLE));
+    im_tiles3 = G2DLoadImage("graphics/tiles3.png", G2D_CLUT8);
     im_teleporter = LoadImage("graphics/teleporter.png", TEX_WHITE);
 
     im_image0 = LoadImage("graphics/levelcomplete.png");
