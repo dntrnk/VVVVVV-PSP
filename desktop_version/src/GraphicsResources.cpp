@@ -726,7 +726,7 @@ void GraphicsResources::destroy(void)
     CLEAR(im_tiles_tint);
     CLEAR(im_tiles2);
     CLEAR(im_tiles2_tint);
-    if (im_tiles) g2dTexFree(&im_tiles3);
+    if (im_tiles3) g2dTexFree(&im_tiles3);
     CLEAR(im_entcolours);
     CLEAR(im_entcolours_tint);
     CLEAR(im_sprites);
