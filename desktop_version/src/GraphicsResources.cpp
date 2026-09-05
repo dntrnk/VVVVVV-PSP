@@ -329,11 +329,6 @@ SDL_Texture* LoadImage(const char *filename, const TextureLoadType loadtype)
     return texture;
 }
 
-static SDL_Texture* LoadImage(const char* filename)
-{
-    return LoadImage(filename, TEX_COLOR);
-}
-
 g2dImage* G2DLoadImage(const char* filename, const TextureLoadType loadtype, g2dTexFormat format)
 {
     // Load Image
@@ -472,50 +467,6 @@ static void G2DLoadVariants(const char* filename, g2dTexFormat format, g2dImage*
     if (grayscale != NULL) *grayscale = G2DLoadImage(filename, TEX_GRAYSCALE, format);
 }
 
-/* Any unneeded variants can be NULL */
-static void LoadVariants(const char* filename, SDL_Texture** colored, SDL_Texture** white, SDL_Texture** grayscale)
-{
-    unsigned char* data;
-    SDL_Surface* loadedImage = LoadImageRaw(filename, &data);
-
-    if (colored != NULL)
-    {
-        *colored = LoadTextureFromRaw(filename, loadedImage, TEX_COLOR);
-        if (*colored == NULL)
-        {
-            vlog_error("Image not found: %s", filename);
-            SDL_assert(0 && "Image not found! See stderr.");
-        }
-    }
-
-    if (grayscale != NULL)
-    {
-        *grayscale = LoadTextureFromRaw(filename, loadedImage, TEX_GRAYSCALE);
-        if (*grayscale == NULL)
-        {
-            vlog_error("Image not found: %s", filename);
-            SDL_assert(0 && "Image not found! See stderr.");
-        }
-    }
-
-    if (white != NULL)
-    {
-        *white = LoadTextureFromRaw(filename, loadedImage, TEX_WHITE);
-        if (*white == NULL)
-        {
-            vlog_error("Image not found: %s", filename);
-            SDL_assert(0 && "Image not found! See stderr.");
-        }
-    }
-
-    if (loadedImage != NULL)
-    {
-        VVV_freefunc(SDL_FreeSurface, loadedImage);
-    }
-
-    VVV_free(data);
-}
-
 /* The pointers `texture` and `surface` cannot be NULL */
 static void LoadSprites(const char* filename, SDL_Texture** texture, SDL_Surface** surface)
 {
@@ -618,70 +569,69 @@ static void LoadSpritesTranslation(
 
 void GraphicsResources::init_translations(void)
 {
-    VVV_freefunc(SDL_DestroyTexture, im_sprites_translated);
-    VVV_freefunc(SDL_DestroyTexture, im_flipsprites_translated);
+//     if (im_sprites_translated) g2dTexFree(&im_sprites_translated);
+//     if (im_flipsprites_translated) g2dTexFree(&im_flipsprites_translated);
 
-    if (loc::english_sprites)
-    {
-        return;
-    }
+//     if (loc::english_sprites)
+//     {
+//         return;
+//     }
 
-    const char* langcode = loc::lang.c_str();
+//     const char* langcode = loc::lang.c_str();
 
-    const char* path_template = "lang/%s/graphics/%s";
-    char path_xml[256];
-    char path_sprites[256];
-    char path_flipsprites[256];
-    SDL_snprintf(path_xml, sizeof(path_xml), path_template, langcode, "spritesmask.xml");
-    SDL_snprintf(path_sprites, sizeof(path_sprites), path_template, langcode, "sprites.png");
-    SDL_snprintf(path_flipsprites, sizeof(path_flipsprites), path_template, langcode, "flipsprites.png");
+//     const char* path_template = "lang/%s/graphics/%s";
+//     char path_xml[256];
+//     char path_sprites[256];
+//     char path_flipsprites[256];
+//     SDL_snprintf(path_xml, sizeof(path_xml), path_template, langcode, "spritesmask.xml");
+//     SDL_snprintf(path_sprites, sizeof(path_sprites), path_template, langcode, "sprites.png");
+//     SDL_snprintf(path_flipsprites, sizeof(path_flipsprites), path_template, langcode, "flipsprites.png");
 
-    /* We don't want to apply main-game translations to level-specific (custom) sprites.
-     * Either sprites and translations are BOTH main-game, or BOTH level-specific.
-     * Our pivots are the XML (it _has_ to exist for translated sprites to work) and
-     * graphics/sprites.png (what sense does it make to have only flipsprites). */
-    if (FILESYSTEM_isAssetMounted(path_xml) != FILESYSTEM_isAssetMounted("graphics/sprites.png"))
-    {
-        return;
-    }
+//     /* We don't want to apply main-game translations to level-specific (custom) sprites.
+//      * Either sprites and translations are BOTH main-game, or BOTH level-specific.
+//      * Our pivots are the XML (it _has_ to exist for translated sprites to work) and
+//      * graphics/sprites.png (what sense does it make to have only flipsprites). */
+//     if (FILESYSTEM_isAssetMounted(path_xml) != FILESYSTEM_isAssetMounted("graphics/sprites.png"))
+//     {
+//         return;
+//     }
 
-    tinyxml2::XMLDocument doc_mask;
-    if (!FILESYSTEM_loadAssetTiXml2Document(path_xml, doc_mask))
-    {
-        // Only try to load the images if the XML document exists
-        return;
-    }
+//     tinyxml2::XMLDocument doc_mask;
+//     if (!FILESYSTEM_loadAssetTiXml2Document(path_xml, doc_mask))
+//     {
+//         // Only try to load the images if the XML document exists
+//         return;
+//     }
 
-    if (FILESYSTEM_areAssetsInSameRealDir(path_xml, path_sprites))
-    {
-        LoadSpritesTranslation(
-            path_sprites,
-            &doc_mask,
-            im_sprites_surf,
-            &im_sprites_translated
-        );
-    }
-    if (FILESYSTEM_areAssetsInSameRealDir(path_xml, path_flipsprites))
-    {
-        LoadSpritesTranslation(
-            path_flipsprites,
-            &doc_mask,
-            im_flipsprites_surf,
-            &im_flipsprites_translated
-        );
-    }
+//     if (FILESYSTEM_areAssetsInSameRealDir(path_xml, path_sprites))
+//     {
+//         LoadSpritesTranslation(
+//             path_sprites,
+//             &doc_mask,
+//             im_sprites_surf,
+//             &im_sprites_translated
+//         );
+//     }
+//     if (FILESYSTEM_areAssetsInSameRealDir(path_xml, path_flipsprites))
+//     {
+//         LoadSpritesTranslation(
+//             path_flipsprites,
+//             &doc_mask,
+//             im_flipsprites_surf,
+//             &im_flipsprites_translated
+//         );
+//     }
 }
 
 void GraphicsResources::init(void)
 {
-    g2d_sprites = G2DLoadImage("graphics/sprites.png", TEX_WHITE, G2D_CLUT4);
 
     G2DLoadVariants("graphics/tiles.png", G2D_CLUT8, &im_tiles, &im_tiles_white, &im_tiles_tint);
     G2DLoadVariants("graphics/tiles2.png", G2D_CLUT8, &im_tiles2, NULL, &im_tiles2_tint);
     G2DLoadVariants("graphics/entcolours.png", G2D_CLUT8, &im_entcolours, NULL, &im_entcolours_tint);
 
-    LoadSprites("graphics/sprites.png", &im_sprites, &im_sprites_surf);
-    LoadSprites("graphics/flipsprites.png", &im_flipsprites, &im_flipsprites_surf);
+    im_sprites = G2DLoadImage("graphics/sprites.png", TEX_WHITE, G2D_CLUT4);
+    im_flipsprites = G2DLoadImage("graphics/flipsprites.png", TEX_WHITE, G2D_CLUT4);
 
     im_tiles3 = G2DLoadImage("graphics/tiles3.png", G2D_CLUT8);
     im_teleporter = LoadImage("graphics/teleporter.png", TEX_WHITE);
@@ -702,7 +652,7 @@ void GraphicsResources::init(void)
     im_sprites_translated = NULL;
     im_flipsprites_translated = NULL;
 
-    init_translations();
+    // init_translations();
 
     im_image12 = NULL;
 
@@ -729,8 +679,8 @@ void GraphicsResources::destroy(void)
     if (im_tiles3) g2dTexFree(&im_tiles3);
     if (im_entcolours) g2dTexFree(&im_entcolours);
     if (im_entcolours_tint) g2dTexFree(&im_entcolours_tint);
-    CLEAR(im_sprites);
-    CLEAR(im_flipsprites);
+    if (im_sprites) g2dTexFree(&im_sprites);
+    if (im_flipsprites) g2dTexFree(&im_flipsprites);
     CLEAR(im_teleporter);
 
     if (im_image0) g2dTexFree(&im_image0);
@@ -747,8 +697,8 @@ void GraphicsResources::destroy(void)
     if (im_image11) g2dTexFree(&im_image11);
     if (im_image12) g2dTexFree(&im_image12);
 
-    CLEAR(im_sprites_translated);
-    CLEAR(im_flipsprites_translated);
+    if (im_sprites_translated) g2dTexFree(&im_sprites_translated);
+    if (im_flipsprites_translated) g2dTexFree(&im_flipsprites_translated);
 #undef CLEAR
 
     VVV_freefunc(SDL_FreeSurface, im_sprites_surf);

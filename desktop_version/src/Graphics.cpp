@@ -439,9 +439,7 @@ void Graphics::print_level_creator(
         sprite_x = 103;
         print_flags |= PR_RIGHT;
     }
-    set_texture_color_mod(grphx.im_sprites, r, g, b);
-    draw_texture_part(grphx.im_sprites, face_x, y - 1, sprite_x, 2, 10, 10, 1, 1);
-    set_texture_color_mod(grphx.im_sprites, 255, 255, 255);
+    draw_texture_part(grphx.im_sprites, face_x, y - 1, sprite_x, 2, 10, 10, 1, 1, G2D_WHITE);
     font::print(print_flags, text_x, y, creator, r, g, b);
 }
 
@@ -531,12 +529,49 @@ bool Graphics::substitute(SDL_Texture** texture)
     /* Either keep the given texture the same and return false,
      * or substitute it for a translation and return true. */
 
+    // if (loc::english_sprites)
+    // {
+    //     return false;
+    // }
+
+    // SDL_Texture* subst = NULL;
+
+    // if (*texture == grphx.im_sprites)
+    // {
+    //     subst = grphx.im_sprites_translated;
+    // }
+    // else if (*texture == grphx.im_flipsprites)
+    // {
+    //     subst = grphx.im_flipsprites_translated;
+    // }
+
+    // if (subst == NULL)
+    // {
+    //     return false;
+    // }
+
+    // // Apply the same colors as on the original
+    // Uint8 r, g, b, a;
+    // SDL_GetTextureColorMod(*texture, &r, &g, &b);
+    // SDL_GetTextureAlphaMod(*texture, &a);
+    // set_texture_color_mod(subst, r, g, b);
+    // set_texture_alpha_mod(subst, a);
+
+    // *texture = subst;
+    return true;
+}
+
+bool Graphics::substitute(g2dImage** texture)
+{
+    /* Either keep the given texture the same and return false,
+     * or substitute it for a translation and return true. */
+
     if (loc::english_sprites)
     {
         return false;
     }
 
-    SDL_Texture* subst = NULL;
+    g2dImage* subst = NULL;
 
     if (*texture == grphx.im_sprites)
     {
@@ -551,13 +586,6 @@ bool Graphics::substitute(SDL_Texture** texture)
     {
         return false;
     }
-
-    // Apply the same colors as on the original
-    Uint8 r, g, b, a;
-    SDL_GetTextureColorMod(*texture, &r, &g, &b);
-    SDL_GetTextureAlphaMod(*texture, &a);
-    set_texture_color_mod(subst, r, g, b);
-    set_texture_alpha_mod(subst, a);
 
     *texture = subst;
     return true;
@@ -653,7 +681,7 @@ int Graphics::draw_points(const SDL_Point* points, const int count, const int r,
 
 void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b)
 {
-    draw_grid_tile(grphx.im_sprites, t, x, y, sprites_rect.w, sprites_rect.h, r, g, b);
+    draw_grid_tile(grphx.im_sprites, t, x, y, sprites_rect.w, sprites_rect.h, G2D_RGB(r, g, b));
 }
 
 void Graphics::draw_sprite(const int x, const int y, const int t, const g2dColor color)
@@ -1061,26 +1089,6 @@ void Graphics::draw_texture(g2dImage* image, const int x, const int y, g2dColor 
     g2dHelperDrawImage(image, x, y, image->w, image->h, color, 0, 0, image->w, image->h);
 }
 
-void Graphics::draw_texture_part(SDL_Texture* image, const int x, const int y, const int x2, const int y2, const int w, const int h, const int scalex, const int scaley)
-{
-    const SDL_Rect srcrect = {x2, y2, w, h};
-
-    int flip = SDL_FLIP_NONE;
-
-    if (scalex < 0)
-    {
-        flip |= SDL_FLIP_HORIZONTAL;
-    }
-    if (scaley < 0)
-    {
-        flip |= SDL_FLIP_VERTICAL;
-    }
-
-    const SDL_Rect dstrect = {x, y, w * SDL_abs(scalex), h * SDL_abs(scaley)};
-
-    copy_texture(image, &srcrect, &dstrect, 0, NULL, (SDL_RendererFlip) flip);
-}
-
 void Graphics::draw_texture_part(g2dImage* image, const int x, const int y, const int x2, const int y2, const int w, const int h, const int scalex, const int scaley, const g2dColor color)
 {
     // if (scalex < 0)
@@ -1093,20 +1101,6 @@ void Graphics::draw_texture_part(g2dImage* image, const int x, const int y, cons
     // }
     
     g2dHelperDrawImage(image, x, y, w * SDL_abs(scalex), h * SDL_abs(scaley), color, x2, y2, w, h);
-}
-
-void Graphics::draw_grid_tile(SDL_Texture* texture, const int t, const int x, const int y, const int width, const int height, const int scalex, const int scaley)
-{
-    int tex_width;
-
-    if (query_texture(texture, NULL, NULL, &tex_width, NULL) != 0)
-    {
-        return;
-    }
-
-    const int x2 = (t % (tex_width / width)) * width;
-    const int y2 = (t / (tex_width / width)) * height;
-    draw_texture_part(texture, x, y, x2, y2, width, height, scalex, scaley);
 }
 
 void Graphics::draw_grid_tile(g2dImage* texture, const int t, const int x, const int y, const int width, const int height, const int scalex, const int scaley)
@@ -1124,30 +1118,10 @@ void Graphics::draw_grid_tile(g2dImage* texture, const int t, const int x, const
 }
 
 void Graphics::draw_grid_tile(
-    SDL_Texture* texture, const int t,
-    const int x, const int y, const int width, const int height
-) {
-    draw_grid_tile(texture, t, x, y, width, height, 1, 1);
-}
-
-void Graphics::draw_grid_tile(
     g2dImage* texture, const int t,
     const int x, const int y, const int width, const int height
 ) {
     draw_grid_tile((g2dImage*) texture, t, x, y, width, height, 1, 1);
-}
-
-void Graphics::draw_grid_tile(
-    SDL_Texture* texture, const int t,
-    const int x, const int y, const int width, const int height,
-    const int r, const int g, const int b, const int a,
-    const int scalex, const int scaley
-) {
-    set_texture_color_mod(texture, r, g, b);
-    set_texture_alpha_mod(texture, a);
-    draw_grid_tile(texture, t, x, y, width, height, scalex, scaley);
-    set_texture_color_mod(texture, 255, 255, 255);
-    set_texture_alpha_mod(texture, 255);
 }
 
 void Graphics::draw_grid_tile(
@@ -1164,54 +1138,12 @@ void Graphics::draw_grid_tile(
 }
 
 void Graphics::draw_grid_tile(
-    SDL_Texture* texture, const int t,
-    const int x, const int y, const int width, const int height,
-    const int r, const int g, const int b, const int a
-) {
-    draw_grid_tile(texture, t, x, y, width, height, r, g, b, a, 1, 1);
-}
-
-void Graphics::draw_grid_tile(
-    SDL_Texture* texture, const int t,
-    const int x, const int y, const int width, const int height,
-    const int r, const int g, const int b,
-    const int scalex, const int scaley
-) {
-    draw_grid_tile(texture, t, x, y, width, height, r, g, b, 255, scalex, scaley);
-}
-
-void Graphics::draw_grid_tile(
-    SDL_Texture* texture, const int t,
-    const int x, const int y, const int width, const int height,
-    const int r, const int g, const int b
-) {
-    draw_grid_tile(texture, t, x, y, width, height, r, g, b, 255);
-}
-
-void Graphics::draw_grid_tile(
-    SDL_Texture* texture, const int t,
-    const int x, const int y, const int width, const int height,
-    const g2dColor color,
-    const int scalex, const int scaley
-) {
-    draw_grid_tile(texture, t, x, y, width, height, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color), G2D_GET_A(color), scalex, scaley);
-}
-
-void Graphics::draw_grid_tile(
     g2dImage* texture, const int t,
     const int x, const int y, const int width, const int height,
     const g2dColor color,
     const int scalex, const int scaley
 ) {
     draw_grid_tile((g2dImage*) texture, t, x, y, width, height, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color), G2D_GET_A(color), scalex, scaley);
-}
-
-void Graphics::draw_grid_tile(
-    SDL_Texture* texture, const int t,
-    const int x, const int y, const int width, const int height,
-    const g2dColor color
-) {
-    draw_grid_tile(texture, t, x, y, width, height, color, 1, 1);
 }
 
 void Graphics::draw_grid_tile(
@@ -2004,7 +1936,7 @@ void Graphics::drawentity(const int i, const int yoff)
         custom_gray = false;
     }
 
-    SDL_Texture* sprites = flipmode ? grphx.im_flipsprites : grphx.im_sprites;
+    g2dImage* sprites = flipmode ? grphx.im_flipsprites : grphx.im_sprites;
     g2dImage* tiles = (map.custommode && !map.finalmode) ? grphx.im_entcolours : grphx.im_tiles;
     g2dImage* tiles_tint = (map.custommode && !map.finalmode) ? grphx.im_entcolours_tint : grphx.im_tiles_tint;
 
@@ -2025,12 +1957,6 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.y += tpoint.y;
 
         draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct); 
-        
-        //
-        const int x2 = (obj.entities[i].drawframe % (384 / 32)) * 32;
-        const int y2 = (obj.entities[i].drawframe / (384 / 32)) * 32;
-        g2dHelperDrawImage(grphx.g2d_sprites, drawRect.x, drawRect.y, 32, 32, ct, x2, y2, 32, 32);
-        //
 
         // screenwrapping!
         SDL_Point wrappedPoint;
@@ -3550,15 +3476,17 @@ void Graphics::draw_screenshot_border(void)
 
 void Graphics::drawtele(int x, int y, int t, const g2dColor color)
 {
-    SDL_Rect telerect;
-    setRect(telerect, x, y, tele_rect.w, tele_rect.h);
+    // Later
 
-    draw_grid_tile(grphx.im_teleporter, 0, x, y, tele_rect.w, tele_rect.h, 16, 16, 16);
+    // SDL_Rect telerect;
+    // setRect(telerect, x, y, tele_rect.w, tele_rect.h);
 
-    if (t > 9) t = 8;
-    if (t < 1) t = 1;
+    // draw_grid_tile(grphx.im_teleporter, 0, x, y, tele_rect.w, tele_rect.h, 16, 16, 16);
 
-    draw_grid_tile(grphx.im_teleporter, t, x, y, tele_rect.w, tele_rect.h, color);
+    // if (t > 9) t = 8;
+    // if (t < 1) t = 1;
+
+    // draw_grid_tile(grphx.im_teleporter, t, x, y, tele_rect.w, tele_rect.h, color);
 }
 
 g2dColor Graphics::RGBf(int r, int g, int b)
@@ -3662,8 +3590,8 @@ bool Graphics::reloadresources(void)
 
     destroy();
 
-    make_array(&grphx.im_sprites_surf, sprites_surf, 32);
-    make_array(&grphx.im_flipsprites_surf, flipsprites_surf, 32);
+    // make_array(&grphx.im_sprites_surf, sprites_surf, 32);
+    // make_array(&grphx.im_flipsprites_surf, flipsprites_surf, 32);
 
     images[IMAGE_LEVELCOMPLETE] = grphx.im_image0;
     images[IMAGE_MINIMAP] = grphx.im_image1;

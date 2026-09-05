@@ -222,6 +222,7 @@ public:
     int clear(void);
 
     bool substitute(SDL_Texture** texture);
+    bool substitute(g2dImage** texture);
     void post_substitute(SDL_Texture* subst);
 
     int copy_texture(SDL_Texture* texture, const SDL_Rect* src, const SDL_Rect* dest);

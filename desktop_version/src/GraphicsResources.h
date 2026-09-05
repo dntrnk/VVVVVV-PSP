@@ -31,8 +31,8 @@ public:
     g2dImage* im_tiles3;
     g2dImage* im_entcolours;
     g2dImage* im_entcolours_tint;
-    SDL_Texture* im_sprites;
-    SDL_Texture* im_flipsprites;
+    g2dImage* im_sprites;
+    g2dImage* im_flipsprites;
     SDL_Texture* im_teleporter;
     g2dImage* im_image0;
     g2dImage* im_image1;
@@ -48,10 +48,8 @@ public:
     g2dImage* im_image11;
     g2dImage* im_image12;
 
-    SDL_Texture* im_sprites_translated;
-    SDL_Texture* im_flipsprites_translated;
-
-    g2dImage* g2d_sprites;
+    g2dImage* im_sprites_translated;
+    g2dImage* im_flipsprites_translated;
 };
 
 SDL_Surface* LoadImageSurface(const char* filename);
