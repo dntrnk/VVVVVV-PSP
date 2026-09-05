@@ -686,32 +686,34 @@ void GraphicsResources::init(void)
     im_tiles3 = G2DLoadImage("graphics/tiles3.png", G2D_CLUT8);
     im_teleporter = LoadImage("graphics/teleporter.png", TEX_WHITE);
 
-    im_image0 = LoadImage("graphics/levelcomplete.png");
-    im_image1 = LoadImage("graphics/minimap.png");
-    im_image2 = LoadImage("graphics/covered.png");
-    im_image3 = LoadImage("graphics/elephant.png", TEX_WHITE);
-    im_image4 = LoadImage("graphics/gamecomplete.png");
-    im_image5 = LoadImage("graphics/fliplevelcomplete.png");
-    im_image6 = LoadImage("graphics/flipgamecomplete.png");
-    im_image7 = LoadImage("graphics/site.png", TEX_WHITE);
-    im_image8 = LoadImage("graphics/site2.png", TEX_WHITE);
-    im_image9 = LoadImage("graphics/site3.png", TEX_WHITE);
-    im_image10 = LoadImage("graphics/ending.png");
-    im_image11 = LoadImage("graphics/site4.png", TEX_WHITE);
+    im_image0 = G2DLoadImage("graphics/levelcomplete.png", G2D_CLUT4);
+    im_image1 = G2DLoadImage("graphics/minimap.png", G2D_CLUT8);
+    im_image2 = G2DLoadImage("graphics/covered.png", G2D_CLUT8);
+    im_image3 = G2DLoadImage("graphics/elephant.png", TEX_WHITE, G2D_CLUT4);
+    im_image4 = G2DLoadImage("graphics/gamecomplete.png", G2D_CLUT4);
+    im_image5 = G2DLoadImage("graphics/fliplevelcomplete.png", G2D_CLUT4);
+    im_image6 = G2DLoadImage("graphics/flipgamecomplete.png", G2D_CLUT4);
+    im_image7 = G2DLoadImage("graphics/site.png", TEX_WHITE, G2D_CLUT4);
+    im_image8 = G2DLoadImage("graphics/site2.png", TEX_WHITE, G2D_CLUT4);
+    im_image9 = G2DLoadImage("graphics/site3.png", TEX_WHITE, G2D_CLUT4);
+    im_image10 = G2DLoadImage("graphics/ending.png", G2D_CLUT8);
+    im_image11 = G2DLoadImage("graphics/site4.png", TEX_WHITE, G2D_CLUT4);
 
     im_sprites_translated = NULL;
     im_flipsprites_translated = NULL;
 
     init_translations();
 
-    im_image12 = SDL_CreateTexture(gameScreen.m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, 240, 180);
+    im_image12 = NULL;
 
-    if (im_image12 == NULL)
-    {
-        vlog_error("Failed to create minimap texture: %s", SDL_GetError());
-        SDL_assert(0 && "Failed to create minimap texture! See stderr.");
-        return;
-    }
+    // im_image12 = SDL_CreateTexture(gameScreen.m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, 240, 180);
+
+    // if (im_image12 == NULL)
+    // {
+    //     vlog_error("Failed to create minimap texture: %s", SDL_GetError());
+    //     SDL_assert(0 && "Failed to create minimap texture! See stderr.");
+    //     return;
+    // }
 
 }
 
@@ -731,19 +733,19 @@ void GraphicsResources::destroy(void)
     CLEAR(im_flipsprites);
     CLEAR(im_teleporter);
 
-    CLEAR(im_image0);
-    CLEAR(im_image1);
-    CLEAR(im_image2);
-    CLEAR(im_image3);
-    CLEAR(im_image4);
-    CLEAR(im_image5);
-    CLEAR(im_image6);
-    CLEAR(im_image7);
-    CLEAR(im_image8);
-    CLEAR(im_image9);
-    CLEAR(im_image10);
-    CLEAR(im_image11);
-    CLEAR(im_image12);
+    if (im_image0) g2dTexFree(&im_image0);
+    if (im_image1) g2dTexFree(&im_image1);
+    if (im_image2) g2dTexFree(&im_image2);
+    if (im_image3) g2dTexFree(&im_image3);
+    if (im_image4) g2dTexFree(&im_image4);
+    if (im_image5) g2dTexFree(&im_image5);
+    if (im_image6) g2dTexFree(&im_image6);
+    if (im_image7) g2dTexFree(&im_image7);
+    if (im_image8) g2dTexFree(&im_image8);
+    if (im_image9) g2dTexFree(&im_image9);
+    if (im_image10) g2dTexFree(&im_image10);
+    if (im_image11) g2dTexFree(&im_image11);
+    if (im_image12) g2dTexFree(&im_image12);
 
     CLEAR(im_sprites_translated);
     CLEAR(im_flipsprites_translated);

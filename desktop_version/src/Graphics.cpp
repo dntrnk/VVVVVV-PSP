@@ -1013,24 +1013,18 @@ void Graphics::drawimagecol( int t, int xp, int yp, const g2dColor ct, bool cent
     {
         return;
     }
-    SDL_Rect trect;
 
-    trect.x = xp;
-    trect.y = yp;
-
-    if (query_texture(images[t], NULL, NULL, &trect.w, &trect.h) != 0)
+    if (images[t] == NULL)
     {
         return;
     }
 
     if (cent)
     {
-        trect.x = (int) ((SCREEN_WIDTH_PIXELS - trect.w) / 2);
+        xp = (int) ((SCREEN_WIDTH_PIXELS - images[t]->w) / 2);
     }
 
-    set_texture_color_mod(images[t], G2D_GET_R(ct), G2D_GET_G(ct), G2D_GET_B(ct));
-    draw_texture(images[t], trect.x, trect.y);
-    set_texture_color_mod(images[t], 255, 255, 255);
+    draw_texture(images[t], xp, yp, ct);
 }
 
 void Graphics::drawimage( int t, int xp, int yp, bool cent/*=false*/ )
@@ -1040,22 +1034,17 @@ void Graphics::drawimage( int t, int xp, int yp, bool cent/*=false*/ )
         return;
     }
 
-    SDL_Rect trect;
-
-    trect.x = xp;
-    trect.y = yp;
-
-    if (query_texture(images[t], NULL, NULL, &trect.w, &trect.h) != 0)
+    if (images[t] == NULL)
     {
         return;
     }
 
     if (cent)
     {
-        trect.x = (int) ((SCREEN_WIDTH_PIXELS - trect.w) / 2);
+        xp = (int) ((SCREEN_WIDTH_PIXELS - images[t]->w) / 2);
     }
 
-    draw_texture(images[t], trect.x, trect.y);
+    draw_texture(images[t], xp, yp, G2D_WHITE);
 }
 
 void Graphics::drawpartimage(const int t, const int xp, const int yp, const int wp, const int hp)
@@ -1064,21 +1053,12 @@ void Graphics::drawpartimage(const int t, const int xp, const int yp, const int 
     {
         return;
     }
-    draw_texture_part(images[t], xp, yp, 0, 0, wp, hp, 1, 1);
+    draw_texture_part(images[t], xp, yp, 0, 0, wp, hp, 1, 1, G2D_WHITE);
 }
 
-void Graphics::draw_texture(SDL_Texture* image, const int x, const int y)
+void Graphics::draw_texture(g2dImage* image, const int x, const int y, g2dColor color)
 {
-    int w, h;
-
-    if (query_texture(image, NULL, NULL, &w, &h) != 0)
-    {
-        return;
-    }
-
-    const SDL_Rect dstrect = {x, y, w, h};
-
-    copy_texture(image, NULL, &dstrect);
+    g2dHelperDrawImage(image, x, y, image->w, image->h, color, 0, 0, image->w, image->h);
 }
 
 void Graphics::draw_texture_part(SDL_Texture* image, const int x, const int y, const int x2, const int y2, const int w, const int h, const int scalex, const int scaley)

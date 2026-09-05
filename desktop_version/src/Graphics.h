@@ -161,7 +161,7 @@ public:
 
     void drawimagecol(int t, int xp, int yp, g2dColor ct, bool cent= false);
 
-    void draw_texture(SDL_Texture* image, int x, int y);
+    void draw_texture(g2dImage* image, int x, int y, g2dColor color);
 
     void draw_texture_part(SDL_Texture* image, int x, int y, int x2, int y2, int w, int h, int scalex, int scaley);
     void draw_texture_part(g2dImage* image, int x, int y, int x2, int y2, int w, int h, int scalex, int scaley, g2dColor color);
@@ -327,7 +327,7 @@ public:
     std::vector <SDL_Surface*> sprites_surf;
     std::vector <SDL_Surface*> flipsprites_surf;
 
-    SDL_Texture* images[NUM_IMAGES];
+    g2dImage* images[NUM_IMAGES];
 
     bool flipmode;
     bool setflipmode;

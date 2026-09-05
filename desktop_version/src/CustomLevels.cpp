@@ -1715,8 +1715,8 @@ void customlevelclass::generatecustomminimap(void)
 
     // Start drawing the minimap
 
-    SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
-    graphics.set_render_target(graphics.images[IMAGE_CUSTOMMINIMAP]);
+    // SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer); // Not now
+    // graphics.set_render_target(graphics.images[IMAGE_CUSTOMMINIMAP]); // Not now
     graphics.clear();
 
     // Scan over the map size
@@ -1784,7 +1784,7 @@ void customlevelclass::generatecustomminimap(void)
         }
     }
 
-    graphics.set_render_target(target);
+    // graphics.set_render_target(target); // Not now
 }
 
 // Return a graphics-ready color based off of the given tileset and tilecol
