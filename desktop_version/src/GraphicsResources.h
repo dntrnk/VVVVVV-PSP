@@ -23,14 +23,14 @@ public:
     SDL_Surface* im_sprites_surf;
     SDL_Surface* im_flipsprites_surf;
 
-    SDL_Texture* im_tiles;
-    SDL_Texture* im_tiles_white;
-    SDL_Texture* im_tiles_tint;
-    SDL_Texture* im_tiles2;
-    SDL_Texture* im_tiles2_tint;
+    g2dImage* im_tiles;
+    g2dImage* im_tiles_white;
+    g2dImage* im_tiles_tint;
+    g2dImage* im_tiles2;
+    g2dImage* im_tiles2_tint;
     g2dImage* im_tiles3;
-    SDL_Texture* im_entcolours;
-    SDL_Texture* im_entcolours_tint;
+    g2dImage* im_entcolours;
+    g2dImage* im_entcolours_tint;
     SDL_Texture* im_sprites;
     SDL_Texture* im_flipsprites;
     SDL_Texture* im_teleporter;
@@ -51,8 +51,6 @@ public:
     SDL_Texture* im_sprites_translated;
     SDL_Texture* im_flipsprites_translated;
 
-    g2dImage* g2d_tiles;
-    g2dImage* g2d_tiles2;
     g2dImage* g2d_sprites;
 };
 

@@ -698,13 +698,6 @@ bool Graphics::shouldrecoloroneway(const int tilenum, const bool mounted)
 
 void Graphics::drawtile(int x, int y, int t)
 {
-    // Just for test
-    const int tex_width = 320;
-    const int x2 = (t % (tex_width / tiles_rect.w)) * tiles_rect.w;
-    const int y2 = (t / (tex_width / tiles_rect.w)) * tiles_rect.h;
-
-    g2dHelperDrawImage(grphx.g2d_tiles, x, y, tiles_rect.w, tiles_rect.h, G2D_WHITE, x2, y2, tiles_rect.w, tiles_rect.h);
-
     if (shouldrecoloroneway(t, tiles1_mounted))
     {
         draw_grid_tile(grphx.im_tiles_tint, t, x, y, tiles_rect.w, tiles_rect.h, cl.getonewaycol());
@@ -718,13 +711,6 @@ void Graphics::drawtile(int x, int y, int t)
 
 void Graphics::drawtile2(int x, int y, int t)
 {
-    // Just for test
-    const int tex_width = 320;
-    const int x2 = (t % (tex_width / tiles_rect.w)) * tiles_rect.w;
-    const int y2 = (t / (tex_width / tiles_rect.w)) * tiles_rect.h;
-
-    g2dHelperDrawImage(grphx.g2d_tiles2, x, y, tiles_rect.w, tiles_rect.h, G2D_WHITE, x2, y2, tiles_rect.w, tiles_rect.h);
-
     if (shouldrecoloroneway(t, tiles2_mounted))
     {
         draw_grid_tile(grphx.im_tiles2_tint, t, x, y, tiles_rect.w, tiles_rect.h, cl.getonewaycol());
@@ -1150,11 +1136,32 @@ void Graphics::draw_grid_tile(SDL_Texture* texture, const int t, const int x, co
     draw_texture_part(texture, x, y, x2, y2, width, height, scalex, scaley);
 }
 
+void Graphics::draw_grid_tile(g2dImage* texture, const int t, const int x, const int y, const int width, const int height, const int scalex, const int scaley)
+{
+    draw_grid_tile((g2dImage*) texture, t, x, y, width, height, scalex, scaley, G2D_WHITE);
+}
+
+void Graphics::draw_grid_tile(g2dImage* texture, const int t, const int x, const int y, const int width, const int height, const int scalex, const int scaley, const g2dColor color)
+{
+    int tex_width = texture->w;
+
+    const int x2 = (t % (tex_width / width)) * width;
+    const int y2 = (t / (tex_width / width)) * height;
+    draw_texture_part((g2dImage*) texture, x, y, x2, y2, width, height, scalex, scaley, color);
+}
+
 void Graphics::draw_grid_tile(
     SDL_Texture* texture, const int t,
     const int x, const int y, const int width, const int height
 ) {
     draw_grid_tile(texture, t, x, y, width, height, 1, 1);
+}
+
+void Graphics::draw_grid_tile(
+    g2dImage* texture, const int t,
+    const int x, const int y, const int width, const int height
+) {
+    draw_grid_tile((g2dImage*) texture, t, x, y, width, height, 1, 1);
 }
 
 void Graphics::draw_grid_tile(
@@ -1168,6 +1175,19 @@ void Graphics::draw_grid_tile(
     draw_grid_tile(texture, t, x, y, width, height, scalex, scaley);
     set_texture_color_mod(texture, 255, 255, 255);
     set_texture_alpha_mod(texture, 255);
+}
+
+void Graphics::draw_grid_tile(
+    g2dImage* texture, const int t,
+    const int x, const int y, const int width, const int height,
+    const int r, const int g, const int b, const int a,
+    const int scalex, const int scaley
+) {
+    // set_texture_color_mod(texture, r, g, b);
+    // set_texture_alpha_mod(texture, a);
+    draw_grid_tile((g2dImage*) texture, t, x, y, width, height, scalex, scaley, G2D_RGBA(r, g, b, a));
+    // set_texture_color_mod(texture, 255, 255, 255);
+    // set_texture_alpha_mod(texture, 255);
 }
 
 void Graphics::draw_grid_tile(
@@ -1205,11 +1225,28 @@ void Graphics::draw_grid_tile(
 }
 
 void Graphics::draw_grid_tile(
+    g2dImage* texture, const int t,
+    const int x, const int y, const int width, const int height,
+    const g2dColor color,
+    const int scalex, const int scaley
+) {
+    draw_grid_tile((g2dImage*) texture, t, x, y, width, height, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color), G2D_GET_A(color), scalex, scaley);
+}
+
+void Graphics::draw_grid_tile(
     SDL_Texture* texture, const int t,
     const int x, const int y, const int width, const int height,
     const g2dColor color
 ) {
     draw_grid_tile(texture, t, x, y, width, height, color, 1, 1);
+}
+
+void Graphics::draw_grid_tile(
+    g2dImage* texture, const int t,
+    const int x, const int y, const int width, const int height,
+    const g2dColor color
+) {
+    draw_grid_tile((g2dImage*) texture, t, x, y, width, height, color, 1, 1);
 }
 
 void Graphics::cutscenebars(void)
@@ -1718,7 +1755,7 @@ void Graphics::drawcoloredtile(
     const int t,
     const int r, const int g, const int b
 ) {
-    draw_grid_tile(grphx.im_tiles_white, t, x, y, tiles_rect.w, tiles_rect.h, r, g, b);
+    draw_grid_tile(grphx.im_tiles_white, t, x, y, tiles_rect.w, tiles_rect.h, G2D_RGB(r, g, b));
 }
 
 
@@ -1995,8 +2032,8 @@ void Graphics::drawentity(const int i, const int yoff)
     }
 
     SDL_Texture* sprites = flipmode ? grphx.im_flipsprites : grphx.im_sprites;
-    SDL_Texture* tiles = (map.custommode && !map.finalmode) ? grphx.im_entcolours : grphx.im_tiles;
-    SDL_Texture* tiles_tint = (map.custommode && !map.finalmode) ? grphx.im_entcolours_tint : grphx.im_tiles_tint;
+    g2dImage* tiles = (map.custommode && !map.finalmode) ? grphx.im_entcolours : grphx.im_tiles;
+    g2dImage* tiles_tint = (map.custommode && !map.finalmode) ? grphx.im_entcolours_tint : grphx.im_tiles_tint;
 
     const int xp = lerp(obj.entities[i].lerpoldxp, obj.entities[i].xp);
     const int yp = lerp(obj.entities[i].lerpoldyp, obj.entities[i].yp);
@@ -2016,9 +2053,11 @@ void Graphics::drawentity(const int i, const int yoff)
 
         draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct); 
         
+        //
         const int x2 = (obj.entities[i].drawframe % (384 / 32)) * 32;
         const int y2 = (obj.entities[i].drawframe / (384 / 32)) * 32;
         g2dHelperDrawImage(grphx.g2d_sprites, drawRect.x, drawRect.y, 32, 32, ct, x2, y2, 32, 32);
+        //
 
         // screenwrapping!
         SDL_Point wrappedPoint;

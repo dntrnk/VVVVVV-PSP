@@ -674,13 +674,11 @@ void GraphicsResources::init_translations(void)
 
 void GraphicsResources::init(void)
 {
-    g2d_tiles = G2DLoadImage("graphics/tiles.png", G2D_CLUT8);
-    g2d_tiles2 = G2DLoadImage("graphics/tiles2.png", G2D_CLUT8);
     g2d_sprites = G2DLoadImage("graphics/sprites.png", TEX_WHITE, G2D_CLUT4);
 
-    LoadVariants("graphics/tiles.png", &im_tiles, &im_tiles_white, &im_tiles_tint);
-    LoadVariants("graphics/tiles2.png", &im_tiles2, NULL, &im_tiles2_tint);
-    LoadVariants("graphics/entcolours.png", &im_entcolours, NULL, &im_entcolours_tint);
+    G2DLoadVariants("graphics/tiles.png", G2D_CLUT8, &im_tiles, &im_tiles_white, &im_tiles_tint);
+    G2DLoadVariants("graphics/tiles2.png", G2D_CLUT8, &im_tiles2, NULL, &im_tiles2_tint);
+    G2DLoadVariants("graphics/entcolours.png", G2D_CLUT8, &im_entcolours, NULL, &im_entcolours_tint);
 
     LoadSprites("graphics/sprites.png", &im_sprites, &im_sprites_surf);
     LoadSprites("graphics/flipsprites.png", &im_flipsprites, &im_flipsprites_surf);
@@ -721,14 +719,14 @@ void GraphicsResources::init(void)
 void GraphicsResources::destroy(void)
 {
 #define CLEAR(img) VVV_freefunc(SDL_DestroyTexture, img)
-    CLEAR(im_tiles);
-    CLEAR(im_tiles_white);
-    CLEAR(im_tiles_tint);
-    CLEAR(im_tiles2);
-    CLEAR(im_tiles2_tint);
+    if (im_tiles) g2dTexFree(&im_tiles);
+    if (im_tiles_white) g2dTexFree(&im_tiles_white);
+    if (im_tiles_tint) g2dTexFree(&im_tiles_tint);
+    if (im_tiles2) g2dTexFree(&im_tiles2);
+    if (im_tiles2_tint) g2dTexFree(&im_tiles2_tint);
     if (im_tiles3) g2dTexFree(&im_tiles3);
-    CLEAR(im_entcolours);
-    CLEAR(im_entcolours_tint);
+    if (im_entcolours) g2dTexFree(&im_entcolours);
+    if (im_entcolours_tint) g2dTexFree(&im_entcolours_tint);
     CLEAR(im_sprites);
     CLEAR(im_flipsprites);
     CLEAR(im_teleporter);
