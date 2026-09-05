@@ -63,6 +63,18 @@ void g2dHelperDrawRect(int x, int y, int w, int h, g2dColor color) {
     g2dAdd();
 }
 
+void g2dHelperDrawLine(int x, int y, int x2, int y2, g2dColor color) {
+    _flush_batch();
+    g2dBeginLines(G2D_STRIP);
+    g2dReset();
+    g2dSetColor(color);
+    g2dSetCoordXY(x, y);
+    g2dAdd();
+    g2dSetCoordXY(x2, y2);
+    g2dAdd();
+    g2dEnd();
+}
+
 void g2dHelperDrawImage(g2dImage* tex, int x, int y, int w, int h, g2dColor color, int srcx, int srcy, int srcw, int srch) {
     _check_batch(tex);
     g2dReset();

@@ -632,14 +632,7 @@ void Graphics::draw_rect(const int x, const int y, const int w, const int h, con
 
 void Graphics::draw_line(const int x, const int y, const int x2, const int y2, const g2dColor color)
 {
-    g2dBeginLines(G2D_STRIP);
-    g2dReset();
-    g2dSetColor(color);
-    g2dSetCoordXY(x, y);
-    g2dAdd();
-    g2dSetCoordXY(x2, y2);
-    g2dAdd();
-    g2dEnd();
+    g2dHelperDrawLine(x, y, x2, y2, color);
 }
 
 int Graphics::draw_points(const SDL_Point* points, const int count)
