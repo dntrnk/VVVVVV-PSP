@@ -334,7 +334,7 @@ static SDL_Texture* LoadImage(const char* filename)
     return LoadImage(filename, TEX_COLOR);
 }
 
-static g2dImage* G2DLoadImage(const char* filename, const TextureLoadType loadtype, g2dTexFormat format)
+g2dImage* G2DLoadImage(const char* filename, const TextureLoadType loadtype, g2dTexFormat format)
 {
     // Load Image
     unsigned int width, height;
@@ -459,7 +459,7 @@ static g2dImage* G2DLoadImage(const char* filename, const TextureLoadType loadty
     return resultTex;
 }
 
-static g2dImage* G2DLoadImage(const char* filename, g2dTexFormat format)
+g2dImage* G2DLoadImage(const char* filename, g2dTexFormat format)
 {
     return G2DLoadImage(filename, TEX_COLOR, format);
 }

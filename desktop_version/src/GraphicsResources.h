@@ -56,6 +56,8 @@ public:
 
 SDL_Surface* LoadImageSurface(const char* filename);
 SDL_Texture* LoadImage(const char *filename, TextureLoadType loadtype);
+g2dImage* G2DLoadImage(const char *filename, TextureLoadType loadtype, g2dTexFormat format);
+g2dImage* G2DLoadImage(const char *filename, g2dTexFormat format);
 
 bool SaveImage(const SDL_Surface* surface, const char* filename);
 bool SaveScreenshot(void);

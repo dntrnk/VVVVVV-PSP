@@ -55,7 +55,7 @@ struct Font
     uint8_t glyph_w;
     uint8_t glyph_h;
 
-    SDL_Texture* image;
+    g2dImage* image;
 
     GlyphInfo* glyph_page[FONT_N_PAGES];
 
@@ -332,7 +332,7 @@ static uint8_t load_font(FontContainer* container, const char* name)
         }
     }
 
-    f->image = LoadImage(name_png, white_teeth ? TEX_COLOR : TEX_WHITE);
+    f->image = G2DLoadImage(name_png, white_teeth ? TEX_COLOR : TEX_WHITE, G2D_CLUT4);
     SDL_zeroa(f->glyph_page);
 
     if (f->image == NULL)
@@ -706,7 +706,7 @@ void load_custom(const char* name)
 
 void unload_font(Font* f)
 {
-    VVV_freefunc(SDL_DestroyTexture, f->image);
+    if (f->image) g2dTexFree(&f->image);
 
     for (int i = 0; i < FONT_N_PAGES; i++)
     {
@@ -1143,7 +1143,7 @@ static int print_char(
         y,
         f_glyph->glyph_w,
         f_glyph->glyph_h,
-        r, g, b,
+        G2D_RGB(r, g, b),
         scale,
         scale * (graphics.flipmode ? -1 : 1)
     );

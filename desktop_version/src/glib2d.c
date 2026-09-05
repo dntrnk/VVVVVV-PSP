@@ -190,7 +190,7 @@ void g2dInit() {
     sceGuDepthFunc(GU_LEQUAL);
     sceGuBlendFunc(GU_ADD, GU_SRC_ALPHA, GU_ONE_MINUS_SRC_ALPHA, 0, 0);
     sceGuTexFunc(GU_TFX_MODULATE, GU_TCC_RGBA);
-    sceGuTexFilter(GU_LINEAR, GU_LINEAR);
+    sceGuTexFilter(GU_NEAREST, GU_NEAREST);
     sceGuShadeModel(GU_SMOOTH);
 
     sceGuDisable(GU_CULL_FACE);
