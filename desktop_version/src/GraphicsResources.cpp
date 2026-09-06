@@ -646,7 +646,7 @@ void GraphicsResources::init(void)
     im_image7 = G2DLoadImage("graphics/site.png", TEX_WHITE, G2D_CLUT4);
     im_image8 = G2DLoadImage("graphics/site2.png", TEX_WHITE, G2D_CLUT4);
     im_image9 = G2DLoadImage("graphics/site3.png", TEX_WHITE, G2D_CLUT4);
-    im_image10 = G2DLoadImage("graphics/ending.png", G2D_CLUT8);
+    im_image10 = G2DLoadImage("graphics/ending.png", G2D_CLUT4);
     im_image11 = G2DLoadImage("graphics/site4.png", TEX_WHITE, G2D_CLUT4);
 
     im_sprites_translated = NULL;
