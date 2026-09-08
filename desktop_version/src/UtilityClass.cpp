@@ -214,9 +214,30 @@ std::string UtilityClass::number_words(int _t, const char* number_class)
     }
 }
 
-bool UtilityClass::intersects( SDL_Rect A, SDL_Rect B )
+bool UtilityClass::intersects(int ax, int ay, int aw, int ah, int bx, int by, int bw, int bh)
 {
-    return (SDL_HasIntersection(&A, &B) == SDL_TRUE);
+    /* Special cases for empty rects */
+    if (aw <= 0 || ah <= 0 || bw <= 0 || bh <= 0)
+        return false;
+
+    /* Horizontal intersection */
+    int left = (ax > bx) ? ax : bx;
+    int right = (ax + aw < bx + bw) ? ax + aw : bx + bw;
+    if (right <= left)
+        return false;
+
+    /* Vertical intersection */
+    int top = (ay > by) ? ay : by;
+    int bottom = (ay + ah < by + bh) ? ay + ah : by + bh;
+    if (bottom <= top)
+        return false;
+
+    return true;
+}
+
+bool UtilityClass::intersects(const SDL_Rect& A, const SDL_Rect& B)
+{
+    return intersects(A.x, A.y, A.w, A.h, B.x, B.y, B.w, B.h);
 }
 
 void UtilityClass::updateglow(void)

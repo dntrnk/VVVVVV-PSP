@@ -4029,20 +4029,10 @@ bool entityclass::entitycollide( int a, int b )
     }
 
     //Do entities a and b collide?
-    SDL_Rect temprect;
-    temprect.x = entities[a].xp + entities[a].cx;
-    temprect.y = entities[a].yp + entities[a].cy;
-    temprect.w = entities[a].w;
-    temprect.h = entities[a].h;
-
-    SDL_Rect temprect2;
-    temprect2.x = entities[b].xp + entities[b].cx;
-    temprect2.y = entities[b].yp + entities[b].cy;
-    temprect2.w = entities[b].w;
-    temprect2.h = entities[b].h;
-
-    if (help.intersects(temprect, temprect2)) return true;
-    return false;
+    return help.intersects(
+        entities[a].xp + entities[a].cx, entities[a].yp + entities[a].cy, entities[a].w, entities[a].h,
+        entities[b].xp + entities[b].cx, entities[b].yp + entities[b].cy, entities[b].w, entities[b].h
+    );
 }
 
 bool entityclass::checkdamage(bool scm /*= false*/)
