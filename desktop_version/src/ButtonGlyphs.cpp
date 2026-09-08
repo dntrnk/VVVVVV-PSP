@@ -199,67 +199,7 @@ void BUTTONGLYPHS_keyboard_set_active(bool active)
 
 void BUTTONGLYPHS_update_layout(SDL_GameController *c)
 {
-    Uint16 vendor = SDL_GameControllerGetVendor(c);
-    Uint16 product = SDL_GameControllerGetProduct(c);
-
-    if (vendor == 0x054c)
-    {
-        layout = LAYOUT_PLAYSTATION;
-    }
-    else if (vendor == 0x28de)
-    {
-        /* Steam Virtual Gamepads can hypothetically tell us that the physical
-         * device is a PlayStation controller, so try to catch that scenario */
-        SDL_GameControllerType gct = SDL_GameControllerGetType(c);
-        if ( gct == SDL_CONTROLLER_TYPE_PS3 ||
-             gct == SDL_CONTROLLER_TYPE_PS4 ||
-             gct == SDL_CONTROLLER_TYPE_PS5 )
-        {
-            layout = LAYOUT_PLAYSTATION;
-        }
-        else
-        {
-            layout = LAYOUT_DECK;
-        }
-    }
-    else if (vendor == 0x057e)
-    {
-        if (product == 0x2006)
-        {
-            layout = LAYOUT_NINTENDO_SWITCH_JOYCON_L;
-        }
-        else if (product == 0x2007)
-        {
-            layout = LAYOUT_NINTENDO_SWITCH_JOYCON_R;
-        }
-        else if (product == 0x0337)
-        {
-            layout = LAYOUT_GAMECUBE;
-        }
-        else
-        {
-            layout = LAYOUT_NINTENDO_SWITCH_PRO;
-        }
-    }
-    else if (vendor == 0x2dc8) /* 8BitDo */
-    {
-        if (    product == 0x2002 ||   /* Ultimate Wired Controller for Xbox */
-                product == 0x3106    ) /* Ultimate Wireless / Pro 2 Wired Controller */
-        {
-            layout = LAYOUT_XBOX;
-        }
-        else
-        {
-            layout = LAYOUT_NINTENDO_SWITCH_PRO;
-        }
-    }
-    else
-    {
-        /* For now we assume Xbox (0x045e), Generic will be used when
-         * migrating to SDL_ActionSet
-         */
-        layout = LAYOUT_XBOX;
-    }
+    layout = LAYOUT_PLAYSTATION;
 }
 
 const char* BUTTONGLYPHS_get_wasd_text(void)
