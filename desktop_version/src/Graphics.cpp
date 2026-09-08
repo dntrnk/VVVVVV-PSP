@@ -2685,86 +2685,60 @@ void Graphics::updatebackground(int t)
 
 void Graphics::drawmap(void)
 {
-    if (!foregrounddrawn)
+    for (int y = 0; y < 30; y++)
     {
-        SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
-
-        set_render_target(foregroundTexture);
-        set_blendmode(foregroundTexture, SDL_BLENDMODE_BLEND);
-        clear(0, 0, 0, 0);
-
-        for (int y = 0; y < 30; y++)
+        for (int x = 0; x < 40; x++)
         {
-            for (int x = 0; x < 40; x++)
+            int tile;
+            int tileset;
+            if (game.gamestate == EDITORMODE)
             {
-                int tile;
-                int tileset;
-                if (game.gamestate == EDITORMODE)
-                {
-                    tile = cl.gettile(ed.levx, ed.levy, x, y);
-                    tileset = (cl.getroomprop(ed.levx, ed.levy)->tileset == 0) ? 0 : 1;
-                }
-                else
-                {
-                    tile = map.contents[TILE_IDX(x, y)];
-                    tileset = map.tileset;
-                }
+                tile = cl.gettile(ed.levx, ed.levy, x, y);
+                tileset = (cl.getroomprop(ed.levx, ed.levy)->tileset == 0) ? 0 : 1;
+            }
+            else
+            {
+                tile = map.contents[TILE_IDX(x, y)];
+                tileset = map.tileset;
+            }
 
-                if (tile > 0)
+            if (tile > 0)
+            {
+                if (tileset == 0)
                 {
-                    if (tileset == 0)
-                    {
-                        drawtile(x * 8, y * 8, tile);
-                    }
-                    else if (tileset == 1)
-                    {
-                        drawtile2(x * 8, y * 8, tile);
-                    }
-                    else if (tileset == 2)
-                    {
-                        drawtile3(x * 8, y * 8, tile, map.rcol);
-                    }
+                    drawtile(x * 8, y * 8, tile);
+                }
+                else if (tileset == 1)
+                {
+                    drawtile2(x * 8, y * 8, tile);
+                }
+                else if (tileset == 2)
+                {
+                    drawtile3(x * 8, y * 8, tile, map.rcol);
                 }
             }
         }
-
-        set_render_target(target);
-        // foregrounddrawn = true;
     }
-
-    copy_texture(foregroundTexture, NULL, NULL);
 }
 
 void Graphics::drawfinalmap(void)
 {
-    if (!foregrounddrawn)
-    {
-        SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
-
-        set_render_target(foregroundTexture);
-        set_blendmode(foregroundTexture, SDL_BLENDMODE_BLEND);
-        clear(0, 0, 0, 0);
-        if (map.tileset == 0) {
-            for (int j = 0; j < 30; j++) {
-                for (int i = 0; i < 40; i++) {
-                    if ((map.contents[TILE_IDX(i, j)]) > 0)
-                        drawtile(i * 8, j * 8, map.finalat(i, j));
-                }
+    if (map.tileset == 0) {
+        for (int j = 0; j < 30; j++) {
+            for (int i = 0; i < 40; i++) {
+                if ((map.contents[TILE_IDX(i, j)]) > 0)
+                    drawtile(i * 8, j * 8, map.finalat(i, j));
             }
         }
-        else if (map.tileset == 1) {
-            for (int j = 0; j < 30; j++) {
-                for (int i = 0; i < 40; i++) {
-                    if ((map.contents[TILE_IDX(i, j)]) > 0)
-                        drawtile2(i * 8, j * 8, map.finalat(i, j));
-                }
-            }
-        }
-        set_render_target(target);
-        foregrounddrawn = true;
     }
-
-    copy_texture(foregroundTexture, NULL, NULL);
+    else if (map.tileset == 1) {
+        for (int j = 0; j < 30; j++) {
+            for (int i = 0; i < 40; i++) {
+                if ((map.contents[TILE_IDX(i, j)]) > 0)
+                    drawtile2(i * 8, j * 8, map.finalat(i, j));
+            }
+        }
+    }
 }
 
 void Graphics::drawtowermap(void)
