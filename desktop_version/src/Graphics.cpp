@@ -2387,22 +2387,36 @@ void Graphics::drawbackground( int t )
     }
     case 3: //Warp zone (horizontal)
     {
-        clear();
+        const int temp = 680 + (rcol * 3);
 
-        const int offset = (int) lerp(-3, 0);
-        const SDL_Rect srcRect = {8 + offset, 0, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS};
+        for (int j = 0; j < 15; j++)
+        {
+            for (int i = 0; i < 21; i++)
+            {
+                drawtile2((i * 16) - backoffset - 3, (j * 16), temp + 40);
+                drawtile2((i * 16) - backoffset + 8 - 3, (j * 16), temp + 41);
+                drawtile2((i * 16) - backoffset - 3, (j * 16) + 8, temp + 80);
+                drawtile2((i * 16) - backoffset + 8 - 3, (j * 16) + 8, temp + 81);
+            }
+        }
 
-        copy_texture(backgroundTexture, &srcRect, NULL);
         break;
     }
     case 4: //Warp zone (vertical)
     {
-        clear();
+        const int temp = 760 + (rcol * 3);
 
-        const int offset = (int) lerp(-3, 0);
-        const SDL_Rect srcRect = {0, 8 + offset, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS};
+        for (int j = 0; j < 16; j++)
+        {
+            for (int i = 0; i < 21; i++)
+            {
+                drawtile2((i * 16), (j * 16) - backoffset - 3, temp + 40);
+                drawtile2((i * 16) + 8, (j * 16) - backoffset - 3, temp + 41);
+                drawtile2((i * 16), (j * 16) - backoffset + 8 - 3, temp + 80);
+                drawtile2((i * 16) + 8, (j * 16) - backoffset + 8 - 3, temp + 81);
+            }
+        }
 
-        copy_texture(backgroundTexture, &srcRect, NULL);
         break;
     }
     case 5:
@@ -2573,88 +2587,16 @@ void Graphics::updatebackground(int t)
         break;
     case 3: // Warp zone (horizontal)
     {
-        const int temp = 680 + (rcol * 3);
         backoffset += 3;
         if (backoffset >= 16) backoffset -= 16;
 
-        SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
-        set_render_target(backgroundTexture);
-
-        if (backgrounddrawn)
-        {
-            scroll_texture(backgroundTexture, tempScrollingTexture, -3, 0);
-            for (int j = 0; j < 15; j++)
-            {
-                for (int i = 0; i < 2; i++)
-                {
-                    drawtile2(317 - backoffset + (i * 16), (j * 16), temp + 40);  // 20*16 = 320
-                    drawtile2(317 - backoffset + (i * 16) + 8, (j * 16), temp + 41);
-                    drawtile2(317 - backoffset + (i * 16), (j * 16) + 8, temp + 80);
-                    drawtile2(317 - backoffset + (i * 16) + 8, (j * 16) + 8, temp + 81);
-                }
-            }
-        }
-        else
-        {
-            // draw the whole thing for the first time!
-            backoffset = 0;
-            clear();
-            for (int j = 0; j < 15; j++)
-            {
-                for (int i = 0; i < 21; i++)
-                {
-                    drawtile2((i * 16) - backoffset - 3, (j * 16), temp + 40);
-                    drawtile2((i * 16) - backoffset + 8 - 3, (j * 16), temp + 41);
-                    drawtile2((i * 16) - backoffset - 3, (j * 16) + 8, temp + 80);
-                    drawtile2((i * 16) - backoffset + 8 - 3, (j * 16) + 8, temp + 81);
-                }
-            }
-            backgrounddrawn = true;
-        }
-        set_render_target(target);
         break;
     }
     case 4: // Warp zone (vertical)
     {
-        const int temp = 760 + (rcol * 3);
         backoffset += 3;
         if (backoffset >= 16) backoffset -= 16;
 
-        SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
-        set_render_target(backgroundTexture);
-
-        if (backgrounddrawn)
-        {
-            scroll_texture(backgroundTexture, tempScrollingTexture, 0, -3);
-            for (int j = 0; j < 2; j++)
-            {
-                for (int i = 0; i < 21; i++)
-                {
-                    drawtile2((i * 16), 237 - backoffset + (j * 16), temp + 40); // 14*17=240 - 3
-                    drawtile2((i * 16) + 8, 237 - backoffset + (j * 16), temp + 41);
-                    drawtile2((i * 16), 237 - backoffset + (j * 16) + 8, temp + 80);
-                    drawtile2((i * 16) + 8, 237 - backoffset + (j * 16) + 8, temp + 81);
-                }
-            }
-        }
-        else
-        {
-            // draw the whole thing for the first time!
-            backoffset = 0;
-            clear();
-            for (int j = 0; j < 16; j++)
-            {
-                for (int i = 0; i < 21; i++)
-                {
-                    drawtile2((i * 16), (j * 16) - backoffset - 3, temp + 40);
-                    drawtile2((i * 16) + 8, (j * 16) - backoffset - 3, temp + 41);
-                    drawtile2((i * 16), (j * 16) - backoffset + 8 - 3, temp + 80);
-                    drawtile2((i * 16) + 8, (j * 16) - backoffset + 8 - 3, temp + 81);
-                }
-            }
-            backgrounddrawn = true;
-        }
-        set_render_target(target);
         break;
     }
     case 5:
