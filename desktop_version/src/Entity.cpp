@@ -35,33 +35,32 @@ bool entityclass::checktowerspikes(int t)
         return false;
     }
 
-    SDL_Rect temprect;
-    temprect.x = entities[t].xp + entities[t].cx;
-    temprect.y = entities[t].yp + entities[t].cy;
-    temprect.w = entities[t].w;
-    temprect.h = entities[t].h;
+    int rect_x = entities[t].xp + entities[t].cx;
+    int rect_y = entities[t].yp + entities[t].cy;
+    int rect_w = entities[t].w;
+    int rect_h = entities[t].h;
 
-    int tempx = getgridpoint(temprect.x);
-    int tempy = getgridpoint(temprect.y);
-    int tempw = getgridpoint(temprect.x + temprect.w - 1);
-    int temph = getgridpoint(temprect.y + temprect.h - 1);
+    int tempx = getgridpoint(rect_x);
+    int tempy = getgridpoint(rect_y);
+    int tempw = getgridpoint(rect_x + rect_w - 1);
+    int temph = getgridpoint(rect_y + rect_h - 1);
     if (map.towerspikecollide(tempx, tempy)) return true;
     if (map.towerspikecollide(tempw, tempy)) return true;
     if (map.towerspikecollide(tempx, temph)) return true;
     if (map.towerspikecollide(tempw, temph)) return true;
-    if (temprect.h >= 12)
+    if (rect_h >= 12)
     {
-        int tpy1 = getgridpoint(temprect.y + 6);
+        int tpy1 = getgridpoint(rect_y + 6);
         if (map.towerspikecollide(tempx, tpy1)) return true;
         if (map.towerspikecollide(tempw, tpy1)) return true;
-        if (temprect.h >= 18)
+        if (rect_h >= 18)
         {
-            tpy1 = getgridpoint(temprect.y + 12);
+            tpy1 = getgridpoint(rect_y + 12);
             if (map.towerspikecollide(tempx, tpy1)) return true;
             if (map.towerspikecollide(tempw, tpy1)) return true;
-            if (temprect.h >= 24)
+            if (rect_h >= 24)
             {
-                tpy1 = getgridpoint(temprect.y + 18);
+                tpy1 = getgridpoint(rect_y + 18);
                 if (map.towerspikecollide(tempx, tpy1)) return true;
                 if (map.towerspikecollide(tempw, tpy1)) return true;
             }
