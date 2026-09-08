@@ -788,8 +788,8 @@ void entityclass::createblock( int t, int xp, int yp, int w, int h, int trig /*=
     {
         if (blocks[i].wp == 0
         && blocks[i].hp == 0
-        && blocks[i].rect.w == 0
-        && blocks[i].rect.h == 0)
+        && blocks[i].rect_w == 0
+        && blocks[i].rect_h == 0)
         {
             reuse = true;
             blockptr = &blocks[i];
@@ -1155,8 +1155,8 @@ void entityclass::disableblock( int t )
     blocks[t].wp = 0;
     blocks[t].hp = 0;
 
-    blocks[t].rect.w = blocks[t].wp;
-    blocks[t].rect.h = blocks[t].hp;
+    blocks[t].rect_w = blocks[t].wp;
+    blocks[t].rect_h = blocks[t].hp;
 }
 
 void entityclass::moveblockto(int x1, int y1, int x2, int y2, int w, int h)
@@ -4038,19 +4038,23 @@ bool entityclass::entitycollide( int a, int b )
 bool entityclass::checkdamage(bool scm /*= false*/)
 {
     //Returns true if player (or supercrewmate) collides with a damagepoint
-    for(size_t i=0; i < entities.size(); i++)
-    {
-        if((scm && entities[i].type == 14) || (!scm && entities[i].rule == 0))
-        {
-            SDL_Rect temprect;
-            temprect.x = entities[i].xp + entities[i].cx;
-            temprect.y = entities[i].yp + entities[i].cy;
-            temprect.w = entities[i].w;
-            temprect.h = entities[i].h;
+    const size_t entity_count = entities.size();
+    const size_t block_count = blocks.size();
 
-            for (size_t j=0; j<blocks.size(); j++)
+    for(size_t i=0; i < entity_count; i++)
+    {
+        const entclass& entity = entities[i];
+
+        if((scm && entity.type == 14) || (!scm && entity.rule == 0))
+        {
+            for (size_t j=0; j<block_count; j++)
             {
-                if (blocks[j].type == DAMAGE && help.intersects(blocks[j].rect, temprect))
+                const blockclass& block = blocks[j];
+
+                if (block.type == DAMAGE && help.intersects(
+                    block.rect_x, block.rect_y, block.rect_w, block.rect_h, 
+                    entity.xp + entity.cx, entity.yp + entity.cy, entity.w, entity.h
+                ))
                 {
                     return true;
                 }
@@ -4064,23 +4068,27 @@ int entityclass::checktrigger(int* block_idx)
 {
     //Returns an int player entity (rule 0) collides with a trigger
     //Also returns the index of the block
-    *block_idx = -1;
-    for(size_t i=0; i < entities.size(); i++)
-    {
-        if(entities[i].rule==0)
-        {
-            SDL_Rect temprect;
-            temprect.x = entities[i].xp + entities[i].cx;
-            temprect.y = entities[i].yp + entities[i].cy;
-            temprect.w = entities[i].w;
-            temprect.h = entities[i].h;
+    const size_t entity_count = entities.size();
+    const size_t block_count = blocks.size();
 
-            for (size_t j=0; j<blocks.size(); j++)
+    *block_idx = -1;
+    for(size_t i=0; i < entity_count; i++)
+    {
+        const entclass& entity = entities[i];
+
+        if(entity.rule==0)
+        {
+            for (size_t j=0; j<block_count; j++)
             {
-                if (blocks[j].type == TRIGGER && help.intersects(blocks[j].rect, temprect))
+                const blockclass& block = blocks[j];
+
+                if (block.type == TRIGGER && help.intersects(
+                    block.rect_x, block.rect_y, block.rect_w, block.rect_h,
+                    entity.xp + entity.cx, entity.yp + entity.cy, entity.w, entity.h
+                ))
                 {
                     *block_idx = j;
-                    return blocks[j].trigger;
+                    return block.trigger;
                 }
             }
         }
@@ -4091,19 +4099,23 @@ int entityclass::checktrigger(int* block_idx)
 int entityclass::checkactivity(void)
 {
     //Returns an int player entity (rule 0) collides with an activity
-    for(size_t i=0; i < entities.size(); i++)
-    {
-        if(entities[i].rule==0)
-        {
-            SDL_Rect temprect;
-            temprect.x = entities[i].xp + entities[i].cx;
-            temprect.y = entities[i].yp + entities[i].cy;
-            temprect.w = entities[i].w;
-            temprect.h = entities[i].h;
+    const size_t entity_count = entities.size();
+    const size_t block_count = blocks.size();
 
-            for (size_t j=0; j<blocks.size(); j++)
+    for(size_t i=0; i < entity_count; i++)
+    {
+        const entclass& entity = entities[i];
+
+        if(entity.rule==0)
+        {
+            for (size_t j=0; j<block_count; j++)
             {
-                if (blocks[j].type == ACTIVITY && help.intersects(blocks[j].rect, temprect))
+                const blockclass& block = blocks[j];
+
+                if (block.type == ACTIVITY && help.intersects(
+                    block.rect_x, block.rect_y, block.rect_w, block.rect_h,
+                    entity.xp + entity.cx, entity.yp + entity.cy, entity.w, entity.h
+                ))
                 {
                     return j;
                 }
@@ -4113,37 +4125,48 @@ int entityclass::checkactivity(void)
     return -1;
 }
 
-bool entityclass::checkplatform(const SDL_Rect& temprect, int* px, int* py)
+bool entityclass::checkplatform(int entity_x, int entity_y, int entity_w, int entity_h, int* px, int* py)
 {
     //Return true if rectset intersects a moving platform, setups px & py to the platform x & y
-    for (size_t i = 0; i < blocks.size(); i++)
+    const size_t block_count = blocks.size();
+
+    for (size_t i = 0; i < block_count; i++)
     {
-        if (blocks[i].type == BLOCK && help.intersects(blocks[i].rect, temprect))
+        const blockclass& block = blocks[i];
+
+        if (block.type == BLOCK && help.intersects(
+            block.rect_x, block.rect_y, block.rect_w, block.rect_h,
+            entity_x, entity_y, entity_w, entity_h
+        ))
         {
-            *px = blocks[i].xp;
-            *py = blocks[i].yp;
+            *px = block.xp;
+            *py = block.yp;
             return true;
         }
     }
     return false;
 }
 
-bool entityclass::checkblocks(const SDL_Rect& temprect, const float dx, const float dy, const int dr, const bool skipdirblocks)
+bool entityclass::checkblocks(int entity_x, int entity_y, int entity_w, int entity_h, const float dx, const float dy, const int dr, const bool skipdirblocks)
 {
-    for (size_t i = 0; i < blocks.size(); i++)
+    const size_t block_count = blocks.size();
+
+    for (size_t i = 0; i < block_count; i++)
     {
-        if(!skipdirblocks && blocks[i].type == DIRECTIONAL)
+        const blockclass& block = blocks[i];
+
+        if(!skipdirblocks && block.type == DIRECTIONAL)
         {
-            if (dy > 0 && blocks[i].trigger == 0) if (help.intersects(blocks[i].rect, temprect)) return true;
-            if (dy <= 0 && blocks[i].trigger == 1) if (help.intersects(blocks[i].rect, temprect)) return true;
-            if (dx > 0 && blocks[i].trigger == 2) if (help.intersects(blocks[i].rect, temprect)) return true;
-            if (dx <= 0 && blocks[i].trigger == 3) if (help.intersects(blocks[i].rect, temprect)) return true;
+            if (dy > 0 && block.trigger == 0) if (help.intersects(block.rect_x, block.rect_y, block.rect_w, block.rect_h, entity_x, entity_y, entity_w, entity_h)) return true;
+            if (dy <= 0 && block.trigger == 1) if (help.intersects(block.rect_x, block.rect_y, block.rect_w, block.rect_h, entity_x, entity_y, entity_w, entity_h)) return true;
+            if (dx > 0 && block.trigger == 2) if (help.intersects(block.rect_x, block.rect_y, block.rect_w, block.rect_h, entity_x, entity_y, entity_w, entity_h)) return true;
+            if (dx <= 0 && block.trigger == 3) if (help.intersects(block.rect_x, block.rect_y, block.rect_w, block.rect_h, entity_x, entity_y, entity_w, entity_h)) return true;
         }
-        if (blocks[i].type == BLOCK && help.intersects(blocks[i].rect, temprect))
+        if (block.type == BLOCK && help.intersects(block.rect_x, block.rect_y, block.rect_w, block.rect_h, entity_x, entity_y, entity_w, entity_h))
         {
             return true;
         }
-        if (blocks[i].type == SAFE && (dr)==1 && help.intersects(blocks[i].rect, temprect))
+        if (block.type == SAFE && (dr)==1 && help.intersects(block.rect_x, block.rect_y, block.rect_w, block.rect_h, entity_x, entity_y, entity_w, entity_h))
         {
             return true;
         }
@@ -4151,53 +4174,53 @@ bool entityclass::checkblocks(const SDL_Rect& temprect, const float dx, const fl
     return false;
 }
 
-bool entityclass::checkwall(const bool invincible, const SDL_Rect& temprect, const float dx, const float dy, const int dr, const bool skipblocks, const bool skipdirblocks)
+bool entityclass::checkwall(const bool invincible, int xp, int yp, int wp, int hp, const float dx, const float dy, const int dr, const bool skipblocks, const bool skipdirblocks)
 {
     //Returns true if entity setup in temprect collides with a wall
     if(skipblocks)
     {
-        if (checkblocks(temprect, dx, dy, dr, skipdirblocks)) return true;
+        if (checkblocks(xp, yp, wp, hp, dx, dy, dr, skipdirblocks)) return true;
     }
 
-    int tempx = getgridpoint(temprect.x);
-    int tempy = getgridpoint(temprect.y);
-    int tempw = getgridpoint(temprect.x + temprect.w - 1);
-    int temph = getgridpoint(temprect.y + temprect.h - 1);
+    int tempx = getgridpoint(xp);
+    int tempy = getgridpoint(yp);
+    int tempw = getgridpoint(xp + wp - 1);
+    int temph = getgridpoint(yp + hp - 1);
     if (map.collide(tempx, tempy, invincible)) return true;
     if (map.collide(tempw, tempy, invincible)) return true;
     if (map.collide(tempx, temph, invincible)) return true;
     if (map.collide(tempw, temph, invincible)) return true;
-    if (temprect.h >= 12)
+    if (hp >= 12)
     {
-        int tpy1 = getgridpoint(temprect.y + 6);
+        int tpy1 = getgridpoint(yp + 6);
         if (map.collide(tempx, tpy1, invincible)) return true;
         if (map.collide(tempw, tpy1, invincible)) return true;
-        if (temprect.h >= 18)
+        if (hp >= 18)
         {
-            tpy1 = getgridpoint(temprect.y + 12);
+            tpy1 = getgridpoint(yp + 12);
             if (map.collide(tempx, tpy1, invincible)) return true;
             if (map.collide(tempw, tpy1, invincible)) return true;
-            if (temprect.h >= 24)
+            if (hp >= 24)
             {
-                tpy1 = getgridpoint(temprect.y + 18);
+                tpy1 = getgridpoint(yp + 18);
                 if (map.collide(tempx, tpy1, invincible)) return true;
                 if (map.collide(tempw, tpy1, invincible)) return true;
             }
         }
     }
-    if (temprect.w >= 12)
+    if (wp >= 12)
     {
-        int tpx1 = getgridpoint(temprect.x + 6);
+        int tpx1 = getgridpoint(xp + 6);
         if (map.collide(tpx1, tempy, invincible)) return true;
         if (map.collide(tpx1, temph, invincible)) return true;
     }
     return false;
 }
 
-bool entityclass::checkwall(const bool invincible, const SDL_Rect& temprect)
+bool entityclass::checkwall(const bool invincible, int xp, int yp, int wp, int hp)
 {
     // Same as above but use default arguments for blocks
-    return checkwall(invincible, temprect, 0, 0, 0, true, false);
+    return checkwall(invincible, xp, yp, wp, hp, 0, 0, 0, true, false);
 }
 
 float entityclass::hplatformat(const int px, const int py)
@@ -4363,14 +4386,13 @@ float entityclass::entitycollideplatformroof( int t )
         return -1000;
     }
 
-    SDL_Rect temprect;
-    temprect.x = entities[t].xp + entities[t].cx;
-    temprect.y = entities[t].yp + entities[t].cy -1;
-    temprect.w = entities[t].w;
-    temprect.h = entities[t].h;
+    const entclass& entity = entities[t];
 
     int px = 0, py = 0;
-    if (checkplatform(temprect, &px, &py))
+    if (checkplatform(
+        entities[t].xp + entity.cx, entity.yp + entity.cy -1, entity.w, entity.h,
+        &px, &py
+    ))
     {
         //px and py now contain an x y coordinate for a platform, find it
         return hplatformat(px, py);
@@ -4386,14 +4408,13 @@ float entityclass::entitycollideplatformfloor( int t )
         return -1000;
     }
 
-    SDL_Rect temprect;
-    temprect.x = entities[t].xp + entities[t].cx;
-    temprect.y = entities[t].yp + entities[t].cy + 1;
-    temprect.w = entities[t].w;
-    temprect.h = entities[t].h;
+    const entclass& entity = entities[t];
 
     int px = 0, py = 0;
-    if (checkplatform(temprect, &px, &py))
+    if (checkplatform(
+        entities[t].xp + entity.cx, entity.yp + entity.cy + 1, entity.w, entity.h,
+        &px, &py
+    ))
     {
         //px and py now contain an x y coordinate for a platform, find it
         return hplatformat(px, py);
@@ -4409,15 +4430,11 @@ bool entityclass::entitycollidefloor( int t )
         return false;
     }
 
-    SDL_Rect temprect;
-    temprect.x = entities[t].xp + entities[t].cx;
-    temprect.y = entities[t].yp + entities[t].cy + 1;
-    temprect.w = entities[t].w;
-    temprect.h = entities[t].h;
+    entclass& entity = entities[t];
 
-    const bool invincible = map.invincibility && entities[t].ishumanoid();
+    const bool invincible = map.invincibility && entity.ishumanoid();
 
-    if (checkwall(invincible, temprect)) return true;
+    if (checkwall(invincible, entity.xp + entity.cx, entity.yp + entity.cy + 1, entity.w, entity.h)) return true;
     return false;
 }
 
@@ -4429,15 +4446,11 @@ bool entityclass::entitycollideroof( int t )
         return false;
     }
 
-    SDL_Rect temprect;
-    temprect.x = entities[t].xp + entities[t].cx;
-    temprect.y = entities[t].yp + entities[t].cy - 1;
-    temprect.w = entities[t].w;
-    temprect.h = entities[t].h;
+    entclass& entity = entities[t]; 
 
-    const bool invincible = map.invincibility && entities[t].ishumanoid();
+    const bool invincible = map.invincibility && entity.ishumanoid();
 
-    if (checkwall(invincible, temprect)) return true;
+    if (checkwall(invincible, entity.xp + entity.cx, entity.yp + entity.cy - 1, entity.w, entity.h)) return true;
     return false;
 }
 
@@ -4449,38 +4462,34 @@ bool entityclass::testwallsx( int t, int tx, int ty, const bool skipdirblocks )
         return false;
     }
 
-    SDL_Rect temprect;
-    temprect.x = tx + entities[t].cx;
-    temprect.y = ty + entities[t].cy;
-    temprect.w = entities[t].w;
-    temprect.h = entities[t].h;
+    entclass& entity = entities[t];
 
-    bool skipblocks = entities[t].rule < 2 || entities[t].type == 14;
+    bool skipblocks = entity.rule < 2 || entity.type == 14;
     float dx = 0;
     float dy = 0;
-    if (entities[t].rule == 0) dx = entities[t].vx;
-    int dr = entities[t].rule;
+    if (entity.rule == 0) dx = entity.vx;
+    int dr = entity.rule;
 
     const bool invincible = map.invincibility && entities[t].ishumanoid();
 
     //Ok, now we check walls
-    if (checkwall(invincible, temprect, dx, dy, dr, skipblocks, skipdirblocks))
+    if (checkwall(invincible, tx + entity.cx, ty + entity.cy, entity.w, entity.h, dx, dy, dr, skipblocks, skipdirblocks))
     {
-        if (entities[t].vx > 1.0f)
+        if (entity.vx > 1.0f)
         {
-            entities[t].vx--;
-            entities[t].newxp = entities[t].xp + entities[t].vx;
-            return testwallsx(t, entities[t].newxp, entities[t].yp, skipdirblocks);
+            entity.vx--;
+            entity.newxp = entity.xp + entity.vx;
+            return testwallsx(t, entity.newxp, entity.yp, skipdirblocks);
         }
-        else if (entities[t].vx < -1.0f)
+        else if (entity.vx < -1.0f)
         {
-            entities[t].vx++;
-            entities[t].newxp = entities[t].xp + entities[t].vx;
-            return testwallsx(t, entities[t].newxp, entities[t].yp, skipdirblocks);
+            entity.vx++;
+            entity.newxp = entity.xp + entity.vx;
+            return testwallsx(t, entity.newxp, entity.yp, skipdirblocks);
         }
         else
         {
-            entities[t].vx=0;
+            entity.vx=0;
             return false;
         }
     }
@@ -4495,39 +4504,35 @@ bool entityclass::testwallsy( int t, int tx, int ty )
         return false;
     }
 
-    SDL_Rect temprect;
-    temprect.x = tx + entities[t].cx;
-    temprect.y = ty + entities[t].cy;
-    temprect.w = entities[t].w;
-    temprect.h = entities[t].h;
+    entclass& entity = entities[t];
 
-    bool skipblocks = entities[t].rule < 2 || entities[t].type == 14;
+    bool skipblocks = entity.rule < 2 || entity.type == 14;
 
     float dx = 0;
     float dy = 0;
-    if (entities[t].rule == 0) dy = entities[t].vy;
-    int dr = entities[t].rule;
+    if (entity.rule == 0) dy = entity.vy;
+    int dr = entity.rule;
 
-    const bool invincible = map.invincibility && entities[t].ishumanoid();
+    const bool invincible = map.invincibility && entity.ishumanoid();
 
     //Ok, now we check walls
-    if (checkwall(invincible, temprect, dx, dy, dr, skipblocks, false))
+    if (checkwall(invincible, tx + entity.cx, ty + entity.cy, entity.w, entity.h, dx, dy, dr, skipblocks, false))
     {
-        if (entities[t].vy > 1)
+        if (entity.vy > 1)
         {
-            entities[t].vy--;
-            entities[t].newyp = int(entities[t].yp + entities[t].vy);
-            return testwallsy(t, entities[t].xp, entities[t].newyp);
+            entity.vy--;
+            entity.newyp = int(entity.yp + entity.vy);
+            return testwallsy(t, entity.xp, entity.newyp);
         }
-        else if (entities[t].vy < -1)
+        else if (entity.vy < -1)
         {
-            entities[t].vy++;
-            entities[t].newyp = int(entities[t].yp + entities[t].vy);
-            return testwallsy(t, entities[t].xp, entities[t].newyp);
+            entity.vy++;
+            entity.newyp = int(entity.yp + entity.vy);
+            return testwallsy(t, entity.xp, entity.newyp);
         }
         else
         {
-            entities[t].vy=0;
+            entity.vy=0;
             return false;
         }
     }

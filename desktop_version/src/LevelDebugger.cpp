@@ -118,7 +118,7 @@ namespace level_debugger
                         {
                             for (int j = 0; j < (int) obj.blocks.size(); j++)
                             {
-                                if (obj.entities[i].xp == obj.blocks[j].rect.x && obj.entities[i].yp == obj.blocks[j].rect.y)
+                                if (obj.entities[i].xp == obj.blocks[j].rect_x && obj.entities[i].yp == obj.blocks[j].rect_y)
                                 {
                                     held_block = j;
                                 }
@@ -159,10 +159,10 @@ namespace level_debugger
             for (int i = 0; i < (int) obj.blocks.size(); i++)
             {
                 SDL_Rect bounding_box = {
-                    obj.blocks[i].rect.x,
-                    obj.blocks[i].rect.y - map.ypos,
-                    obj.blocks[i].rect.w,
-                    obj.blocks[i].rect.h
+                    obj.blocks[i].rect_x,
+                    obj.blocks[i].rect_y - map.ypos,
+                    obj.blocks[i].rect_w,
+                    obj.blocks[i].rect_h
                 };
 
                 if (key.leftbutton)
@@ -173,8 +173,8 @@ namespace level_debugger
                         {
                             mouse_held = true;
                             held_block = i;
-                            grabber_offset_x = key.mousex - obj.blocks[i].rect.x;
-                            grabber_offset_y = key.mousey - obj.blocks[i].rect.y;
+                            grabber_offset_x = key.mousex - obj.blocks[i].rect_x;
+                            grabber_offset_y = key.mousey - obj.blocks[i].rect_y;
                         }
                         break;
                     }
@@ -228,8 +228,8 @@ namespace level_debugger
 
             obj.blocks[held_block].xp = new_xp;
             obj.blocks[held_block].yp = new_yp;
-            obj.blocks[held_block].rect.x = new_xp;
-            obj.blocks[held_block].rect.y = new_yp;
+            obj.blocks[held_block].rect_x = new_xp;
+            obj.blocks[held_block].rect_y = new_yp;
         }
     }
 
@@ -296,10 +296,10 @@ namespace level_debugger
         for (int i = 0; i < (int) obj.blocks.size(); i++)
         {
             SDL_Rect bounding_box = {
-                obj.blocks[i].rect.x,
-                obj.blocks[i].rect.y - map.ypos,
-                obj.blocks[i].rect.w,
-                obj.blocks[i].rect.h
+                obj.blocks[i].rect_x,
+                obj.blocks[i].rect_y - map.ypos,
+                obj.blocks[i].rect_w,
+                obj.blocks[i].rect_h
             };
 
             if (hovered == -1 && mouse_within(&bounding_box))
@@ -426,8 +426,8 @@ namespace level_debugger
             {
                 blockclass* block = &obj.blocks[hovered];
                 render_info(line++, "Index", help.String(hovered));
-                render_coords(line++, "Position", block->rect.x, block->rect.y);
-                render_coords(line++, "Size", block->rect.w, block->rect.h);
+                render_coords(line++, "Position", block->rect_x, block->rect_y);
+                render_coords(line++, "Size", block->rect_w, block->rect_h);
 
                 line++;
 

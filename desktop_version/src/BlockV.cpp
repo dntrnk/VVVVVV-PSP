@@ -19,10 +19,10 @@ void blockclass::clear(void)
     yp = 0;
     wp = 0;
     hp = 0;
-    rect.x = xp;
-    rect.y = yp;
-    rect.w = wp;
-    rect.h = hp;
+    rect_x = xp;
+    rect_y = yp;
+    rect_w = wp;
+    rect_h = hp;
 
     r = 0;
     g = 0;
@@ -40,10 +40,10 @@ void blockclass::clear(void)
 
 void blockclass::rectset(const int xi, const int yi, const int wi, const int hi)
 {
-    rect.x = xi;
-    rect.y = yi;
-    rect.w = wi;
-    rect.h = hi;
+    rect_x = xi;
+    rect_y = yi;
+    rect_w = wi;
+    rect_h = hi;
 }
 
 void blockclass::setblockcolour(const char* col)

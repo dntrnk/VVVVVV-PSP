@@ -16,7 +16,7 @@ public:
     void setblockcolour(const char* col);
 public:
     //Fundamentals
-    SDL_Rect rect;
+    int rect_x, rect_y, rect_w, rect_h;
     int type;
     int trigger;
     int xp, yp, wp, hp;

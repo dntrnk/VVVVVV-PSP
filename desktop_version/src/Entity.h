@@ -119,14 +119,14 @@ public:
 
     int checkactivity(void);
 
-    bool checkplatform(const SDL_Rect& temprect, int* px, int* py);
+    bool checkplatform(int entity_x, int entity_y, int entity_w, int entity_h, int* px, int* py);
 
-    bool checkblocks(const SDL_Rect& temprect, float dx, float dy, int dr, bool skipdirblocks);
+    bool checkblocks(int entity_x, int entity_y, int entity_w, int entity_h, const float dx, const float dy, const int dr, const bool skipdirblocks);
 
     bool checktowerspikes(int t);
 
-    bool checkwall(bool invincible, const SDL_Rect& temprect, float dx, float dy, int dr, bool skipblocks, bool skipdirblocks);
-    bool checkwall(bool invincible, const SDL_Rect& temprect);
+    bool checkwall(bool invincible, int xp, int yp, int wp, int hp, float dx, float dy, int dr, bool skipblocks, bool skipdirblocks);
+    bool checkwall(bool invincible, int xp, int yp, int wp, int hp);
 
     float hplatformat(int px, int py);
 
