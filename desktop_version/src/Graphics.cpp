@@ -2710,28 +2710,13 @@ void Graphics::drawtowerspikes(void)
     }
 }
 
-void Graphics::drawtowerbackground(const TowerBG& bg_obj)
-{
-    clear();
-
-    const int offset = (int) lerp(-bg_obj.bscroll, 0);
-    const SDL_Rect srcRect = {0, 8 + offset, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS};
-
-    copy_texture(bg_obj.texture, &srcRect, NULL);
-}
-
-void Graphics::updatetowerbackground(TowerBG& bg_obj)
+void Graphics::drawtowerbackground(TowerBG& bg_obj)
 {
     if (bg_obj.bypos < 0) bg_obj.bypos += 120 * 8;
 
-    SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
-    set_render_target(bg_obj.texture);
-
-    if (bg_obj.tdrawback)
     {
         int off = bg_obj.scrolldir == 0 ? 0 : bg_obj.bscroll;
         //Draw the whole thing; needed for every colour cycle!
-        clear();
         for (int j = -1; j < 32; j++)
         {
             for (int i = 0; i < 40; i++)
@@ -2740,39 +2725,7 @@ void Graphics::updatetowerbackground(TowerBG& bg_obj)
                 drawtile3(i * 8, (j * 8) - (bg_obj.bypos % 8) - off, temp, bg_obj.colstate);
             }
         }
-
-        bg_obj.tdrawback = false;
     }
-    else
-    {
-        // just update the bottom
-        scroll_texture(bg_obj.texture, tempScrollingTexture, 0, -bg_obj.bscroll);
-        if (bg_obj.scrolldir == 0)
-        {
-            for (int i = 0; i < 40; i++)
-            {
-                int temp = map.tower.backat(i, -1, bg_obj.bypos);
-                drawtile3(i * 8, -1 * 8 - (bg_obj.bypos % 8), temp, bg_obj.colstate);
-                temp = map.tower.backat(i, 0, bg_obj.bypos);
-                drawtile3(i * 8, -(bg_obj.bypos % 8), temp, bg_obj.colstate);
-            }
-        }
-        else
-        {
-            for (int i = 0; i < 40; i++)
-            {
-                int temp = map.tower.backat(i, 29, bg_obj.bypos);
-                drawtile3(i * 8, 29 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate);
-                temp = map.tower.backat(i, 30, bg_obj.bypos);
-                drawtile3(i * 8, 30 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate);
-                temp = map.tower.backat(i, 31, bg_obj.bypos);
-                drawtile3(i * 8, 31 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate);
-                temp = map.tower.backat(i, 32, bg_obj.bypos);
-                drawtile3(i * 8, 32 * 8 - (bg_obj.bypos % 8) - bg_obj.bscroll, temp, bg_obj.colstate);
-            }
-        }
-    }
-    set_render_target(target);
 }
 
 #define GETCOL_RANDOM (game.noflashingmode ? 0.5 : fRandom())

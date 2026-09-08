@@ -2009,7 +2009,6 @@ void editorrenderfixed(void)
     case EditorState_MENU:
         graphics.titlebg.bypos -= 2;
         graphics.titlebg.bscroll = -2;
-        graphics.updatetowerbackground(graphics.titlebg);
         break;
     default:
         break;

@@ -3524,10 +3524,6 @@ void gamecompleteinput(void)
     game.press_interact = false;
 
     //Do this before we update map.bypos
-    if (!game.colourblindmode)
-    {
-        graphics.updatetowerbackground(graphics.titlebg);
-    }
 
     //Do these here because input comes first
     graphics.titlebg.bypos += graphics.titlebg.bscroll;

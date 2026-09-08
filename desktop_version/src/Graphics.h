@@ -313,8 +313,7 @@ public:
 
     void menuoffrender(void);
 
-    void drawtowerbackground(const TowerBG& bg_obj);
-    void updatetowerbackground(TowerBG& bg_obj);
+    void drawtowerbackground(TowerBG& bg_obj);
 
     g2dColor getcol(int t);
     void drawfinalmap(void);

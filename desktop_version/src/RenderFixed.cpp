@@ -93,11 +93,7 @@ void gamerenderfixed(void)
 
     if (!game.colourblindmode)
     {
-        if (map.towermode)
-        {
-            graphics.updatetowerbackground(graphics.towerbg);
-        }
-        else
+        if (!map.towermode)
         {
             graphics.updatebackground(map.background);
         }
@@ -174,11 +170,6 @@ void gamerenderfixed(void)
 
 void titlerenderfixed(void)
 {
-    if (!game.colourblindmode)
-    {
-        graphics.updatetowerbackground(graphics.titlebg);
-    }
-
     if (!game.menustart)
     {
         graphics.col_tr = (int)(164 - (help.glow / 2) - int(fRandom() * 4));
