@@ -4547,17 +4547,19 @@ void entityclass::applyfriction( int t, float xrate, float yrate )
         return;
     }
 
-    if (entities[t].vx > 0.00f) entities[t].vx -= xrate;
-    if (entities[t].vx < 0.00f) entities[t].vx += xrate;
-    if (entities[t].vy > 0.00f) entities[t].vy -= yrate;
-    if (entities[t].vy < 0.00f) entities[t].vy += yrate;
-    if (entities[t].vy > 10.00f) entities[t].vy = 10.0f;
-    if (entities[t].vy < -10.00f) entities[t].vy = -10.0f;
-    if (entities[t].vx > 6.00f) entities[t].vx = 6.0f;
-    if (entities[t].vx < -6.00f) entities[t].vx = -6.0f;
+    entclass& entity = entities[t];
 
-    if (SDL_fabsf(entities[t].vx) < xrate) entities[t].vx = 0.0f;
-    if (SDL_fabsf(entities[t].vy) < yrate) entities[t].vy = 0.0f;
+    if (entity.vx > 0.00f) entity.vx -= xrate;
+    if (entity.vx < 0.00f) entity.vx += xrate;
+    if (entity.vy > 0.00f) entity.vy -= yrate;
+    if (entity.vy < 0.00f) entity.vy += yrate;
+    if (entity.vy > 10.00f) entity.vy = 10.0f;
+    if (entity.vy < -10.00f) entity.vy = -10.0f;
+    if (entity.vx > 6.00f) entity.vx = 6.0f;
+    if (entity.vx < -6.00f) entity.vx = -6.0f;
+
+    if (SDL_fabsf(entity.vx) < xrate) entity.vx = 0.0f;
+    if (SDL_fabsf(entity.vy) < yrate) entity.vy = 0.0f;
 }
 
 void entityclass::updateentitylogic( int t )
@@ -4568,39 +4570,41 @@ void entityclass::updateentitylogic( int t )
         return;
     }
 
-    entities[t].oldxp = entities[t].xp;
-    entities[t].oldyp = entities[t].yp;
+    entclass& entity = entities[t];
 
-    entities[t].vx = entities[t].vx + entities[t].ax;
-    entities[t].vy = entities[t].vy + entities[t].ay;
-    entities[t].ax = 0;
+    entity.oldxp = entity.xp;
+    entity.oldyp = entity.yp;
 
-    if (entities[t].gravity)
+    entity.vx = entity.vx + entity.ax;
+    entity.vy = entity.vy + entity.ay;
+    entity.ax = 0;
+
+    if (entity.gravity)
     {
-        if (entities[t].rule == 0)
+        if (entity.rule == 0)
         {
             if(game.gravitycontrol==0)
             {
-                entities[t].ay = 3;
+                entity.ay = 3;
             }
             else
             {
-                entities[t].ay = -3;
+                entity.ay = -3;
             }
         }
-        else if (entities[t].rule == 7)
+        else if (entity.rule == 7)
         {
-            entities[t].ay = -3;
+            entity.ay = -3;
         }
         else
         {
-            entities[t].ay = 3;
+            entity.ay = 3;
         }
         applyfriction(t, game.inertia, 0.25f);
     }
 
-    entities[t].newxp = entities[t].xp + entities[t].vx;
-    entities[t].newyp = entities[t].yp + entities[t].vy;
+    entity.newxp = entity.xp + entity.vx;
+    entity.newyp = entity.yp + entity.vy;
 }
 
 void entityclass::entitymapcollision( int t )
@@ -4611,23 +4615,25 @@ void entityclass::entitymapcollision( int t )
         return;
     }
 
-    if (testwallsx(t, entities[t].newxp, entities[t].yp, false))
+    entclass& entity = entities[t];
+
+    if (testwallsx(t, entity.newxp, entity.yp, false))
     {
-        entities[t].xp = entities[t].newxp;
+        entity.xp = entity.newxp;
     }
     else
     {
-        if (entities[t].onwall > 0) entities[t].state = entities[t].onwall;
-        if (entities[t].onxwall > 0) entities[t].state = entities[t].onxwall;
+        if (entity.onwall > 0) entity.state = entity.onwall;
+        if (entity.onxwall > 0) entity.state = entity.onxwall;
     }
-    if (testwallsy(t, entities[t].xp, entities[t].newyp))
+    if (testwallsy(t, entity.xp, entity.newyp))
     {
-        entities[t].yp = entities[t].newyp;
+        entity.yp = entity.newyp;
     }
     else
     {
-        if (entities[t].onwall > 0) entities[t].state = entities[t].onwall;
-        if (entities[t].onywall > 0) entities[t].state = entities[t].onywall;
+        if (entity.onwall > 0) entity.state = entity.onwall;
+        if (entity.onywall > 0) entity.state = entity.onywall;
     }
 }
 
@@ -4681,20 +4687,25 @@ void entityclass::customwarplinecheck(int i) {
         return;
     }
 
+    const entclass& entity1 = entities[i];
+
     //Turns on obj.customwarpmodevon and obj.customwarpmodehon if player collides
     //with warp lines
 
     //We test entity to entity
-    for (int j = 0; j < (int) entities.size(); j++) {
+    const int entity_count = (int) entities.size();
+    for (int j = 0; j < entity_count; j++) {
         if (i != j) {
-            if (entities[i].rule == 0 && entities[j].rule == 5 //Player vs vertical line!
-            && (entities[j].type == 51 || entities[j].type == 52)
+            const entclass& entity2 = entities[j];
+
+            if (entity1.rule == 0 && entity2.rule == 5 //Player vs vertical line!
+            && (entity2.type == 51 || entity2.type == 52)
             && entitywarpvlinecollide(i, j)) {
                 customwarpmodevon = true;
             }
 
-            if (entities[i].rule == 0 && entities[j].rule == 7   //Player vs horizontal WARP line
-            && (entities[j].type == 53 || entities[j].type == 54)
+            if (entity1.rule == 0 && entity2.rule == 7   //Player vs horizontal WARP line
+            && (entity2.type == 53 || entity2.type == 54)
             && entitywarphlinecollide(i, j)) {
                 customwarpmodehon = true;
             }
@@ -4916,17 +4927,19 @@ void entityclass::stuckprevention(int t)
         return;
     }
 
+    entclass& entity = entities[t];
+
     // Can't have this entity (player or supercrewmate) being stuck...
-    if (!testwallsx(t, entities[t].xp, entities[t].yp, true))
+    if (!testwallsx(t, entity.xp, entity.yp, true))
     {
         // Let's try to get out...
         if (game.gravitycontrol == 0)
         {
-            entities[t].yp -= 3;
+            entity.yp -= 3;
         }
         else
         {
-            entities[t].yp += 3;
+            entity.yp += 3;
         }
     }
 }
