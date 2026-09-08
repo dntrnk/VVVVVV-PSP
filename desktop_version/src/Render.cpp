@@ -529,14 +529,18 @@ static void menurender(void)
         }
         break;
     case Menu::credits:
-        font::print(PR_CEN, -1, 50, loc::gettext("VVVVVV is a game by"), tr, tg, tb);
-        font::print(PR_2X | PR_CEN | PR_FONT_8X8, -1, 65, "Terry Cavanagh", tr, tg, tb);
+        font::print(PR_CEN, -1, 18, loc::gettext("VVVVVV is a game by"), tr, tg, tb);
+        font::print(PR_2X | PR_CEN | PR_FONT_8X8, -1, 33, "Terry Cavanagh", tr, tg, tb);
 
-        graphics.drawimagecol(IMAGE_SITE, -1, 86, G2D_RGB(tr, tg, tb), true);
+        graphics.drawimagecol(IMAGE_SITE, -1, 54, G2D_RGB(tr, tg, tb), true);
 
-        font::print(PR_CEN, -1, 120, loc::gettext("and features music by"), tr, tg, tb);
-        font::print(PR_2X | PR_CEN | PR_FONT_8X8, -1, 135, "Magnus Pålsson", tr, tg, tb);
-        graphics.drawimagecol(IMAGE_SITE2, -1, 156, G2D_RGB(tr, tg, tb), true);
+        font::print(PR_CEN, -1, 78, loc::gettext("and features music by"), tr, tg, tb);
+        font::print(PR_2X | PR_CEN | PR_FONT_8X8, -1, 93, "Magnus Pålsson", tr, tg, tb);
+        graphics.drawimagecol(IMAGE_SITE2, -1, 114, G2D_RGB(tr, tg, tb), true);
+
+        font::print(PR_CEN, -1, 138, "This PSP port was made by", tr, tg, tb);
+        font::print(PR_2X | PR_CEN | PR_FONT_8X8, -1, 153, "dntrnk", tr, tg, tb);
+        font::print(PR_CEN | PR_FONT_8X8, -1, 174, "https://www.dntrnk.ru", tr, tg, tb);
         break;
     case Menu::credits2:
         font::print(PR_CEN, -1, 40, loc::gettext("Roomnames are by"), tr, tg, tb);
