@@ -332,7 +332,9 @@ static uint8_t load_font(FontContainer* container, const char* name)
         }
     }
 
-    f->image = G2DLoadImage(name_png, white_teeth ? TEX_COLOR : TEX_WHITE, G2D_CLUT4);
+    // We use TEX_GRAYSCALE instead of TEX_COLOR so button glyphs are
+    // black & white to fit the PSP style
+    f->image = G2DLoadImage(name_png, white_teeth ? TEX_GRAYSCALE : TEX_WHITE, G2D_CLUT4);
     SDL_zeroa(f->glyph_page);
 
     if (f->image == NULL)
