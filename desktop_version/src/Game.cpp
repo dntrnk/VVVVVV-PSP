@@ -4725,7 +4725,7 @@ void Game::deserializesettings(tinyxml2::XMLElement* dataNode, struct ScreenSett
             pText = "";
         }
 
-        if (SDL_strcmp(pKey, "fullscreen") == 0)
+if (SDL_strcmp(pKey, "fullscreen") == 0)
         {
             screen_settings->fullscreen = help.Int(pText);
         }
@@ -6747,18 +6747,7 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         maxspacing = 15;
         break;
     case Menu::graphicoptions:
-        if (!gameScreen.isForcedFullscreen())
-        {
-            option(loc::gettext("toggle fullscreen"));
-        }
-        option(loc::gettext("scaling mode"));
-        if (!gameScreen.isForcedFullscreen())
-        {
-            option(loc::gettext("resize to nearest"), gameScreen.isWindowed);
-        }
-        option(loc::gettext("toggle filter"));
         option(loc::gettext("toggle analogue"));
-        option(loc::gettext("toggle vsync"));
         option(loc::gettext("return"));
         menuyoff = -10;
         maxspacing = 15;

@@ -552,13 +552,13 @@ void KeyPoll::Poll(void)
         hidemouse
     );
 
-    SDL_Rect rect = {0, 0, 480, 272};
+    SDL_Rect rect = {0, 0, 320, 240};
 
-    int window_width = 480;
-    int window_height = 272;
+    int window_width = 320;
+    int window_height = 240;
 
-    int scaled_window_width = 480;
-    int scaled_window_height = 272;
+    int scaled_window_width = 320;
+    int scaled_window_height = 240;
 
     float scale_x = (float)window_width / (float)scaled_window_width;
     float scale_y = (float)window_height / (float)scaled_window_height;

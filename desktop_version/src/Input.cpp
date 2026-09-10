@@ -684,63 +684,12 @@ static void menuactionpress(void)
     {
         int offset = 0;
         bool processed = false;
-        if (game.currentmenuoption == offset + 0 && !gameScreen.isForcedFullscreen())
-        {
-            processed = true;
-            music.playef(Sound_VIRIDIAN);
-            // gameScreen.toggleFullScreen();
-        }
-        if (gameScreen.isForcedFullscreen())
-        {
-            --offset;
-        }
-        if (game.currentmenuoption == offset + 1)
-        {
-            processed = true;
-            music.playef(Sound_VIRIDIAN);
-            // gameScreen.toggleScalingMode();
-            game.savestatsandsettings_menu();
-        }
-        if (game.currentmenuoption == offset + 2 && !gameScreen.isForcedFullscreen())
-        {
-            processed = true;
-            // resize to nearest multiple
-            if (gameScreen.isWindowed)
-            {
-                music.playef(Sound_VIRIDIAN);
-                // gameScreen.ResizeToNearestMultiple();
-                game.savestatsandsettings_menu();
-            }
-            else
-            {
-                music.playef(Sound_CRY);
-            }
-        }
-        if (gameScreen.isForcedFullscreen())
-        {
-            --offset;
-        }
-        if (game.currentmenuoption == offset + 3)
-        {
-            processed = true;
-            music.playef(Sound_VIRIDIAN);
-            gameScreen.toggleLinearFilter();
-            game.savestatsandsettings_menu();
-        }
-        if (game.currentmenuoption == offset + 4)
+        if (game.currentmenuoption == offset + 0)
         {
             processed = true;
             //change smoothing
             music.playef(Sound_VIRIDIAN);
             gameScreen.badSignalEffect= !gameScreen.badSignalEffect;
-            game.savestatsandsettings_menu();
-        }
-        if (game.currentmenuoption == offset + 5)
-        {
-            processed = true;
-            //toggle vsync
-            music.playef(Sound_VIRIDIAN);
-            // gameScreen.toggleVSync();
             game.savestatsandsettings_menu();
         }
         if (!processed)

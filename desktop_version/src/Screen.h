@@ -16,8 +16,6 @@ public:
     void GetSettings(struct ScreenSettings* settings);
 
     void RenderPresent(void);
-    
-    void toggleLinearFilter(void);
 
     void recacheTextures(void);
 

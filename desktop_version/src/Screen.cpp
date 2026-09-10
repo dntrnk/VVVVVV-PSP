@@ -21,9 +21,9 @@
 void ScreenSettings_default(struct ScreenSettings* _this)
 {
     _this->windowDisplay = 0;
-    _this->windowWidth = SCREEN_WIDTH_PIXELS * 2;
-    _this->windowHeight = SCREEN_HEIGHT_PIXELS * 2;
-    _this->fullscreen = false;
+    _this->windowWidth = 320;
+    _this->windowHeight = 240;
+    _this->fullscreen = true;
     _this->useVsync = true; // Now that uncapped is the default...
     _this->scalingMode = SCALING_INTEGER;
     _this->linearFilter = false;
@@ -43,38 +43,6 @@ void Screen::init(const struct ScreenSettings* settings)
     badSignalEffect = settings->badSignal;
     vsync = settings->useVsync;
 
-    // Uncomment this next line when you need to debug -flibit
-    // SDL_SetHintWithPriority(SDL_HINT_RENDER_DRIVER, "software", SDL_HINT_OVERRIDE);
-
-    // SDL_CreateWindowAndRenderer(480, 272, 0, &m_window, &m_renderer);
-
-    // m_window = SDL_CreateWindow(
-    //     "VVVVVV",
-    //     SDL_WINDOWPOS_CENTERED_DISPLAY(windowDisplay),
-    //     SDL_WINDOWPOS_CENTERED_DISPLAY(windowDisplay),
-    //     SCREEN_WIDTH_PIXELS * 2,
-    //     SCREEN_HEIGHT_PIXELS * 2,
-    //     SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI
-    // );
-
-    // if (m_window == NULL)
-    // {
-    //     vlog_error("Could not create window: %s", SDL_GetError());
-    //     VVV_exit(1);
-    // }
-
-    // m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
-
-    // if (m_renderer == NULL)
-    // {
-    //     vlog_error("Could not create renderer: %s", SDL_GetError());
-    //     VVV_exit(1);
-    // }
-
-    // SDL_RenderSetVSync(m_renderer, (int) vsync);
-
-    // SDL_SetWindowMinimumSize(m_window, 480, 272);
-
     g2dInit();
 }
 
@@ -89,12 +57,6 @@ void Screen::destroy(void)
 
 void Screen::GetSettings(struct ScreenSettings* settings)
 {
-    windowDisplay = SDL_GetWindowDisplayIndex(m_window);
-    if (windowDisplay < 0)
-    {
-        vlog_error("Error: could not get display index: %s", SDL_GetError());
-        windowDisplay = 0;
-    }
     settings->windowDisplay = windowDisplay;
     settings->windowWidth = windowWidth;
     settings->windowHeight = windowHeight;
@@ -115,52 +77,6 @@ void Screen::RenderPresent(void)
     graphics.fill_rect(-80, 0, 80, 240, G2D_BLACK);
     graphics.fill_rect(320, 0, 80, 240, G2D_BLACK);
     g2dHelperFlip();
-}
-
-void Screen::toggleLinearFilter(void)
-{
-    isFiltered = !isFiltered;
-
-    SDL_DestroyTexture(graphics.gameTexture);
-    SDL_DestroyTexture(graphics.tempShakeTexture);
-
-    graphics.gameTexture = SDL_CreateTexture(
-        m_renderer,
-        SDL_PIXELFORMAT_ARGB8888,
-        SDL_TEXTUREACCESS_TARGET,
-        SCREEN_WIDTH_PIXELS,
-        SCREEN_HEIGHT_PIXELS
-    );
-
-    graphics.tempShakeTexture = SDL_CreateTexture(
-        m_renderer,
-        SDL_PIXELFORMAT_ARGB8888,
-        SDL_TEXTUREACCESS_TARGET,
-        SCREEN_WIDTH_PIXELS,
-        SCREEN_HEIGHT_PIXELS
-    );
-
-    if (graphics.gameTexture == NULL)
-    {
-        vlog_error("Could not create game texture: %s", SDL_GetError());
-        return;
-    }
-
-    if (graphics.tempShakeTexture == NULL)
-    {
-        vlog_error("Could not create temp shake texture: %s", SDL_GetError());
-        return;
-    }
-
-    SDL_SetTextureScaleMode(
-        graphics.gameTexture,
-        isFiltered ? SDL_ScaleModeLinear : SDL_ScaleModeNearest
-    );
-
-    SDL_SetTextureScaleMode(
-        graphics.tempShakeTexture,
-        isFiltered ? SDL_ScaleModeLinear : SDL_ScaleModeNearest
-    );
 }
 
 void Screen::recacheTextures(void)

@@ -402,91 +402,10 @@ static void menurender(void)
     case Menu::graphicoptions:
     {
         int offset = 0;
-        if (game.currentmenuoption == offset + 0 && !gameScreen.isForcedFullscreen())
-        {
-            font::print(PR_2X | PR_CEN,  -1, 30, loc::gettext("Toggle Fullscreen"), tr, tg, tb);
-            int next_y = font::print_wrap(PR_CEN, -1, 65, loc::gettext("Change to fullscreen/windowed mode."), tr, tg, tb);
-
-            if (gameScreen.isWindowed)
-            {
-                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Current mode: WINDOWED"), tr, tg, tb);
-            }
-            else
-            {
-                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Current mode: FULLSCREEN"), tr, tg, tb);
-            }
-        }
-
-        if (gameScreen.isForcedFullscreen())
-        {
-            --offset;
-        }
-
-        if (game.currentmenuoption == offset + 1)
-        {
-            font::print(PR_2X | PR_CEN,  -1, 30, loc::gettext("Scaling Mode"), tr, tg, tb);
-            int next_y = font::print_wrap(PR_CEN, -1, 65, loc::gettext("Choose letterbox/stretch/integer mode."), tr, tg, tb);
-
-            switch (gameScreen.scalingMode)
-            {
-            case SCALING_INTEGER:
-                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Current mode: INTEGER"), tr, tg, tb);
-                break;
-            case SCALING_STRETCH:
-                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Current mode: STRETCH"), tr, tg, tb);
-                break;
-            case SCALING_LETTERBOX:
-            default:
-                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Current mode: LETTERBOX"), tr, tg, tb);
-                break;
-            }
-        }
-        if (game.currentmenuoption == offset + 2 && !gameScreen.isForcedFullscreen())
-        {
-            font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Resize to Nearest"), tr, tg, tb);
-            int next_y = font::print_wrap(PR_CEN, -1, 65, loc::gettext("Resize to the nearest window size that is of an integer multiple."), tr, tg, tb);
-            if (!gameScreen.isWindowed)
-            {
-                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("You must be in windowed mode to use this option."), tr, tg, tb);
-            }
-        }
-        if (gameScreen.isForcedFullscreen())
-        {
-            --offset;
-        }
-        if (game.currentmenuoption == offset + 3)
-        {
-            font::print(PR_2X | PR_CEN,  -1, 30, loc::gettext("Toggle Filter"), tr, tg, tb);
-            int next_y = font::print_wrap(PR_CEN, -1, 65, loc::gettext("Change to nearest/linear filter."), tr, tg, tb);
-
-            if (gameScreen.isFiltered)
-            {
-                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Current mode: LINEAR"), tr, tg, tb);
-            }
-            else
-            {
-                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Current mode: NEAREST"), tr, tg, tb);
-            }
-        }
-
-        if (game.currentmenuoption == offset + 4)
+        if (game.currentmenuoption == offset + 0)
         {
             font::print(PR_2X | PR_CEN,  -1, 30, loc::gettext("Analogue Mode"), tr, tg, tb);
             font::print_wrap(PR_CEN, -1, 65, loc::gettext("There is nothing wrong with your television set. Do not attempt to adjust the picture."), tr, tg, tb);
-        }
-        if (game.currentmenuoption == offset + 5)
-        {
-            font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Toggle VSync"), tr, tg, tb);
-            int next_y = font::print_wrap(PR_CEN, -1, 65, loc::gettext("Turn VSync on or off."), tr, tg, tb);
-
-            if (!gameScreen.vsync)
-            {
-                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Current mode: VSYNC OFF"), tr/2, tg/2, tb/2);
-            }
-            else
-            {
-                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Current mode: VSYNC ON"), tr, tg, tb);
-            }
         }
         break;
     }

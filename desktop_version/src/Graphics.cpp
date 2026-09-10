@@ -3249,7 +3249,7 @@ void Graphics::render(void)
 
     draw_window_background();
 
-    SDL_Rect stretch_info = {0, 0, 480, 272};
+    SDL_Rect stretch_info = {0, 0, 320, 240};
 
     ime_set_rect(&stretch_info);
 
