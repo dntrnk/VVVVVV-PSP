@@ -95,8 +95,6 @@ obj_use_tex_linear, obj_use_tex_repeat, obj_use_int;
 static g2dCoord_Mode obj_coord_mode;
 static int obj_colors_count;
 static g2dImage *obj_tex;
-static int obj_camera_x, obj_camera_y;
-static bool obj_use_camera = false;
 
 float g2dScreenOffsetX = 80.0f;
 float g2dScreenOffsetY = 16.0f;
@@ -531,10 +529,6 @@ void g2dAdd() {
     }
 
     obj_list_size++;
-    if (obj_use_camera) {
-        obj.x -= obj_camera_x;
-        obj.y -= obj_camera_y;
-    }
     obj.rot_x = obj.x;
     obj.rot_y = obj.y;
     CURRENT_OBJ = obj;
