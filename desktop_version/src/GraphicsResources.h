@@ -33,7 +33,7 @@ public:
     g2dImage* im_entcolours_tint;
     g2dImage* im_sprites;
     g2dImage* im_flipsprites;
-    SDL_Texture* im_teleporter;
+    g2dImage* im_teleporter;
     g2dImage* im_image0;
     g2dImage* im_image1;
     g2dImage* im_image2;
@@ -53,7 +53,6 @@ public:
 };
 
 SDL_Surface* LoadImageSurface(const char* filename);
-SDL_Texture* LoadImage(const char *filename, TextureLoadType loadtype);
 g2dImage* G2DLoadImage(const char *filename, TextureLoadType loadtype, g2dTexFormat format);
 g2dImage* G2DLoadImage(const char *filename, g2dTexFormat format);
 

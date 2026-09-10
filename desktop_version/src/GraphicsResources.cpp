@@ -305,30 +305,6 @@ static SDL_Texture* LoadTextureFromRaw(const char* filename, SDL_Surface* loaded
     return texture;
 }
 
-SDL_Texture* LoadImage(const char *filename, const TextureLoadType loadtype)
-{
-    unsigned char* data;
-
-    SDL_Surface* loadedImage = LoadImageRaw(filename, &data);
-
-    SDL_Texture* texture = LoadTextureFromRaw(filename, loadedImage, loadtype);
-
-    if (loadedImage != NULL)
-    {
-        VVV_freefunc(SDL_FreeSurface, loadedImage);
-    }
-
-    VVV_free(data);
-
-    if (texture == NULL)
-    {
-        vlog_error("Image not found: %s", filename);
-        SDL_assert(0 && "Image not found! See stderr.");
-    }
-
-    return texture;
-}
-
 g2dImage* G2DLoadImage(const char* filename, const TextureLoadType loadtype, g2dTexFormat format)
 {
     // Load Image
@@ -634,7 +610,7 @@ void GraphicsResources::init(void)
     im_flipsprites = G2DLoadImage("graphics/flipsprites.png", TEX_WHITE, G2D_CLUT4);
 
     im_tiles3 = G2DLoadImage("graphics/tiles3.png", G2D_CLUT8);
-    im_teleporter = LoadImage("graphics/teleporter.png", TEX_WHITE);
+    im_teleporter = G2DLoadImage("graphics/teleporter.png", TEX_WHITE, G2D_CLUT4);
 
     im_image0 = G2DLoadImage("graphics/levelcomplete.png", G2D_CLUT4);
     im_image1 = G2DLoadImage("graphics/minimap.png", G2D_CLUT8);
@@ -670,35 +646,35 @@ void GraphicsResources::init(void)
 
 void GraphicsResources::destroy(void)
 {
-#define CLEAR(img) VVV_freefunc(SDL_DestroyTexture, img)
-    if (im_tiles) g2dTexFree(&im_tiles);
-    if (im_tiles_white) g2dTexFree(&im_tiles_white);
-    if (im_tiles_tint) g2dTexFree(&im_tiles_tint);
-    if (im_tiles2) g2dTexFree(&im_tiles2);
-    if (im_tiles2_tint) g2dTexFree(&im_tiles2_tint);
-    if (im_tiles3) g2dTexFree(&im_tiles3);
-    if (im_entcolours) g2dTexFree(&im_entcolours);
-    if (im_entcolours_tint) g2dTexFree(&im_entcolours_tint);
-    if (im_sprites) g2dTexFree(&im_sprites);
-    if (im_flipsprites) g2dTexFree(&im_flipsprites);
+#define CLEAR(img) if (img) g2dTexFree(&img)
+    CLEAR(im_tiles);
+    CLEAR(im_tiles_white);
+    CLEAR(im_tiles_tint);
+    CLEAR(im_tiles2);
+    CLEAR(im_tiles2_tint);
+    CLEAR(im_tiles3);
+    CLEAR(im_entcolours);
+    CLEAR(im_entcolours_tint);
+    CLEAR(im_sprites);
+    CLEAR(im_flipsprites);
     CLEAR(im_teleporter);
 
-    if (im_image0) g2dTexFree(&im_image0);
-    if (im_image1) g2dTexFree(&im_image1);
-    if (im_image2) g2dTexFree(&im_image2);
-    if (im_image3) g2dTexFree(&im_image3);
-    if (im_image4) g2dTexFree(&im_image4);
-    if (im_image5) g2dTexFree(&im_image5);
-    if (im_image6) g2dTexFree(&im_image6);
-    if (im_image7) g2dTexFree(&im_image7);
-    if (im_image8) g2dTexFree(&im_image8);
-    if (im_image9) g2dTexFree(&im_image9);
-    if (im_image10) g2dTexFree(&im_image10);
-    if (im_image11) g2dTexFree(&im_image11);
-    if (im_image12) g2dTexFree(&im_image12);
+    CLEAR(im_image0);
+    CLEAR(im_image1);
+    CLEAR(im_image2);
+    CLEAR(im_image3);
+    CLEAR(im_image4);
+    CLEAR(im_image5);
+    CLEAR(im_image6);
+    CLEAR(im_image7);
+    CLEAR(im_image8);
+    CLEAR(im_image9);
+    CLEAR(im_image10);
+    CLEAR(im_image11);
+    CLEAR(im_image12);
 
-    if (im_sprites_translated) g2dTexFree(&im_sprites_translated);
-    if (im_flipsprites_translated) g2dTexFree(&im_flipsprites_translated);
+    CLEAR(im_sprites_translated);
+    CLEAR(im_flipsprites_translated);
 #undef CLEAR
 
     VVV_freefunc(SDL_FreeSurface, im_sprites_surf);
