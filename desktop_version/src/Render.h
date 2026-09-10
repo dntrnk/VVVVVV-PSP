@@ -1,6 +1,8 @@
 #ifndef RENDER_H
 #define RENDER_H
 
+void renderupdatelangcode(void);
+
 void titlerender(void);
 
 void gamerender(void);

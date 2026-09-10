@@ -8,6 +8,7 @@
 #include "FileSystemUtils.h"
 #include "Font.h"
 #include "Graphics.h"
+#include "Render.h" // for renderupdatelangcode()
 #include "Unused.h"
 #include "UtilityClass.h"
 #include "VFormat.h"
@@ -1067,6 +1068,8 @@ void loadtext(bool check_max)
     {
         loadtext_custom(NULL);
     }
+
+    renderupdatelangcode();
 }
 
 void loadlanguagelist(void)

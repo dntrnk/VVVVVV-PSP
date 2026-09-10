@@ -1,5 +1,7 @@
 #include <SDL.h>
 
+#include <iostream>
+
 #include "ActionSets.h"
 #include "ButtonGlyphs.h"
 #include "Constants.h"
@@ -32,6 +34,64 @@ static int tr;
 static int tg;
 static int tb;
 
+typedef enum {
+    AR,
+    CA,
+    CY,
+    DE,
+    EN,
+    EO,
+    ES,
+    ES_419,
+    FA,
+    FR,
+    GA,
+    IT,
+    JA,
+    KO,
+    NL,
+    PL,
+    RU,
+    SZL,
+    TR,
+    UK,
+    ZH,
+    ES_AR,
+    PT_BR,
+    PT_PT,
+    ZH_TW
+} LANG_CODES;
+
+static const char* port_made_by_strings[] = {
+    [AR] = "تم إنشاء هذا الإصدار لجهاز PSP بواسطة",
+    [CA] = "Aquest port per a PSP va ser fet per",
+    [CY] = "Gwnaed y port PSP hwn gan",
+    [DE] = "Diese PSP-Portierung wurde erstellt von",
+    [EN] = "This PSP port was made by",
+    [EO] = "Ĉi tiun PSP-porton faris",
+    [ES] = "Este port para PSP fue realizado por",
+    [ES_419] = "Este port para PSP fue hecho por",
+    [FA] = "پورت PSP ساخته شده توسط",
+    [FR] = "Ce portage PSP a été réalisé par",
+    [GA] = "Rinneadh an port PSP seo ag",
+    [IT] = "Porting per PSP realizzato da",
+    [JA] = "",
+    [KO] = "",
+    [NL] = "Deze PSP-port is gemaakt door",
+    [PL] = "Ten port na PSP został stworzony przez",
+    [RU] = "Этот порт для PSP сделал",
+    [SZL] = "Tyn port PSP bōł stworzōny bez",
+    [TR] = "PSP portu yapımcısı:",
+    [UK] = "Цей порт для PSP зробив",
+    [ZH] = "",
+    [ES_AR] = "Este port para PSP fue hecho por",
+    [PT_BR] = "Esta versão para PSP foi feita por",
+    [PT_PT] = "Esta versão para a PSP foi feita por",
+    [ZH_TW] = ""
+};
+
+static LANG_CODES current_lang_code = EN;
+
 struct MapRenderData
 {
     int zoom;
@@ -40,6 +100,34 @@ struct MapRenderData
     int legendxoff;
     int legendyoff;
 };
+
+void renderupdatelangcode(void) {
+    if (loc::lang == "AR") {current_lang_code = AR; return;}
+    if (loc::lang == "CA") {current_lang_code = CA; return;}
+    if (loc::lang == "CY") {current_lang_code = CY; return;}
+    if (loc::lang == "DE") {current_lang_code = DE; return;}
+    if (loc::lang == "EN") {current_lang_code = EN; return;}
+    if (loc::lang == "EO") {current_lang_code = EO; return;}
+    if (loc::lang == "ES") {current_lang_code = ES; return;}
+    if (loc::lang == "ES_419") {current_lang_code = ES_419; return;}
+    if (loc::lang == "FA") {current_lang_code = FA; return;}
+    if (loc::lang == "FR") {current_lang_code = FR; return;}
+    if (loc::lang == "GA") {current_lang_code = GA; return;}
+    if (loc::lang == "IT") {current_lang_code = IT; return;}
+    if (loc::lang == "JA") {current_lang_code = JA; return;}
+    if (loc::lang == "KO") {current_lang_code = KO; return;}
+    if (loc::lang == "NL") {current_lang_code = NL; return;}
+    if (loc::lang == "PL") {current_lang_code = PL; return;}
+    if (loc::lang == "RU") {current_lang_code = RU; return;}
+    if (loc::lang == "SZL") {current_lang_code = SZL; return;}
+    if (loc::lang == "TR") {current_lang_code = TR; return;}
+    if (loc::lang == "UK") {current_lang_code = UK; return;}
+    if (loc::lang == "ZH") {current_lang_code = ZH; return;}
+    if (loc::lang == "es_AR") {current_lang_code = ES_AR; return;}
+    if (loc::lang == "pt_BR") {current_lang_code = PT_BR; return;}
+    if (loc::lang == "pt_PT") {current_lang_code = PT_PT; return;}
+    if (loc::lang == "zh_TW") {current_lang_code = ZH_TW; return;}
+}
 
 static inline void drawslowdowntext(const int y)
 {
@@ -457,7 +545,8 @@ static void menurender(void)
         font::print(PR_2X | PR_CEN | PR_FONT_8X8, -1, 93, "Magnus Pålsson", tr, tg, tb);
         graphics.drawimagecol(IMAGE_SITE2, -1, 114, G2D_RGB(tr, tg, tb), true);
 
-        font::print(PR_CEN, -1, 138, "This PSP port was made by", tr, tg, tb);
+        font::print(PR_CEN, -1, 138, port_made_by_strings[current_lang_code], tr, tg, tb);
+
         font::print(PR_2X | PR_CEN | PR_FONT_8X8, -1, 153, "dntrnk", tr, tg, tb);
         font::print(PR_CEN | PR_FONT_8X8, -1, 174, "https://www.dntrnk.ru", tr, tg, tb);
         break;
