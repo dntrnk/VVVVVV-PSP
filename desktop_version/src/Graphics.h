@@ -191,8 +191,6 @@ public:
 
     void draw_flipsprite(int x, int y, int t, g2dColor color);
 
-    void scroll_texture(SDL_Texture* texture, SDL_Texture* temp, int x, int y);
-
     void printcrewname(int x, int y, int t);
     void printcrewnamedark(int x, int y, int t);
 
@@ -331,7 +329,6 @@ public:
 
     SDL_Texture* gameTexture;
     SDL_Texture* tempShakeTexture;
-    SDL_Texture* gameplayTexture;
     SDL_Texture* menuTexture;
     SDL_Texture* ghostTexture;
     SDL_Texture* backgroundTexture;

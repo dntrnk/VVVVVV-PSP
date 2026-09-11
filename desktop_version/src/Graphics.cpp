@@ -106,7 +106,6 @@ void Graphics::init(void)
     m = 0;
     linedelay = 0;
     gameTexture = NULL;
-    gameplayTexture = NULL;
     menuTexture = NULL;
     ghostTexture = NULL;
     tempShakeTexture = NULL;
@@ -184,7 +183,6 @@ void Graphics::create_buffers(void)
     CREATE_TEXTURE_WITH_DIMENSIONS(SCREEN_WIDTH_PIXELS + 16, SCREEN_WIDTH_PIXELS + 16)
 
     gameTexture = CREATE_TEXTURE;
-    gameplayTexture = CREATE_TEXTURE;
     menuTexture = CREATE_TEXTURE;
     ghostTexture = CREATE_TEXTURE;
     tempShakeTexture = CREATE_TEXTURE;
@@ -212,7 +210,6 @@ void Graphics::create_buffers(void)
 void Graphics::destroy_buffers(void)
 {
     VVV_freefunc(SDL_DestroyTexture, gameTexture);
-    VVV_freefunc(SDL_DestroyTexture, gameplayTexture);
     VVV_freefunc(SDL_DestroyTexture, menuTexture);
     VVV_freefunc(SDL_DestroyTexture, ghostTexture);
     VVV_freefunc(SDL_DestroyTexture, tempShakeTexture);
@@ -694,22 +691,6 @@ void Graphics::draw_sprite(const int x, const int y, const int t, const g2dColor
 void Graphics::draw_flipsprite(const int x, const int y, const int t, const g2dColor color)
 {
     draw_grid_tile(grphx.im_flipsprites, t, x, y, sprites_rect.w, sprites_rect.h, color);
-}
-
-void Graphics::scroll_texture(SDL_Texture* texture, SDL_Texture* temp, const int x, const int y)
-{
-    SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer);
-    SDL_Rect texture_rect = {0, 0, 0, 0};
-    SDL_QueryTexture(texture, NULL, NULL, &texture_rect.w, &texture_rect.h);
-
-    const SDL_Rect src = {0, 0, texture_rect.w, texture_rect.h};
-    const SDL_Rect dest = {x, y, texture_rect.w, texture_rect.h};
-
-    set_render_target(temp);
-    clear();
-    copy_texture(texture, &src, &dest);
-    set_render_target(target);
-    copy_texture(temp, &src, &src);
 }
 
 bool Graphics::shouldrecoloroneway(const int tilenum, const bool mounted)
@@ -3165,7 +3146,10 @@ int Graphics::crewcolour(const int t)
 
 void Graphics::flashlight(void)
 {
-    set_blendmode(SDL_BLENDMODE_NONE);
+    if (game.screenshake > 0 && !game.noflashingmode)
+    {
+        g2dHelperClear(G2D_BLACK);
+    }
 
     fill_rect(G2D_RGBA(0xBB, 0xBB, 0xBB, 0xBB));
 }
@@ -3177,29 +3161,13 @@ void Graphics::screenshake(void)
     //     ApplyFilter(&tempFilterSrc, &tempFilterDest);
     // }
 
-    // set_render_target(tempShakeTexture);
-    // set_blendmode(SDL_BLENDMODE_NONE);
-    // clear();
-
-    // const SDL_Rect shake = {screenshake_x, screenshake_y, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS};
-
-    // copy_texture(gameTexture, NULL, &shake);
-
     // draw_screenshot_border();
 
-    // set_render_target(gameTexture);
-    // clear();
-
-    // // Clear the gameplay texture so blackout() is actually black after a screenshake
-    // if (game.gamestate == GAMEMODE && game.blackout)
+    // Clear the gameplay texture so blackout() is actually black after a screenshake
+    // if (game.screenshake > 0 && !game.noflashingmode)
     // {
-    //     set_render_target(gameplayTexture);
-    //     clear();
+    //     g2dHelperClear(G2D_BLACK);
     // }
-
-    // set_render_target(NULL);
-    // set_blendmode(SDL_BLENDMODE_NONE);
-    // draw_window_background();
 
     // SDL_Rect rect = {0, 0, 480, 272};
 

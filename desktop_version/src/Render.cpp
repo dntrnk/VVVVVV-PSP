@@ -2359,8 +2359,6 @@ static void mode_indicator_text(const int alpha)
 
 void gamerender(void)
 {
-    graphics.set_render_target(graphics.gameplayTexture);
-    // graphics.set_color(0, 0, 0, 255); // Unused?
     if(!game.blackout)
     {
         if (map.towermode)
@@ -2500,8 +2498,6 @@ void gamerender(void)
     }
 
     graphics.set_render_target(graphics.gameTexture);
-
-    graphics.copy_texture(graphics.gameplayTexture, NULL, NULL);
 
     if (game.advancetext)
     {
