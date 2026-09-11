@@ -660,7 +660,9 @@ void Graphics::draw_rect(const int x, const int y, const int w, const int h, con
 
 void Graphics::draw_line(const int x, const int y, const int x2, const int y2, const g2dColor color)
 {
-    g2dHelperDrawLine(x, y, x2, y2, color);
+    int width = x == x2 ? 1 : x2 - x + 1;
+    int height = y == y2 ? 1 : y2 - y + 1;
+    g2dHelperFillRect(x, y, width, height, color);
 }
 
 int Graphics::draw_points(const SDL_Point* points, const int count)
