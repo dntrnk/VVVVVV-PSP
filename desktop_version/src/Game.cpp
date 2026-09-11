@@ -7787,6 +7787,7 @@ void Game::mapmenuchange(const enum GameGamestate newgamestate, const bool user_
     gamestate = newgamestate;
     graphics.resumegamemode = false;
     mapheld = true;
+    graphics.frozen_alpha = graphics.alpha;
 
     if (prevgamestate == GAMEMODE)
     {

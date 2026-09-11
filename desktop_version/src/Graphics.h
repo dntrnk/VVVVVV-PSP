@@ -240,9 +240,9 @@ public:
     int draw_points(const SDL_Point* points, int count);
     int draw_points(const SDL_Point* points, int count, int r, int g, int b);
 
-    void map_tab(int opt, const char* text, bool selected = false);
+    void map_tab(int opt, const int offset, const char* text, bool selected = false);
 
-    void map_option(int opt, int num_opts, const std::string& text, bool selected = false);
+    void map_option(int opt, int num_opts, const int offset, const std::string& text, bool selected = false);
 
     void drawspritesetcol(int x, int y, int t, int c);
 
@@ -253,8 +253,6 @@ public:
 
     int screenshake_x;
     int screenshake_y;
-
-    void draw_window_background(void);
 
     void render(void);
     void renderwithscreeneffects(void);
@@ -310,8 +308,6 @@ public:
     bool levelcomplete_mounted;
     bool flipgamecomplete_mounted;
     bool fliplevelcomplete_mounted;
-
-    void menuoffrender(void);
 
     void drawtowerbackground(TowerBG& bg_obj);
 
@@ -405,6 +401,7 @@ public:
     }
 #endif
     float alpha;
+    float frozen_alpha;
 
     g2dColor col_crewred;
     g2dColor col_crewyellow;

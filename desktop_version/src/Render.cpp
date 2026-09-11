@@ -2813,7 +2813,7 @@ void gamerender(void)
     graphics.renderwithscreeneffects();
 }
 
-static void draw_roomname_menu(void)
+static void draw_roomname_menu(const int offset)
 {
     const char* name;
 
@@ -2826,7 +2826,7 @@ static void draw_roomname_menu(void)
         name = loc::gettext_roomname(map.custommode, game.roomx, game.roomy, map.roomname, map.roomname_special);
     }
 
-    font::print(PR_FONT_LEVEL | PR_CEN, -1, 2, name, 196, 196, 255 - help.glow);
+    font::print(PR_FONT_LEVEL | PR_CEN, -1, 2 + offset, name, 196, 196, 255 - help.glow);
 }
 
 /* Used to keep some graphics positions on the map screen
@@ -2865,20 +2865,20 @@ static MapRenderData getmaprenderdata(void)
     return data;
 }
 
-static void rendermap(void)
+static void rendermap(const int offset)
 {
     if (map.custommode && map.customshowmm)
     {
-        graphics.drawpixeltextbox(35 + map.custommmxoff, 16 + map.custommmyoff, map.custommmxsize + 10, map.custommmysize + 10, 65, 185, 207);
-        graphics.drawpartimage(graphics.minimap_mounted ? IMAGE_MINIMAP : IMAGE_CUSTOMMINIMAP, 40 + map.custommmxoff, 21 + map.custommmyoff, map.custommmxsize, map.custommmysize);
+        graphics.drawpixeltextbox(35 + map.custommmxoff, 16 + map.custommmyoff + offset, map.custommmxsize + 10, map.custommmysize + 10, 65, 185, 207);
+        graphics.drawpartimage(graphics.minimap_mounted ? IMAGE_MINIMAP : IMAGE_CUSTOMMINIMAP, 40 + map.custommmxoff, 21 + map.custommmyoff + offset, map.custommmxsize, map.custommmysize);
         return;
      }
 
-    graphics.drawpixeltextbox(35, 16, 250, 190, 65, 185, 207);
-    graphics.drawimage(IMAGE_MINIMAP, 40, 21, false);
+    graphics.drawpixeltextbox(35, 16 + offset, 250, 190, 65, 185, 207);
+    graphics.drawimage(IMAGE_MINIMAP, 40, 21 + offset, false);
 }
 
-static void rendermapfog(void)
+static void rendermapfog(const int offset)
 {
     const MapRenderData data = getmaprenderdata();
 
@@ -2893,7 +2893,7 @@ static void rendermapfog(void)
                 {
                     for (int y = 0; y < data.zoom; y++)
                     {
-                        graphics.drawimage(IMAGE_COVERED, data.xoff + 40 + (x * 12) + (i * (12 * data.zoom)), data.yoff + 21 + (y * 9) + (j * (9 * data.zoom)), false);
+                        graphics.drawimage(IMAGE_COVERED, data.xoff + 40 + (x * 12) + (i * (12 * data.zoom)), data.yoff + 21 + (y * 9) + (j * (9 * data.zoom)) + offset, false);
                     }
                 }
             }
@@ -2901,7 +2901,7 @@ static void rendermapfog(void)
     }
 }
 
-static void rendermaplegend(void)
+static void rendermaplegend(const int offset)
 {
     // Draw the map legend, aka teleports/targets/trinkets
 
@@ -2911,11 +2911,11 @@ static void rendermaplegend(void)
     {
         if (map.showteleporters && map.isexplored(map.teleporters[i].x, map.teleporters[i].y))
         {
-            font::print(PR_FONT_8X8 | PR_FULLBOR, data.legendxoff + (map.teleporters[i].x * 12 * data.zoom), data.legendyoff + (map.teleporters[i].y * 9 * data.zoom), "💿", 171, 255, 252);
+            font::print(PR_FONT_8X8 | PR_FULLBOR, data.legendxoff + (map.teleporters[i].x * 12 * data.zoom), data.legendyoff + (map.teleporters[i].y * 9 * data.zoom) + offset, "💿", 171, 255, 252);
         }
         else if (map.showtargets && !map.isexplored(map.teleporters[i].x, map.teleporters[i].y))
         {
-            font::print(PR_FONT_8X8 | PR_FULLBOR, data.legendxoff + (map.teleporters[i].x * 12 * data.zoom), data.legendyoff + (map.teleporters[i].y * 9 * data.zoom), "❓", 64, 64, 64);
+            font::print(PR_FONT_8X8 | PR_FULLBOR, data.legendxoff + (map.teleporters[i].x * 12 * data.zoom), data.legendyoff + (map.teleporters[i].y * 9 * data.zoom) + offset, "❓", 64, 64, 64);
         }
     }
 
@@ -2925,13 +2925,13 @@ static void rendermaplegend(void)
         {
             if (!obj.collect[i])
             {
-                font::print(PR_FONT_8X8 | PR_FULLBOR, data.legendxoff + (map.shinytrinkets[i].x * 12 * data.zoom), data.legendyoff + (map.shinytrinkets[i].y * 9 * data.zoom), "🪙", 254, 252, 58);
+                font::print(PR_FONT_8X8 | PR_FULLBOR, data.legendxoff + (map.shinytrinkets[i].x * 12 * data.zoom), data.legendyoff + (map.shinytrinkets[i].y * 9 * data.zoom) + offset, "🪙", 254, 252, 58);
             }
         }
     }
 }
 
-static void rendermapcursor(const bool flashing)
+static void rendermapcursor(const int offset, const bool flashing)
 {
     const MapRenderData data = getmaprenderdata();
 
@@ -2940,19 +2940,19 @@ static void rendermapcursor(const bool flashing)
         // Draw the tower specially
         if (!flashing || game.noflashingmode)
         {
-            graphics.draw_rect(40 + ((game.roomx - 100) * 12) + 2, 21 + 2, 12 - 4, 180 - 4, G2D_RGB(16, 245 - (help.glow * 2), 245 - (help.glow * 2)));
+            graphics.draw_rect(40 + ((game.roomx - 100) * 12) + 2, 21 + 2 + offset, 12 - 4, 180 - 4, G2D_RGB(16, 245 - (help.glow * 2), 245 - (help.glow * 2)));
         }
         else if (map.cursorstate == 1)
         {
             if (int(map.cursordelay / 4) % 2 == 0)
             {
-                graphics.draw_rect(40 + ((game.roomx - 100) * 12), 21, 12, 180, G2D_WHITE);
-                graphics.draw_rect(40 + ((game.roomx - 100) * 12) + 2, 21 + 2, 12 - 4, 180 - 4, G2D_WHITE);
+                graphics.draw_rect(40 + ((game.roomx - 100) * 12), 21 + offset, 12, 180, G2D_WHITE);
+                graphics.draw_rect(40 + ((game.roomx - 100) * 12) + 2, 21 + 2 + offset, 12 - 4, 180 - 4, G2D_WHITE);
             }
         }
         else if (map.cursorstate == 2 && (int(map.cursordelay / 15) % 2 == 0))
         {
-            graphics.draw_rect(40 + ((game.roomx - 100) * 12) + 2, 21 + 2, 12 - 4, 180 - 4, G2D_RGB(16, 245 - (help.glow), 245 - (help.glow)));
+            graphics.draw_rect(40 + ((game.roomx - 100) * 12) + 2, 21 + 2 + offset, 12 - 4, 180 - 4, G2D_RGB(16, 245 - (help.glow), 245 - (help.glow)));
         }
         return;
     }
@@ -2962,30 +2962,42 @@ static void rendermapcursor(const bool flashing)
         int margin = (data.zoom == 4) ? 2 : 1;
         graphics.draw_rect(
             40 + ((game.roomx - 100) * 12 * data.zoom) + margin + data.xoff,
-            21 + ((game.roomy - 100) * 9 * data.zoom) + margin + data.yoff,
+            21 + ((game.roomy - 100) * 9 * data.zoom) + margin + data.yoff + offset,
             (12 * data.zoom) - (2 * margin), (9 * data.zoom) - (2 * margin),
             G2D_RGB(16, 245 - (help.glow), 245 - (help.glow))
         );
     }
     else if (map.cursorstate == 1 && int(map.cursordelay / 4) % 2 == 0)
     {
-        graphics.draw_rect(40 + ((game.roomx - 100) * 12 * data.zoom) + data.xoff, 21 + ((game.roomy - 100) * 9 * data.zoom) + data.yoff, 12 * data.zoom, 9 * data.zoom, G2D_WHITE);
-        graphics.draw_rect(40 + ((game.roomx - 100) * 12 * data.zoom) + 2 + data.xoff, 21 + ((game.roomy - 100) * 9 * data.zoom) + 2 + data.yoff, (12 * data.zoom) - 4, (9 * data.zoom) - 4, G2D_WHITE);
+        graphics.draw_rect(40 + ((game.roomx - 100) * 12 * data.zoom) + data.xoff, 21 + ((game.roomy - 100) * 9 * data.zoom) + data.yoff + offset, 12 * data.zoom, 9 * data.zoom, G2D_WHITE);
+        graphics.draw_rect(40 + ((game.roomx - 100) * 12 * data.zoom) + 2 + data.xoff, 21 + ((game.roomy - 100) * 9 * data.zoom) + 2 + data.yoff + offset, (12 * data.zoom) - 4, (9 * data.zoom) - 4, G2D_WHITE);
     }
 }
 
 void maprender(void)
 {
+    const int offset = (int) graphics.lerp(graphics.oldmenuoffset, graphics.menuoffset);
+
+    if (offset != 0)
+    {
+        float old_alpha = graphics.alpha;
+        graphics.alpha = graphics.frozen_alpha;
+        gamerender();
+        graphics.alpha = old_alpha;
+    }
+
     graphics.set_render_target(graphics.menuTexture);
     graphics.clear();
 
-    draw_roomname_menu();
+    g2dHelperFillRect(0, offset, 320, 240, G2D_BLACK);
+
+    draw_roomname_menu(offset);
 
     //Background color
-    graphics.fill_rect(0, 12, 320, 240, G2D_RGB(10, 24, 26));
+    graphics.fill_rect(0, 12 + offset, 320, 240, G2D_RGB(10, 24, 26));
 
     //Menubar:
-    graphics.drawpixeltextbox( -10, 212, 43*8, 16 + font::height(PR_FONT_INTERFACE), 65, 185, 207);
+    graphics.drawpixeltextbox( -10, 212 + offset, 43*8, 16 + font::height(PR_FONT_INTERFACE), 65, 185, 207);
 
     // Draw the selected page name at the bottom
     // menupage 0 - 3 is the pause screen
@@ -2994,7 +3006,7 @@ void maprender(void)
         // While in a cutscene, you can only save
         char buffer[SCREEN_WIDTH_CHARS + 1];
         vformat_buf(buffer, sizeof(buffer), loc::get_langmeta()->menu_select_tight.c_str(), "label:str", loc::gettext("SAVE"));
-        font::print(PR_CEN | PR_CJK_LOW, -1, 220, buffer, 196, 196, 255 - help.glow);
+        font::print(PR_CEN | PR_CJK_LOW, -1, 220 + offset, buffer, 196, 196, 255 - help.glow);
     }
     else if (game.menupage <= 3)
     {
@@ -3011,7 +3023,7 @@ void maprender(void)
         {
             tab1 = loc::gettext("CREW");
         }
-#define TAB(opt, text) graphics.map_tab(opt, text, game.menupage == opt)
+#define TAB(opt, text) graphics.map_tab(opt, offset, text, game.menupage == opt)
         TAB(0, loc::gettext("MAP"));
         TAB(1, tab1);
         TAB(2, loc::gettext("STATS"));
@@ -3026,13 +3038,13 @@ void maprender(void)
     case 31:
     case 32:
     case 33:
-        font::print(PR_CEN | PR_CJK_LOW, -1, 220, loc::gettext("[ PAUSE ]"), 196, 196, 255 - help.glow);
+        font::print(PR_CEN | PR_CJK_LOW, -1, 220 + offset, loc::gettext("[ PAUSE ]"), 196, 196, 255 - help.glow);
     }
 
     // Draw menu options
     if (game.menupage >= 30 && game.menupage <= 33)
     {
-#define OPTION(opt, text) graphics.map_option(opt, 4, text, game.menupage - 30 == opt)
+#define OPTION(opt, text) graphics.map_option(opt, 4, offset, text, game.menupage - 30 == opt)
         OPTION(0, loc::gettext("return to game"));
         OPTION(1, loc::gettext("options"));
         OPTION(2, loc::gettext("quit to menu"));
@@ -3052,7 +3064,7 @@ void maprender(void)
     switch(game.menupage)
     {
     case 0:
-        rendermap();
+        rendermap(offset);
 
         if (map.finalmode || (map.custommode&&!map.customshowmm))
         {
@@ -3061,16 +3073,16 @@ void maprender(void)
             {
                 for (int i = 0; i < 20; i++)
                 {
-                    graphics.drawimage(IMAGE_COVERED, 40 + (i * 12), 21 + (j * 9), false);
+                    graphics.drawimage(IMAGE_COVERED, 40 + (i * 12), 21 + (j * 9) + offset, false);
                 }
             }
-            font::print(PR_CEN | PR_BOR, -1, 105, loc::gettext("NO SIGNAL"), 245, 245, 245);
+            font::print(PR_CEN | PR_BOR, -1, 105 + offset, loc::gettext("NO SIGNAL"), 245, 245, 245);
         }
         else
         {
-            rendermapfog();
-            rendermapcursor(true);
-            rendermaplegend();
+            rendermapfog(offset);
+            rendermapcursor(offset, true);
+            rendermaplegend(offset);
         }
         break;
     case 1:
@@ -3078,67 +3090,67 @@ void maprender(void)
         {
             if (graphics.flipmode)
             {
-                font::print_wrap(PR_CEN, -1, 174, loc::gettext("SUPER GRAVITRON HIGHSCORE"), 196, 196, 255 - help.glow);
+                font::print_wrap(PR_CEN, -1, 174 + offset, loc::gettext("SUPER GRAVITRON HIGHSCORE"), 196, 196, 255 - help.glow);
 
                 std::string tempstring = help.timestring(game.swnrecord);
                 font::print(PR_CEN, -1, 124, loc::gettext("Best Time"), 196, 196, 255 - help.glow);
-                font::print(PR_2X | PR_CEN | PR_CJK_HIGH, -1, 102, tempstring, 196, 196, 255 - help.glow);
+                font::print(PR_2X | PR_CEN | PR_CJK_HIGH, -1, 102 + offset, tempstring, 196, 196, 255 - help.glow);
 
                 switch(game.swnbestrank)
                 {
                 case 0:
-                    font::print_wrap(PR_CEN, -1, 40, loc::gettext("Next Trophy at 5 seconds"), 196, 196, 255 - help.glow);
+                    font::print_wrap(PR_CEN, -1, 40 + offset, loc::gettext("Next Trophy at 5 seconds"), 196, 196, 255 - help.glow);
                     break;
                 case 1:
-                    font::print_wrap(PR_CEN, -1, 40, loc::gettext("Next Trophy at 10 seconds"), 196, 196, 255 - help.glow);
+                    font::print_wrap(PR_CEN, -1, 40 + offset, loc::gettext("Next Trophy at 10 seconds"), 196, 196, 255 - help.glow);
                     break;
                 case 2:
-                    font::print_wrap(PR_CEN, -1, 40, loc::gettext("Next Trophy at 15 seconds"), 196, 196, 255 - help.glow);
+                    font::print_wrap(PR_CEN, -1, 40 + offset, loc::gettext("Next Trophy at 15 seconds"), 196, 196, 255 - help.glow);
                     break;
                 case 3:
-                    font::print_wrap(PR_CEN, -1, 40, loc::gettext("Next Trophy at 20 seconds"), 196, 196, 255 - help.glow);
+                    font::print_wrap(PR_CEN, -1, 40 + offset, loc::gettext("Next Trophy at 20 seconds"), 196, 196, 255 - help.glow);
                     break;
                 case 4:
-                    font::print_wrap(PR_CEN, -1, 40, loc::gettext("Next Trophy at 30 seconds"), 196, 196, 255 - help.glow);
+                    font::print_wrap(PR_CEN, -1, 40 + offset, loc::gettext("Next Trophy at 30 seconds"), 196, 196, 255 - help.glow);
                     break;
                 case 5:
-                    font::print_wrap(PR_CEN, -1, 40, loc::gettext("Next Trophy at 1 minute"), 196, 196, 255 - help.glow);
+                    font::print_wrap(PR_CEN, -1, 40 + offset, loc::gettext("Next Trophy at 1 minute"), 196, 196, 255 - help.glow);
                     break;
                 case 6:
-                    font::print_wrap(PR_CEN, -1, 40, loc::gettext("All Trophies collected!"), 196, 196, 255 - help.glow);
+                    font::print_wrap(PR_CEN, -1, 40 + offset, loc::gettext("All Trophies collected!"), 196, 196, 255 - help.glow);
                     break;
                 }
             }
             else
             {
-                font::print_wrap(PR_CEN, -1, 40, loc::gettext("SUPER GRAVITRON HIGHSCORE"), 196, 196, 255 - help.glow);
+                font::print_wrap(PR_CEN, -1, 40 + offset, loc::gettext("SUPER GRAVITRON HIGHSCORE"), 196, 196, 255 - help.glow);
 
                 std::string tempstring = help.timestring(game.swnrecord);
-                font::print(PR_CEN, -1, 90, loc::gettext("Best Time"), 196, 196, 255 - help.glow);
-                font::print(PR_2X | PR_CEN | PR_CJK_LOW, -1, 104, tempstring, 196, 196, 255 - help.glow);
+                font::print(PR_CEN, -1, 90 + offset, loc::gettext("Best Time"), 196, 196, 255 - help.glow);
+                font::print(PR_2X | PR_CEN | PR_CJK_LOW, -1, 104 + offset, tempstring, 196, 196, 255 - help.glow);
 
                 switch(game.swnbestrank)
                 {
                 case 0:
-                    font::print_wrap(PR_CEN, -1, 174, loc::gettext("Next Trophy at 5 seconds"), 196, 196, 255 - help.glow);
+                    font::print_wrap(PR_CEN, -1, 174 + offset, loc::gettext("Next Trophy at 5 seconds"), 196, 196, 255 - help.glow);
                     break;
                 case 1:
-                    font::print_wrap(PR_CEN, -1, 174, loc::gettext("Next Trophy at 10 seconds"), 196, 196, 255 - help.glow);
+                    font::print_wrap(PR_CEN, -1, 174 + offset, loc::gettext("Next Trophy at 10 seconds"), 196, 196, 255 - help.glow);
                     break;
                 case 2:
-                    font::print_wrap(PR_CEN, -1, 174, loc::gettext("Next Trophy at 15 seconds"), 196, 196, 255 - help.glow);
+                    font::print_wrap(PR_CEN, -1, 174 + offset, loc::gettext("Next Trophy at 15 seconds"), 196, 196, 255 - help.glow);
                     break;
                 case 3:
-                    font::print_wrap(PR_CEN, -1, 174, loc::gettext("Next Trophy at 20 seconds"), 196, 196, 255 - help.glow);
+                    font::print_wrap(PR_CEN, -1, 174 + offset, loc::gettext("Next Trophy at 20 seconds"), 196, 196, 255 - help.glow);
                     break;
                 case 4:
-                    font::print_wrap(PR_CEN, -1, 174, loc::gettext("Next Trophy at 30 seconds"), 196, 196, 255 - help.glow);
+                    font::print_wrap(PR_CEN, -1, 174 + offset, loc::gettext("Next Trophy at 30 seconds"), 196, 196, 255 - help.glow);
                     break;
                 case 5:
-                    font::print_wrap(PR_CEN, -1, 174, loc::gettext("Next Trophy at 1 minute"), 196, 196, 255 - help.glow);
+                    font::print_wrap(PR_CEN, -1, 174 + offset, loc::gettext("Next Trophy at 1 minute"), 196, 196, 255 - help.glow);
                     break;
                 case 6:
-                    font::print_wrap(PR_CEN, -1, 174, loc::gettext("All Trophies collected!"), 196, 196, 255 - help.glow);
+                    font::print_wrap(PR_CEN, -1, 174 + offset, loc::gettext("All Trophies collected!"), 196, 196, 255 - help.glow);
                     break;
                 }
             }
@@ -3152,7 +3164,7 @@ void maprender(void)
                 "button:but",
                 vformat_button(ActionSet_InGame, Action_InGame_ACTION)
             );
-            font::print_wrap(PR_CEN, -1, 105, buffer, 196, 196, 255 - help.glow);
+            font::print_wrap(PR_CEN, -1, 105 + offset, buffer, 196, 196, 255 - help.glow);
         }
         else if(map.custommode){
             LevelMetaData& meta = cl.ListOfMetaData[game.playcustomlevel];
@@ -3160,15 +3172,15 @@ void maprender(void)
             uint32_t title_flags = meta.title_is_gettext ? PR_FONT_INTERFACE : PR_FONT_LEVEL;
             uint32_t creator_flags = meta.creator_is_gettext ? PR_FONT_INTERFACE : PR_FONT_LEVEL;
 
-            font::print(title_flags | PR_2X | PR_CEN, -1, FLIP(45, 8), meta.title, 196, 196, 255 - help.glow);
+            font::print(title_flags | PR_2X | PR_CEN, -1, FLIP(45, 8) + offset, meta.title, 196, 196, 255 - help.glow);
             int sp = SDL_max(10, font::height(PR_FONT_LEVEL));
-            graphics.print_level_creator(creator_flags, FLIP(70, 8), meta.creator, 196, 196, 255 - help.glow);
-            font::print(PR_FONT_LEVEL | PR_CEN, -1, FLIP(70+sp, 8), meta.website, 196, 196, 255 - help.glow);
-            font::print(PR_FONT_LEVEL | PR_CEN, -1, FLIP(70+sp*3, 8), meta.Desc1, 196, 196, 255 - help.glow);
-            font::print(PR_FONT_LEVEL | PR_CEN, -1, FLIP(70+sp*4, 8), meta.Desc2, 196, 196, 255 - help.glow);
+            graphics.print_level_creator(creator_flags, FLIP(70, 8) + offset, meta.creator, 196, 196, 255 - help.glow);
+            font::print(PR_FONT_LEVEL | PR_CEN, -1, FLIP(70+sp, 8) + offset, meta.website, 196, 196, 255 - help.glow);
+            font::print(PR_FONT_LEVEL | PR_CEN, -1, FLIP(70+sp*3, 8) + offset, meta.Desc1, 196, 196, 255 - help.glow);
+            font::print(PR_FONT_LEVEL | PR_CEN, -1, FLIP(70+sp*4, 8) + offset, meta.Desc2, 196, 196, 255 - help.glow);
             if (sp <= 10)
             {
-                font::print(PR_FONT_LEVEL | PR_CEN, -1, FLIP(70+sp*5, 8), meta.Desc3, 196, 196, 255 - help.glow);
+                font::print(PR_FONT_LEVEL | PR_CEN, -1, FLIP(70+sp*5, 8) + offset, meta.Desc3, 196, 196, 255 - help.glow);
             }
 
             int remaining = cl.numcrewmates() - game.crewmates();
@@ -3181,7 +3193,7 @@ void maprender(void)
                 "n_crew:int",
                 remaining
             );
-            font::print_wrap(PR_CEN, -1, FLIP(165, 8), buffer, 196, 196, 255 - help.glow);
+            font::print_wrap(PR_CEN, -1, FLIP(165, 8) + offset, buffer, 196, 196, 255 - help.glow);
         }
         else
         {
@@ -3189,54 +3201,54 @@ void maprender(void)
             {
                 for (int i = 0; i < 3; i++)
                 {
-                    graphics.drawcrewman(16, 32 + (i * 64), 2-i, game.crewstats[2-i]);
+                    graphics.drawcrewman(16, 32 + (i * 64) + offset, 2-i, game.crewstats[2-i]);
                     if (game.crewstats[(2-i)])
                     {
-                        graphics.printcrewname(44, 32 + (i * 64)+4+10, 2-i);
+                        graphics.printcrewname(44, 32 + (i * 64)+4+10 + offset, 2-i);
                     }
                     else
                     {
-                        graphics.printcrewnamedark(44, 32 + (i * 64)+4+10, 2-i);
+                        graphics.printcrewnamedark(44, 32 + (i * 64)+4+10 + offset, 2-i);
                     }
-                    graphics.printcrewnamestatus(44, 32 + (i * 64)+4, 2-i, game.crewstats[(2-i)]);
+                    graphics.printcrewnamestatus(44, 32 + (i * 64)+4 + offset, 2-i, game.crewstats[(2-i)]);
 
-                    graphics.drawcrewman(16+160, 32 + (i * 64), (2-i)+3, game.crewstats[(2-i)+3]);
+                    graphics.drawcrewman(16+160, 32 + (i * 64) + offset, (2-i)+3, game.crewstats[(2-i)+3]);
                     if (game.crewstats[(2-i)+3])
                     {
-                        graphics.printcrewname(44+160, 32 + (i * 64)+4+10, (2-i)+3);
+                        graphics.printcrewname(44+160, 32 + (i * 64)+4+10 + offset, (2-i)+3);
                     }
                     else
                     {
-                        graphics.printcrewnamedark(44+160, 32 + (i * 64)+4+10, (2-i)+3);
+                        graphics.printcrewnamedark(44+160, 32 + (i * 64)+4+10 + offset, (2-i)+3);
                     }
-                    graphics.printcrewnamestatus(44+160, 32 + (i * 64)+4, (2-i)+3, game.crewstats[(2-i)+3]);
+                    graphics.printcrewnamestatus(44+160, 32 + (i * 64)+4 + offset, (2-i)+3, game.crewstats[(2-i)+3]);
                 }
             }
             else
             {
                 for (int i = 0; i < 3; i++)
                 {
-                    graphics.drawcrewman(16, 32 + (i * 64), i, game.crewstats[i]);
+                    graphics.drawcrewman(16, 32 + (i * 64) + offset, i, game.crewstats[i]);
                     if (game.crewstats[i])
                     {
-                        graphics.printcrewname(44, 32 + (i * 64)+4, i);
+                        graphics.printcrewname(44, 32 + (i * 64)+4 + offset, i);
                     }
                     else
                     {
-                        graphics.printcrewnamedark(44, 32 + (i * 64)+4, i);
+                        graphics.printcrewnamedark(44, 32 + (i * 64)+4 + offset, i);
                     }
-                    graphics.printcrewnamestatus(44, 32 + (i * 64)+4+10, i, game.crewstats[i]);
+                    graphics.printcrewnamestatus(44, 32 + (i * 64)+4+10 + offset, i, game.crewstats[i]);
 
-                    graphics.drawcrewman(16+160, 32 + (i * 64), i+3, game.crewstats[i+3]);
+                    graphics.drawcrewman(16+160, 32 + (i * 64) + offset, i+3, game.crewstats[i+3]);
                     if (game.crewstats[i+3])
                     {
-                        graphics.printcrewname(44+160, 32 + (i * 64)+4, i+3);
+                        graphics.printcrewname(44+160, 32 + (i * 64)+4 + offset, i+3);
                     }
                     else
                     {
-                        graphics.printcrewnamedark(44+160, 32 + (i * 64)+4, i+3);
+                        graphics.printcrewnamedark(44+160, 32 + (i * 64)+4 + offset, i+3);
                     }
-                    graphics.printcrewnamestatus(44+160, 32 + (i * 64)+4+10, i+3, game.crewstats[i+3]);
+                    graphics.printcrewnamestatus(44+160, 32 + (i * 64)+4+10 + offset, i+3, game.crewstats[i+3]);
                 }
             }
         }
@@ -3254,7 +3266,7 @@ void maprender(void)
         }
 
         /* Stats. */
-        font::print(PR_CEN | FLIP_PR_CJK_HIGH, -1, FLIP(52, 8), loc::gettext("[Trinkets found]"), 196, 196, 255 - help.glow);
+        font::print(PR_CEN | FLIP_PR_CJK_HIGH, -1, FLIP(52, 8) + offset, loc::gettext("[Trinkets found]"), 196, 196, 255 - help.glow);
         char buffer[SCREEN_WIDTH_CHARS + 1];
         vformat_buf(
             buffer, sizeof(buffer),
@@ -3262,40 +3274,40 @@ void maprender(void)
             "n_trinkets:int, max_trinkets:int",
             game.trinkets(), max_trinkets
         );
-        font::print(PR_CEN | FLIP_PR_CJK_LOW, -1, FLIP(64, 8), buffer, 96, 96, 96);
+        font::print(PR_CEN | FLIP_PR_CJK_LOW, -1, FLIP(64, 8) + offset, buffer, 96, 96, 96);
 
-        font::print(PR_CEN | FLIP_PR_CJK_HIGH, -1, FLIP(102, 8), loc::gettext("[Number of Deaths]"), 196, 196, 255 - help.glow);
-        font::print(PR_CEN | FLIP_PR_CJK_LOW, -1, FLIP(114, 8), help.String(game.deathcounts), 96, 96, 96);
+        font::print(PR_CEN | FLIP_PR_CJK_HIGH, -1, FLIP(102, 8) + offset, loc::gettext("[Number of Deaths]"), 196, 196, 255 - help.glow);
+        font::print(PR_CEN | FLIP_PR_CJK_LOW, -1, FLIP(114, 8) + offset, help.String(game.deathcounts), 96, 96, 96);
 
-        font::print(PR_CEN | FLIP_PR_CJK_HIGH, -1, FLIP(152, 8), loc::gettext("[Time Taken]"), 196, 196, 255 - help.glow);
-        font::print(PR_CEN | FLIP_PR_CJK_LOW, -1, FLIP(164, 8), game.timestring(), 96, 96, 96);
+        font::print(PR_CEN | FLIP_PR_CJK_HIGH, -1, FLIP(152, 8) + offset, loc::gettext("[Time Taken]"), 196, 196, 255 - help.glow);
+        font::print(PR_CEN | FLIP_PR_CJK_LOW, -1, FLIP(164, 8) + offset, game.timestring(), 96, 96, 96);
         break;
     }
     case 3:
     {
         if (game.inintermission || game.translator_exploring)
         {
-            font::print_wrap(PR_CEN, -1, 115, loc::gettext("Cannot Save in Level Replay"), 146, 146, 180);
+            font::print_wrap(PR_CEN, -1, 115 + offset, loc::gettext("Cannot Save in Level Replay"), 146, 146, 180);
             break;
         }
         if (game.nodeathmode)
         {
-            font::print_wrap(PR_CEN, -1, 115, loc::gettext("Cannot Save in No Death Mode"), 146, 146, 180);
+            font::print_wrap(PR_CEN, -1, 115 + offset, loc::gettext("Cannot Save in No Death Mode"), 146, 146, 180);
             break;
         }
         if (game.intimetrial)
         {
-            font::print_wrap(PR_CEN, -1, 115, loc::gettext("How'd you get here?"), 146, 146, 180);
+            font::print_wrap(PR_CEN, -1, 115 + offset, loc::gettext("How'd you get here?"), 146, 146, 180);
             break;
         }
         if (game.insecretlab)
         {
-            font::print_wrap(PR_CEN, -1, 115, loc::gettext("Cannot Save in Secret Lab"), 146, 146, 180);
+            font::print_wrap(PR_CEN, -1, 115 + offset, loc::gettext("Cannot Save in Secret Lab"), 146, 146, 180);
             break;
         }
         if (game.gamesavefailed)
         {
-            font::print_wrap(PR_CEN, -1, 115, loc::gettext("ERROR: Could not save game!"), 146, 146, 180);
+            font::print_wrap(PR_CEN, -1, 115 + offset, loc::gettext("ERROR: Could not save game!"), 146, 146, 180);
             break;
         }
 
@@ -3305,7 +3317,7 @@ void maprender(void)
         {
             /* FIXME: The text here should be automatically "balance-wrapped" instead of hardcoding the width.
              * In fact, maybe print_wrap should balance-wrap by default. */
-            font::print_wrap(PR_CEN, -1, 174, loc::gettext("(Note: The game is autosaved at every teleporter.)"), 146, 146, 180, 12);
+            font::print_wrap(PR_CEN, -1, 174 + offset, loc::gettext("(Note: The game is autosaved at every teleporter.)"), 146, 146, 180, 12);
         }
 
         if (!game.gamesaved)
@@ -3318,14 +3330,14 @@ void maprender(void)
                 vformat_button(ActionSet_InGame, Action_InGame_ACTION)
             );
 
-            font::print(PR_CEN, -1, 80, buffer, 255 - help.glow*2, 255 - help.glow*2, 255 - help.glow);
+            font::print(PR_CEN, -1, 80 + offset, buffer, 255 - help.glow*2, 255 - help.glow*2, 255 - help.glow);
 
             if (map.custommode || !game.last_quicksave.exists)
             {
                 break;
             }
 
-            font::print(PR_CEN, -1, FLIP(100, 8), loc::gettext("Last Save:"), 164 - help.glow/4, 164 - help.glow/4, 164);
+            font::print(PR_CEN, -1, FLIP(100, 8) + offset, loc::gettext("Last Save:"), 164 - help.glow/4, 164 - help.glow/4, 164);
 
             struct Game::Summary* last = &game.last_quicksave;
             vformat_buf(
@@ -3336,25 +3348,25 @@ void maprender(void)
                 game.giventimestring(last->hours, last->minutes, last->seconds).c_str()
             );
 
-            font::print(PR_CEN, -1, FLIP(112, 8), buffer, 164 - help.glow/4, 164 - help.glow/4, 164);
+            font::print(PR_CEN, -1, FLIP(112, 8) + offset, buffer, 164 - help.glow/4, 164 - help.glow/4, 164);
             break;
         }
 
         /* We are only still here if the game has been quicksaved... */
 
-        font::print_wrap(PR_CEN, -1, 36, loc::gettext("Game saved ok!"), 255 - help.glow/2, 255 - help.glow/2, 255 - help.glow/2);
+        font::print_wrap(PR_CEN, -1, 36 + offset, loc::gettext("Game saved ok!"), 255 - help.glow/2, 255 - help.glow/2, 255 - help.glow/2);
 
-        graphics.drawpixeltextbox(17, 65, 286, 90, 65, 185, 207);
+        graphics.drawpixeltextbox(17, 65 + offset, 286, 90, 65, 185, 207);
 
         if (map.custommode)
         {
-            font::print(PR_CEN | PR_FONT_LEVEL, -1, FLIP(90, 8), game.customleveltitle, 25, 255 - help.glow/2, 255 - help.glow/2);
+            font::print(PR_CEN | PR_FONT_LEVEL, -1, FLIP(90, 8) + offset, game.customleveltitle, 25, 255 - help.glow/2, 255 - help.glow/2);
         }
         else
         {
             size_t i;
             font::print(
-                PR_CEN, -1, FLIP(80, 8),
+                PR_CEN, -1, FLIP(80, 8) + offset,
                 loc::gettext_roomname_special(map.currentarea(game.last_quicksave.saverx, game.last_quicksave.savery)),
                 25, 255 - help.glow/2, 255 - help.glow/2
             );
@@ -3362,141 +3374,130 @@ void maprender(void)
             {
                 /* Crewmates are annoying. Their height is 21 pixels, but to flip them,
                  * we also have to account for their 2-pixel y-offset (and multiply it by 2). */
-                graphics.drawcrewman(169 - 3*42 + i*42, FLIP(95, 21 + 2*2), i, game.crewstats[i], true);
+                graphics.drawcrewman(169 - 3*42 + i*42, FLIP(95, 21 + 2*2) + offset, i, game.crewstats[i], true);
             }
         }
 
-        font::print(0, 59, FLIP(132, 8), game.savetime, 255 - help.glow/2, 255 - help.glow/2, 255 - help.glow/2);
+        font::print(0, 59, FLIP(132, 8) + offset, game.savetime, 255 - help.glow/2, 255 - help.glow/2, 255 - help.glow/2);
         char buffer[SCREEN_WIDTH_CHARS + 1];
         vformat_buf(buffer, sizeof(buffer),
             loc::gettext("{savebox_n_trinkets|wordy}"),
             "savebox_n_trinkets:int",
             game.savetrinkets
         );
-        font::print(PR_RIGHT, 262, FLIP(132, 8), buffer, 255 - help.glow/2, 255 - help.glow/2, 255 - help.glow/2);
+        font::print(PR_RIGHT, 262, FLIP(132, 8) + offset, buffer, 255 - help.glow/2, 255 - help.glow/2, 255 - help.glow/2);
 
         if (graphics.flipmode)
         {
-            graphics.draw_flipsprite(34, FLIP(126, 17), 50, graphics.col_clock);
-            graphics.draw_flipsprite(270, FLIP(126, 17), 22, graphics.col_trinket);
+            graphics.draw_flipsprite(34, FLIP(126, 17) + offset, 50, graphics.col_clock);
+            graphics.draw_flipsprite(270, FLIP(126, 17) + offset, 22, graphics.col_trinket);
         }
         else
         {
-            graphics.draw_sprite(34, FLIP(126, 17), 50, graphics.col_clock);
-            graphics.draw_sprite(270, FLIP(126, 17), 22, graphics.col_trinket);
+            graphics.draw_sprite(34, FLIP(126, 17) + offset, 50, graphics.col_clock);
+            graphics.draw_sprite(270, FLIP(126, 17) + offset, 22, graphics.col_trinket);
         }
         break;
     }
     case 10:
-        font::print(PR_CEN | PR_CJK_LOW, -1, 220, loc::gettext("[ QUIT ]"), 196, 196, 255 - help.glow);
+        font::print(PR_CEN | PR_CJK_LOW, -1, 220 + offset, loc::gettext("[ QUIT ]"), 196, 196, 255 - help.glow);
 
         if (graphics.flipmode)
         {
             if (game.inspecial())
             {
-                font::print_wrap(PR_CEN, -1, 135, loc::gettext("Return to main menu?"), 196, 196, 255 - help.glow, 12);
+                font::print_wrap(PR_CEN, -1, 135 + offset, loc::gettext("Return to main menu?"), 196, 196, 255 - help.glow, 12);
             }
             else
             {
-                font::print_wrap(PR_CEN, -1, 142, loc::gettext("Do you want to quit? You will lose any unsaved progress."), 196, 196, 255 - help.glow, 12);
+                font::print_wrap(PR_CEN, -1, 142 + offset, loc::gettext("Do you want to quit? You will lose any unsaved progress."), 196, 196, 255 - help.glow, 12);
             }
 
-            font::print(PR_RTL_XFLIP, 80-selection_offset, 88, loc::gettext("[ NO, KEEP PLAYING ]"), 196, 196, 255 - help.glow);
-            font::print(PR_RTL_XFLIP, 80 + 32, 76, loc::gettext("yes, quit to menu"),  96, 96, 96);
+            font::print(PR_RTL_XFLIP, 80-selection_offset, 88 + offset, loc::gettext("[ NO, KEEP PLAYING ]"), 196, 196, 255 - help.glow);
+            font::print(PR_RTL_XFLIP, 80 + 32, 76 + offset, loc::gettext("yes, quit to menu"),  96, 96, 96);
         }
         else
         {
 
             if (game.inspecial())
             {
-                font::print_wrap(PR_CEN, -1, 80, loc::gettext("Return to main menu?"), 196, 196, 255 - help.glow, 12);
+                font::print_wrap(PR_CEN, -1, 80 + offset, loc::gettext("Return to main menu?"), 196, 196, 255 - help.glow, 12);
             }
             else
             {
-                font::print_wrap(PR_CEN, -1, 76, loc::gettext("Do you want to quit? You will lose any unsaved progress."), 196, 196, 255 - help.glow, 12);
+                font::print_wrap(PR_CEN, -1, 76 + offset, loc::gettext("Do you want to quit? You will lose any unsaved progress."), 196, 196, 255 - help.glow, 12);
             }
 
-            font::print(PR_RTL_XFLIP, 80-selection_offset, 130, loc::gettext("[ NO, KEEP PLAYING ]"), 196, 196, 255 - help.glow);
-            font::print(PR_RTL_XFLIP, 80 + 32, 142, loc::gettext("yes, quit to menu"),  96, 96, 96);
+            font::print(PR_RTL_XFLIP, 80-selection_offset, 130 + offset, loc::gettext("[ NO, KEEP PLAYING ]"), 196, 196, 255 - help.glow);
+            font::print(PR_RTL_XFLIP, 80 + 32, 142 + offset, loc::gettext("yes, quit to menu"),  96, 96, 96);
 
         }
         break;
     case 11:
-        font::print(PR_CEN | PR_CJK_LOW, -1, 220, loc::gettext("[ QUIT ]"), 196, 196, 255 - help.glow);
+        font::print(PR_CEN | PR_CJK_LOW, -1, 220 + offset, loc::gettext("[ QUIT ]"), 196, 196, 255 - help.glow);
 
         if (graphics.flipmode)
         {
             if (game.inspecial())
             {
-                font::print_wrap(PR_CEN, -1, 135, loc::gettext("Return to main menu?"), 196, 196, 255 - help.glow, 12);
+                font::print_wrap(PR_CEN, -1, 135 + offset, loc::gettext("Return to main menu?"), 196, 196, 255 - help.glow, 12);
             }
             else
             {
-                font::print_wrap(PR_CEN, -1, 142, loc::gettext("Do you want to quit? You will lose any unsaved progress."), 196, 196, 255 - help.glow, 12);
+                font::print_wrap(PR_CEN, -1, 142 + offset, loc::gettext("Do you want to quit? You will lose any unsaved progress."), 196, 196, 255 - help.glow, 12);
             }
 
-            font::print(PR_RTL_XFLIP, 80, 88, loc::gettext("no, keep playing"), 96,96,96);
-            font::print(PR_RTL_XFLIP, 80+32-selection_offset, 76, loc::gettext("[ YES, QUIT TO MENU ]"),  196, 196, 255 - help.glow);
+            font::print(PR_RTL_XFLIP, 80, 88 + offset, loc::gettext("no, keep playing"), 96,96,96);
+            font::print(PR_RTL_XFLIP, 80+32-selection_offset, 76 + offset, loc::gettext("[ YES, QUIT TO MENU ]"),  196, 196, 255 - help.glow);
         }
         else
         {
             if (game.inspecial())
             {
-                font::print_wrap(PR_CEN, -1, 80, loc::gettext("Return to main menu?"), 196, 196, 255 - help.glow, 12);
+                font::print_wrap(PR_CEN, -1, 80 + offset, loc::gettext("Return to main menu?"), 196, 196, 255 - help.glow, 12);
             }
             else
             {
-                font::print_wrap(PR_CEN, -1, 76, loc::gettext("Do you want to quit? You will lose any unsaved progress."), 196, 196, 255 - help.glow, 12);
+                font::print_wrap(PR_CEN, -1, 76 + offset, loc::gettext("Do you want to quit? You will lose any unsaved progress."), 196, 196, 255 - help.glow, 12);
             }
 
-            font::print(PR_RTL_XFLIP, 80, 130, loc::gettext("no, keep playing"), 96,96,96);
-            font::print(PR_RTL_XFLIP, 80+32-selection_offset, 142, loc::gettext("[ YES, QUIT TO MENU ]"), 196, 196, 255 - help.glow);
+            font::print(PR_RTL_XFLIP, 80, 130 + offset, loc::gettext("no, keep playing"), 96,96,96);
+            font::print(PR_RTL_XFLIP, 80+32-selection_offset, 142 + offset, loc::gettext("[ YES, QUIT TO MENU ]"), 196, 196, 255 - help.glow);
         }
         break;
     case 20:
-        font::print(PR_CEN | PR_CJK_LOW, -1, 220, loc::gettext("[ GRAVITRON ]"), 196, 196, 255 - help.glow);
+        font::print(PR_CEN | PR_CJK_LOW, -1, 220 + offset, loc::gettext("[ GRAVITRON ]"), 196, 196, 255 - help.glow);
 
         if (graphics.flipmode)
         {
-            font::print_wrap(PR_CEN, -1, 88, loc::gettext("Do you want to return to the secret laboratory?"), 196, 196, 255 - help.glow, 12);
-            font::print(PR_RTL_XFLIP, 80-selection_offset, 142, loc::gettext("[ NO, KEEP PLAYING ]"), 196, 196, 255 - help.glow);
-            font::print(PR_RTL_XFLIP, 80 + 32, 130, loc::gettext("yes, return"),  96, 96, 96);
+            font::print_wrap(PR_CEN, -1, 88 + offset, loc::gettext("Do you want to return to the secret laboratory?"), 196, 196, 255 - help.glow, 12);
+            font::print(PR_RTL_XFLIP, 80-selection_offset, 142 + offset, loc::gettext("[ NO, KEEP PLAYING ]"), 196, 196, 255 - help.glow);
+            font::print(PR_RTL_XFLIP, 80 + 32, 130 + offset, loc::gettext("yes, return"),  96, 96, 96);
         }
         else
         {
-            font::print_wrap(PR_CEN, -1, 76, loc::gettext("Do you want to return to the secret laboratory?"), 196, 196, 255 - help.glow, 12);
-            font::print(PR_RTL_XFLIP, 80-selection_offset, 130, loc::gettext("[ NO, KEEP PLAYING ]"), 196, 196, 255 - help.glow);
-            font::print(PR_RTL_XFLIP, 80 + 32, 142, loc::gettext("yes, return"),  96, 96, 96);
+            font::print_wrap(PR_CEN, -1, 76 + offset, loc::gettext("Do you want to return to the secret laboratory?"), 196, 196, 255 - help.glow, 12);
+            font::print(PR_RTL_XFLIP, 80-selection_offset, 130 + offset, loc::gettext("[ NO, KEEP PLAYING ]"), 196, 196, 255 - help.glow);
+            font::print(PR_RTL_XFLIP, 80 + 32, 142 + offset, loc::gettext("yes, return"),  96, 96, 96);
         }
 
         break;
     case 21:
-        font::print(PR_CEN | PR_CJK_LOW, -1, 220, loc::gettext("[ GRAVITRON ]"), 196, 196, 255 - help.glow);
+        font::print(PR_CEN | PR_CJK_LOW, -1, 220 + offset, loc::gettext("[ GRAVITRON ]"), 196, 196, 255 - help.glow);
 
         if (graphics.flipmode)
         {
-            font::print_wrap(PR_CEN, -1, 88, loc::gettext("Do you want to return to the secret laboratory?"), 196, 196, 255 - help.glow, 12);
-            font::print(PR_RTL_XFLIP, 80, 142, loc::gettext("no, keep playing"), 96, 96, 96);
-            font::print(PR_RTL_XFLIP, 80 + 32-selection_offset, 130, loc::gettext("[ YES, RETURN ]"),  196, 196, 255 - help.glow);
+            font::print_wrap(PR_CEN, -1, 88 + offset, loc::gettext("Do you want to return to the secret laboratory?"), 196, 196, 255 - help.glow, 12);
+            font::print(PR_RTL_XFLIP, 80, 142 + offset, loc::gettext("no, keep playing"), 96, 96, 96);
+            font::print(PR_RTL_XFLIP, 80 + 32-selection_offset, 130 + offset, loc::gettext("[ YES, RETURN ]"),  196, 196, 255 - help.glow);
         }
         else
         {
-            font::print_wrap(PR_CEN, -1, 76, loc::gettext("Do you want to return to the secret laboratory?"), 196, 196, 255 - help.glow, 12);
-            font::print(PR_RTL_XFLIP, 80, 130, loc::gettext("no, keep playing"), 96, 96, 96);
-            font::print(PR_RTL_XFLIP, 80 + 32-selection_offset, 142, loc::gettext("[ YES, RETURN ]"),  196, 196, 255 - help.glow);
+            font::print_wrap(PR_CEN, -1, 76 + offset, loc::gettext("Do you want to return to the secret laboratory?"), 196, 196, 255 - help.glow, 12);
+            font::print(PR_RTL_XFLIP, 80, 130 + offset, loc::gettext("no, keep playing"), 96, 96, 96);
+            font::print(PR_RTL_XFLIP, 80 + 32-selection_offset, 142 + offset, loc::gettext("[ YES, RETURN ]"),  196, 196, 255 - help.glow);
         }
 
-    }
-
-    graphics.set_render_target(graphics.gameTexture);
-
-    if (graphics.resumegamemode || graphics.menuoffset > 0 || graphics.oldmenuoffset > 0)
-    {
-        graphics.menuoffrender();
-    }
-    else
-    {
-        graphics.copy_texture(graphics.menuTexture, NULL, NULL);
     }
 
     // We need to draw the black screen above the menu in order to disguise it
@@ -3526,14 +3527,14 @@ void teleporterrender(void)
     const int telex = map.teleporters[game.teleport_to_teleporter].x;
     const int teley = map.teleporters[game.teleport_to_teleporter].y;
 
-    draw_roomname_menu();
+    draw_roomname_menu(0);
 
     //Background color
     graphics.fill_rect(0, 12, 320, 240, G2D_RGB(10, 24, 26));
 
-    rendermap();
-    rendermapfog();
-    rendermapcursor(false);
+    rendermap(0);
+    rendermapfog(0);
+    rendermapcursor(0, false);
 
     // Draw a box around the currently selected teleporter
 
@@ -3550,7 +3551,7 @@ void teleporterrender(void)
 
     // Draw the legend itself
 
-    rendermaplegend();
+    rendermaplegend(0);
 
     // Highlight the currently selected teleporter
 
@@ -3589,17 +3590,6 @@ void teleporterrender(void)
         );
 
         font::print(PR_CEN | PR_BOR, -1, graphics.flipmode ? 228 : 5, buffer_adv, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
-    }
-
-    graphics.set_render_target(graphics.gameTexture);
-
-    if (graphics.resumegamemode || graphics.menuoffset > 0 || graphics.oldmenuoffset > 0)
-    {
-        graphics.menuoffrender();
-    }
-    else
-    {
-        graphics.copy_texture(graphics.menuTexture, NULL, NULL);
     }
 
     graphics.render();

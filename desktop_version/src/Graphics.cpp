@@ -247,22 +247,22 @@ void Graphics::updatetitlecolours(void)
 }
 
 
-void Graphics::map_tab(int opt, const char* text, bool selected /*= false*/)
+void Graphics::map_tab(int opt, const int offset, const char* text, bool selected /*= false*/)
 {
     int x = opt*80 + 40;
     if (selected)
     {
         char buffer[SCREEN_WIDTH_CHARS + 1];
         vformat_buf(buffer, sizeof(buffer), loc::get_langmeta()->menu_select_tight.c_str(), "label:str", text);
-        font::print(PR_CEN | PR_CJK_LOW | PR_RTL_XFLIP, x, 220, buffer, 196, 196, 255 - help.glow);
+        font::print(PR_CEN | PR_CJK_LOW | PR_RTL_XFLIP, x, 220 + offset, buffer, 196, 196, 255 - help.glow);
     }
     else
     {
-        font::print(PR_CEN | PR_CJK_LOW | PR_RTL_XFLIP, x, 220, text, 64, 64, 64);
+        font::print(PR_CEN | PR_CJK_LOW | PR_RTL_XFLIP, x, 220 + offset, text, 64, 64, 64);
     }
 }
 
-void Graphics::map_option(int opt, int num_opts, const std::string& text, bool selected /*= false*/)
+void Graphics::map_option(int opt, int num_opts, const int offset, const std::string& text, bool selected /*= false*/)
 {
     int x = 80 + opt*32;
     int y = 136; // start from middle of menu
@@ -290,11 +290,11 @@ void Graphics::map_option(int opt, int num_opts, const std::string& text, bool s
         // Account for brackets
         x -= (font::len(0, buffer) - font::len(0, text_upper.c_str())) / 2;
 
-        font::print(PR_RTL_XFLIP, x, y, buffer, 196, 196, 255 - help.glow);
+        font::print(PR_RTL_XFLIP, x, y + offset, buffer, 196, 196, 255 - help.glow);
     }
     else
     {
-        font::print(PR_RTL_XFLIP, x, y, loc::remove_toupper_escape_chars(text), 96, 96, 96);
+        font::print(PR_RTL_XFLIP, x, y + offset, loc::remove_toupper_escape_chars(text), 96, 96, 96);
     }
 }
 
@@ -2908,22 +2908,6 @@ g2dColor Graphics::getcol( int t )
 }
 #undef GETCOL_RANDOM
 
-void Graphics::menuoffrender(void)
-{
-    if (copy_texture(gameplayTexture, NULL, NULL) != 0)
-    {
-        return;
-    }
-
-    const int offset = (int) lerp(oldmenuoffset, menuoffset);
-    const SDL_Rect offsetRect = {0, offset, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS};
-
-    if (copy_texture(menuTexture, NULL, &offsetRect) != 0)
-    {
-        return;
-    }
-}
-
 g2dColor Graphics::huetilegetcol()
 {
     if (game.noflashingmode)
@@ -3231,11 +3215,6 @@ void Graphics::updatescreenshake(void)
     screenshake_y = 16 + static_cast<Sint32>((fRandom() * 7) - 4);
 }
 
-void Graphics::draw_window_background(void)
-{
-    clear();
-}
-
 void Graphics::render(void)
 {
     ime_render();
@@ -3249,7 +3228,7 @@ void Graphics::render(void)
     set_render_target(NULL);
     set_blendmode(SDL_BLENDMODE_NONE);
 
-    draw_window_background();
+    // draw_window_background();
 
     SDL_Rect stretch_info = {0, 0, 320, 240};
 
