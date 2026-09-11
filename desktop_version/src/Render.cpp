@@ -1202,34 +1202,6 @@ static void menurender(void)
         switch (game.currentmenuoption)
         {
         case 0:
-        {
-            font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Unfocus Pause"), tr, tg, tb);
-            int next_y = font::print_wrap(PR_CEN, -1, 65, loc::gettext("Toggle if the game will pause when the window is unfocused."), tr, tg, tb);
-            if (game.disablepause)
-            {
-                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Unfocus pause is OFF"), tr/2, tg/2, tb/2);
-            }
-            else
-            {
-                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Unfocus pause is ON"), tr, tg, tb);
-            }
-            break;
-        }
-        case 1:
-        {
-            font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Unfocus Audio"), tr, tg, tb);
-            int next_y = font::print_wrap(PR_CEN, -1, 65, loc::gettext("Toggle if the audio will pause when the window is unfocused."), tr, tg, tb);
-            if (game.disableaudiopause)
-            {
-                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Unfocus audio pause is OFF"), tr/2, tg/2, tb/2);
-            }
-            else
-            {
-                font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Unfocus audio pause is ON"), tr, tg, tb);
-            }
-            break;
-        }
-        case 2:
             font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Room Name BG"), tr, tg, tb);
             int next_y = font::print_wrap(PR_CEN, -1, 65, loc::gettext("Lets you see through what is behind the name at the bottom of the screen."), tr, tg, tb);
             if (graphics.translucentroomname)

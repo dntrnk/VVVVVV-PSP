@@ -830,18 +830,6 @@ static void menuactionpress(void)
         switch (game.currentmenuoption)
         {
         case 0:
-            // toggle unfocus pause
-            game.disablepause = !game.disablepause;
-            game.savestatsandsettings_menu();
-            music.playef(Sound_VIRIDIAN);
-            break;
-        case 1:
-            /* toggle unfocus music pause */
-            game.disableaudiopause = !game.disableaudiopause;
-            game.savestatsandsettings_menu();
-            music.playef(Sound_VIRIDIAN);
-            break;
-        case 2:
             // toggle translucent roomname BG
             graphics.translucentroomname = !graphics.translucentroomname;
             game.savestatsandsettings_menu();

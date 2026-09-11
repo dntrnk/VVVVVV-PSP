@@ -6842,8 +6842,6 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         break;
     }
     case Menu::advancedoptions:
-        option(loc::gettext("unfocus pause"));
-        option(loc::gettext("unfocus audio pause"));
         option(loc::gettext("room name background"));
         option(loc::gettext("return"));
         menuyoff = 0;
