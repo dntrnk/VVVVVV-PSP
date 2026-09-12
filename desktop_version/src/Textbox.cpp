@@ -252,7 +252,7 @@ void textboxclass::padtowidth(size_t new_w)
     resize();
     uint8_t glyph_w = 8;
     font::glyph_dimensions(print_flags, &glyph_w, NULL);
-    size_t chars_w = SDL_max(w-16, new_w) / glyph_w;
+    size_t chars_w = std::max(static_cast<size_t>(w-16), new_w) / glyph_w;
     for (size_t iter = 0; iter < lines.size(); iter++)
     {
         size_t n_glyphs = font::len(print_flags, lines[iter].c_str()) / glyph_w;
@@ -300,7 +300,7 @@ void textboxclass::wrap(int pad)
     do {
         size_t pos_n = wrapped.find('\n', startline);
         size_t pos_p = wrapped.find('|', startline);
-        newline = SDL_min(pos_n, pos_p);
+        newline = std::min(pos_n, pos_p);
         addline(wrapped.substr(startline, newline-startline));
         startline = newline + 1;
     } while (newline != std::string::npos);

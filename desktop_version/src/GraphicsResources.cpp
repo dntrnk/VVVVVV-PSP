@@ -559,9 +559,9 @@ void GraphicsResources::init_translations(void)
 //     char path_xml[256];
 //     char path_sprites[256];
 //     char path_flipsprites[256];
-//     SDL_snprintf(path_xml, sizeof(path_xml), path_template, langcode, "spritesmask.xml");
-//     SDL_snprintf(path_sprites, sizeof(path_sprites), path_template, langcode, "sprites.png");
-//     SDL_snprintf(path_flipsprites, sizeof(path_flipsprites), path_template, langcode, "flipsprites.png");
+//     snprintf(path_xml, sizeof(path_xml), path_template, langcode, "spritesmask.xml");
+//     snprintf(path_sprites, sizeof(path_sprites), path_template, langcode, "sprites.png");
+//     snprintf(path_flipsprites, sizeof(path_flipsprites), path_template, langcode, "flipsprites.png");
 
 //     /* We don't want to apply main-game translations to level-specific (custom) sprites.
 //      * Either sprites and translations are BOTH main-game, or BOTH level-specific.
@@ -739,15 +739,15 @@ bool SaveScreenshot(void)
     char name[32];
     if (subsecond_counter > 1)
     {
-        SDL_snprintf(name, sizeof(name), "%s_%i", timestamp, subsecond_counter);
+        snprintf(name, sizeof(name), "%s_%i", timestamp, subsecond_counter);
     }
     else
     {
-        SDL_strlcpy(name, timestamp, sizeof(name));
+        strlcpy(name, timestamp, sizeof(name));
     }
 
     char filename[64];
-    SDL_snprintf(filename, sizeof(filename), "screenshots/1x/%s_1x.png", name);
+    snprintf(filename, sizeof(filename), "screenshots/1x/%s_1x.png", name);
 
     success = SaveImage(graphics.tempScreenshot, filename);
     if (!success)
@@ -762,7 +762,7 @@ bool SaveScreenshot(void)
         return false;
     }
 
-    SDL_snprintf(filename, sizeof(filename), "screenshots/2x/%s_2x.png", name);
+    snprintf(filename, sizeof(filename), "screenshots/2x/%s_2x.png", name);
 
     success = SaveImage(graphics.tempScreenshot2x, filename);
     if (!success)

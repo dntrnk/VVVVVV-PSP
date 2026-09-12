@@ -1,7 +1,6 @@
 #ifndef TEXTBOOK_H
 #define TEXTBOOK_H
 
-#include <SDL_stdinc.h>
 #include <stdbool.h>
 #include <stddef.h>
 

@@ -91,31 +91,31 @@ static void loadmeta(LangMeta& meta, const std::string& langcode = lang)
             pText = "";
         }
 
-        if (SDL_strcmp(pKey, "active") == 0)
+        if (strcmp(pKey, "active") == 0)
             meta.active = help.Int(pText);
-        else if (SDL_strcmp(pKey, "nativename") == 0)
+        else if (strcmp(pKey, "nativename") == 0)
             meta.nativename = std::string(pText);
-        else if (SDL_strcmp(pKey, "credit") == 0)
+        else if (strcmp(pKey, "credit") == 0)
             meta.credit = std::string(pText);
-        else if (SDL_strcmp(pKey, "action_hint") == 0)
+        else if (strcmp(pKey, "action_hint") == 0)
             meta.action_hint = std::string(pText);
-        else if (SDL_strcmp(pKey, "gamepad_hint") == 0)
+        else if (strcmp(pKey, "gamepad_hint") == 0)
             meta.gamepad_hint = std::string(pText);
-        else if (SDL_strcmp(pKey, "autowordwrap") == 0)
+        else if (strcmp(pKey, "autowordwrap") == 0)
             meta.autowordwrap = help.Int(pText);
-        else if (SDL_strcmp(pKey, "toupper") == 0)
+        else if (strcmp(pKey, "toupper") == 0)
             meta.toupper = help.Int(pText);
-        else if (SDL_strcmp(pKey, "toupper_i_dot") == 0)
+        else if (strcmp(pKey, "toupper_i_dot") == 0)
             meta.toupper_i_dot = help.Int(pText);
-        else if (SDL_strcmp(pKey, "toupper_lower_escape_char") == 0)
+        else if (strcmp(pKey, "toupper_lower_escape_char") == 0)
             meta.toupper_lower_escape_char = help.Int(pText);
-        else if (SDL_strcmp(pKey, "rtl") == 0)
+        else if (strcmp(pKey, "rtl") == 0)
             meta.rtl = help.Int(pText);
-        else if (SDL_strcmp(pKey, "menu_select") == 0)
+        else if (strcmp(pKey, "menu_select") == 0)
             meta.menu_select = std::string(pText);
-        else if (SDL_strcmp(pKey, "menu_select_tight") == 0)
+        else if (strcmp(pKey, "menu_select_tight") == 0)
             meta.menu_select_tight = std::string(pText);
-        else if (SDL_strcmp(pKey, "font") == 0)
+        else if (strcmp(pKey, "font") == 0)
             font::find_main_font_by_name(pText, &meta.font_idx);
     }
 }
@@ -139,7 +139,7 @@ static void map_store_translation(Textbook* textbook, hashmap* map, const char* 
         return;
     }
 
-    hashmap_set(map, tb_eng, SDL_strlen(tb_eng), (uintptr_t) tb_tra);
+    hashmap_set(map, tb_eng, strlen(tb_eng), (uintptr_t) tb_tra);
 }
 
 unsigned char form_for_count(int n)
@@ -150,12 +150,12 @@ unsigned char form_for_count(int n)
         /* Plural forms for negative numbers are debatable in any language I'd imagine...
          * But they shouldn't appear anyway unless there's a bug or you're asking for it.
          * Or do YOU ever get -10 deaths while collecting -1 trinket? */
-        n_ix = SDL_abs(n);
+        n_ix = std::abs(n);
     }
     else
     {
         /* Plural forms for 100 and above always just keep repeating. Thank goodness. */
-        n_ix = SDL_abs(n % 100) + 100;
+        n_ix = std::abs(n % 100) + 100;
     }
 
     return number_plural_form[n_ix];
@@ -194,8 +194,8 @@ static void resettext_custom(bool final_shutdown)
     {
         map_translation_cutscene_custom = hashmap_create();
 
-        SDL_zeroa(translation_roomnames_custom);
-        SDL_zeroa(explanation_roomnames_custom);
+        memset(translation_roomnames_custom, 0, sizeof(translation_roomnames_custom));
+        memset(explanation_roomnames_custom, 0, sizeof(explanation_roomnames_custom));
 
         n_untranslated_roomnames_custom = 0;
         n_unexplained_roomnames_custom = 0;
@@ -246,17 +246,17 @@ void resettext(bool final_shutdown)
             number[i] = "";
             number2[i] = "";
         }
-        SDL_zeroa(number_plural_form);
+        memset(number_plural_form, 0, sizeof(number_plural_form));
         number_plural_form[1] = 1;
 
-        SDL_zeroa(translation_roomnames);
-        SDL_zeroa(explanation_roomnames);
+        memset(translation_roomnames, 0, sizeof(translation_roomnames));
+        memset(explanation_roomnames, 0, sizeof(explanation_roomnames));
 
         n_untranslated_roomnames = 0;
         n_unexplained_roomnames = 0;
-        SDL_zeroa(n_untranslated_roomnames_area);
+        memset(n_untranslated_roomnames_area, 0, sizeof(n_untranslated_roomnames_area));
 
-        SDL_zeroa(n_untranslated);
+        memset(n_untranslated, 0, sizeof(n_untranslated));
 
         map_translation_roomnames_special = hashmap_create();
     }
@@ -273,13 +273,13 @@ bool parse_max(const char* max, unsigned short* max_w, unsigned short* max_h)
         return false;
     }
 
-    char* max_mut = SDL_strdup(max);
+    char* max_mut = strdup(max);
     if (max_mut == NULL)
     {
         return false;
     }
 
-    char* asterisk = SDL_strchr(max_mut, '*');
+    char* asterisk = strchr(max_mut, '*');
     if (asterisk != NULL)
     {
         asterisk[0] = '\0';
@@ -306,7 +306,7 @@ static bool max_check_string(const char* str, const char* max)
     }
 
     /* Special case that must ALWAYS be 2 lines even when the font is bigger */
-    if (SDL_strcmp(str, "You have rescued a crew member!") == 0 && max_h == 1)
+    if (strcmp(str, "You have rescued a crew member!") == 0 && max_h == 1)
     {
         max_h = 2;
     }
@@ -331,12 +331,12 @@ static bool max_check_string(const char* str, const char* max)
     {
         short lines;
         font::string_wordwrap(print_flags, str, max_w_px, &lines);
-        does_overflow = lines*SDL_max(10, font_h) > (short) max_h_px;
+        does_overflow = lines*std::max(static_cast<uint8_t>(10), font_h) > (short) max_h_px;
     }
 
     // Convert max_w and max_h from 8x8 into local
     max_w = max_w_px / font_w;
-    max_h = max_h_px / SDL_max(10, font_h);
+    max_h = max_h_px / std::max(static_cast<uint8_t>(10), font_h);
 
     if (does_overflow)
     {
@@ -554,12 +554,12 @@ static bool get_level_lang_path(bool custom_level, const char* cat, std::string&
 
     if (custom_level
         && custom_level_path != NULL
-        && SDL_strncmp(custom_level_path, "levels/", 7) == 0
-        && SDL_strlen(custom_level_path) > (sizeof(".vvvvvv")-1)
+        && strncmp(custom_level_path, "levels/", 7) == 0
+        && strlen(custom_level_path) > (sizeof(".vvvvvv")-1)
     )
     {
         /* Get rid of .vvvvvv */
-        size_t len = SDL_strlen(custom_level_path)-7;
+        size_t len = strlen(custom_level_path)-7;
         doc_path = std::string(custom_level_path, len);
         doc_path.append("/custom_");
         doc_path.append(cat);
@@ -656,7 +656,7 @@ static void loadtext_cutscenes(bool custom_level)
         hashmap_set_free(
             map,
             script_id,
-            SDL_strlen(script_id),
+            strlen(script_id),
             (uintptr_t) cutscene_map,
             callback_free_map_value,
             NULL
@@ -716,7 +716,7 @@ static void loadtext_cutscenes(bool custom_level)
             {
                 continue;
             }
-            hashmap_set(cutscene_map, tb_eng, SDL_strlen(tb_eng), (uintptr_t) tb_format);
+            hashmap_set(cutscene_map, tb_eng, strlen(tb_eng), (uintptr_t) tb_format);
         }
     }
 }
@@ -967,7 +967,7 @@ static void loadtext_roomnames(bool custom_level, bool check_max)
             }
 
             const RoomProperty* const room = cl.getroomprop(x, y);
-            if (SDL_strcmp(original_roomname, room->roomname.c_str()) != 0)
+            if (strcmp(original_roomname, room->roomname.c_str()) != 0)
             {
                 continue;
             }
@@ -1033,7 +1033,7 @@ void loadtext_custom(const char* custom_path)
     resettext_custom(false);
     if (custom_level_path == NULL && custom_path != NULL)
     {
-        custom_level_path = SDL_strdup(custom_path);
+        custom_level_path = strdup(custom_path);
     }
     loadtext_cutscenes(true);
     loadtext_roomnames(true, false);
@@ -1051,7 +1051,7 @@ void loadtext(bool check_max)
             // We may still need the room name explanations
             loadtext_roomnames(false, false);
             n_untranslated_roomnames = 0;
-            SDL_zeroa(n_untranslated_roomnames_area);
+            memset(n_untranslated_roomnames_area, 0, sizeof(n_untranslated_roomnames_area));
         }
     }
     else
@@ -1089,7 +1089,7 @@ void loadlanguagelist(void)
         {
             languagelist.push_back(meta);
 
-            if (SDL_strcmp(lang.c_str(), code) == 0)
+            if (strcmp(lang.c_str(), code) == 0)
             {
                 languagelist_curlang = opt;
             }
@@ -1103,7 +1103,7 @@ void loadlanguagelist(void)
 const char* map_lookup_text(hashmap* map, const char* eng, const char* fallback)
 {
     uintptr_t ptr_tra;
-    bool found = hashmap_get(map, eng, SDL_strlen(eng), &ptr_tra);
+    bool found = hashmap_get(map, eng, strlen(eng), &ptr_tra);
     const char* tra = (const char*) ptr_tra;
 
     if (found && tra != NULL && tra[0] != '\0')
@@ -1121,15 +1121,15 @@ char* add_disambiguator(char disambiguator, const char* original_string, size_t*
      * It's needed to store plural forms, and when the same text appears multiple times in a cutscene.
      * Caller must VVV_free. */
 
-    size_t alloc_len = 1+SDL_strlen(original_string)+1;
+    size_t alloc_len = 1+strlen(original_string)+1;
 
-    char* alloc = (char*) SDL_malloc(alloc_len);
+    char* alloc = (char*) malloc(alloc_len);
     if (alloc == NULL)
     {
         return NULL;
     }
     alloc[0] = disambiguator;
-    SDL_memcpy(&alloc[1], original_string, alloc_len-1);
+    memcpy(&alloc[1], original_string, alloc_len-1);
 
     if (ext_alloc_len != NULL)
     {

@@ -91,18 +91,18 @@ void entityclass::init(void)
     altstates = 0;
 
 
-    SDL_memset(customcrewmoods, true, sizeof(customcrewmoods));
+    memset(customcrewmoods, true, sizeof(customcrewmoods));
 
     resetallflags();
-    SDL_memset(collect, false, sizeof(collect));
-    SDL_memset(customcollect, false, sizeof(customcollect));
+    memset(collect, false, sizeof(collect));
+    memset(customcollect, false, sizeof(customcollect));
 
     k = 0;
 }
 
 void entityclass::resetallflags(void)
 {
-    SDL_memset(flags, false, sizeof(flags));
+    memset(flags, false, sizeof(flags));
 }
 
 int entityclass::swncolour( int t )

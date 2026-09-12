@@ -474,7 +474,7 @@ void KeyPoll::Poll(void)
                         music.resumeef();
                     }
                 }
-                if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") == 0)
+                if (strcmp(SDL_GetCurrentVideoDriver(), "x11") == 0)
                 {
                     if (wasFullscreen)
                     {
@@ -498,7 +498,7 @@ void KeyPoll::Poll(void)
                     }
                 }
 
-                if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") == 0)
+                if (strcmp(SDL_GetCurrentVideoDriver(), "x11") == 0)
                 {
                     wasFullscreen = !gameScreen.isWindowed;
                     gameScreen.isWindowed = true;

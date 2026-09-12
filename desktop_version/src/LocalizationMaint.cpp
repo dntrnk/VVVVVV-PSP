@@ -25,7 +25,7 @@ static void write_max_local(tinyxml2::XMLElement* pElem, uint8_t glyph_w, uint8_
         if (parse_max(max, &max_w, &max_h))
         {
             max_local_w = (max_w*8) / glyph_w;
-            max_local_h = (max_h*10) / SDL_max(10, glyph_h);
+            max_local_h = (max_h*10) / std::max(static_cast<uint8_t>(10), glyph_h);
 
             if (max_local_h == 0)
             {
@@ -35,11 +35,11 @@ static void write_max_local(tinyxml2::XMLElement* pElem, uint8_t glyph_w, uint8_
             char buf[16];
             if (max_h == 1)
             {
-                SDL_snprintf(buf, sizeof(buf), "%d", max_local_w);
+                snprintf(buf, sizeof(buf), "%d", max_local_w);
             }
             else
             {
-                SDL_snprintf(buf, sizeof(buf), "%d*%d", max_local_w, max_local_h);
+                snprintf(buf, sizeof(buf), "%d*%d", max_local_w, max_local_h);
             }
             pElem->SetAttribute("max_local", buf);
         }
@@ -49,7 +49,7 @@ static void write_max_local(tinyxml2::XMLElement* pElem, uint8_t glyph_w, uint8_
 static void write_max_local_decl(tinyxml2::XMLDocument* doc, uint8_t glyph_w, uint8_t glyph_h)
 {
     char buf[16];
-    SDL_snprintf(buf, sizeof(buf), "%dx%d", glyph_w, glyph_h);
+    snprintf(buf, sizeof(buf), "%dx%d", glyph_w, glyph_h);
     doc->FirstChildElement()->SetAttribute("max_local_for", buf);
 }
 
@@ -78,31 +78,31 @@ static void sync_lang_file(const std::string& langcode)
         {
             const char* pKey = pElem->Value();
 
-            if (SDL_strcmp(pKey, "active") == 0)
+            if (strcmp(pKey, "active") == 0)
                 pElem->SetText((int) langmeta.active);
-            else if (SDL_strcmp(pKey, "nativename") == 0)
+            else if (strcmp(pKey, "nativename") == 0)
                 pElem->SetText(langmeta.nativename.c_str());
-            else if (SDL_strcmp(pKey, "credit") == 0)
+            else if (strcmp(pKey, "credit") == 0)
                 pElem->SetText(langmeta.credit.c_str());
-            else if (SDL_strcmp(pKey, "action_hint") == 0)
+            else if (strcmp(pKey, "action_hint") == 0)
                 pElem->SetText(langmeta.action_hint.c_str());
-            else if (SDL_strcmp(pKey, "gamepad_hint") == 0)
+            else if (strcmp(pKey, "gamepad_hint") == 0)
                 pElem->SetText(langmeta.gamepad_hint.c_str());
-            else if (SDL_strcmp(pKey, "autowordwrap") == 0)
+            else if (strcmp(pKey, "autowordwrap") == 0)
                 pElem->SetText((int) langmeta.autowordwrap);
-            else if (SDL_strcmp(pKey, "toupper") == 0)
+            else if (strcmp(pKey, "toupper") == 0)
                 pElem->SetText((int) langmeta.toupper);
-            else if (SDL_strcmp(pKey, "toupper_i_dot") == 0)
+            else if (strcmp(pKey, "toupper_i_dot") == 0)
                 pElem->SetText((int) langmeta.toupper_i_dot);
-            else if (SDL_strcmp(pKey, "toupper_lower_escape_char") == 0)
+            else if (strcmp(pKey, "toupper_lower_escape_char") == 0)
                 pElem->SetText((int) langmeta.toupper_lower_escape_char);
-            else if (SDL_strcmp(pKey, "rtl") == 0)
+            else if (strcmp(pKey, "rtl") == 0)
                 pElem->SetText((int) langmeta.rtl);
-            else if (SDL_strcmp(pKey, "menu_select") == 0)
+            else if (strcmp(pKey, "menu_select") == 0)
                 pElem->SetText(langmeta.menu_select.c_str());
-            else if (SDL_strcmp(pKey, "menu_select_tight") == 0)
+            else if (strcmp(pKey, "menu_select_tight") == 0)
                 pElem->SetText(langmeta.menu_select_tight.c_str());
-            else if (SDL_strcmp(pKey, "font") == 0)
+            else if (strcmp(pKey, "font") == 0)
                 pElem->SetText(font::get_main_font_name(langmeta.font_idx));
         }
 
@@ -194,7 +194,7 @@ static void sync_lang_file(const std::string& langcode)
     {
         /* Form 255 is technically invalid, but we have to account for it */
         bool form_id_used[256];
-        SDL_zeroa(form_id_used);
+        memset(form_id_used, 0, sizeof(form_id_used));
         for (int num = 0; num < 200; num++)
         {
             form_id_used[number_plural_form[num]] = true;
@@ -259,7 +259,7 @@ static void sync_lang_file(const std::string& langcode)
             hashmap* map = map_translation_cutscene;
 
             uintptr_t ptr_cutscene_map;
-            bool found = hashmap_get(map, cutscene_id, SDL_strlen(cutscene_id), &ptr_cutscene_map);
+            bool found = hashmap_get(map, cutscene_id, strlen(cutscene_id), &ptr_cutscene_map);
             hashmap* cutscene_map = (hashmap*) ptr_cutscene_map;
             if (!found || cutscene_map == NULL)
             {
@@ -547,7 +547,7 @@ bool populate_cutscene_test(const char* script_id)
     {
         EXPECT_ELEM(pElem, "cutscene");
 
-        if (SDL_strcmp(pElem->Attribute("id"), script_id) != 0)
+        if (strcmp(pElem->Attribute("id"), script_id) != 0)
         {
             /* Not the correct cutscene */
             continue;

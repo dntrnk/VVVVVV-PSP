@@ -62,10 +62,10 @@ mapclass::mapclass(void)
     invincibility = false;
 
     //We create a blank map
-    SDL_memset(contents, 0, sizeof(contents));
+    memset(contents, 0, sizeof(contents));
 
-    SDL_memset(roomdeaths, 0, sizeof(roomdeaths));
-    SDL_memset(roomdeathsfinal, 0, sizeof(roomdeathsfinal));
+    memset(roomdeaths, 0, sizeof(roomdeaths));
+    memset(roomdeathsfinal, 0, sizeof(roomdeathsfinal));
     resetmap();
 
     setroomname("");
@@ -177,14 +177,14 @@ void mapclass::setroomname(const char* name)
 {
     VVV_free(roomname_heap);
 
-    const size_t size = SDL_strlcpy(
+    const size_t size = strlcpy(
         roomname_static, name, sizeof(roomname_static)
     ) + 1;
     roomname = roomname_static;
 
     if (size > sizeof(roomname_static))
     {
-        roomname_heap = SDL_strdup(name);
+        roomname_heap = strdup(name);
         if (roomname_heap != NULL)
         {
             roomname = roomname_heap;
@@ -195,7 +195,7 @@ void mapclass::setroomname(const char* name)
 void mapclass::resetmap(void)
 {
     //clear the explored area of the map
-    SDL_memset(explored, 0, sizeof(explored));
+    memset(explored, 0, sizeof(explored));
 }
 
 void mapclass::updateroomnames(void)
@@ -317,7 +317,7 @@ void mapclass::initmapdata(void)
             "The 9 O'Clock News"
         };
 
-        roomnamechange(45, 51, lines, SDL_arraysize(lines));
+        roomnamechange(45, 51, lines, std::size(lines));
     }
 
     {
@@ -331,7 +331,7 @@ void mapclass::initmapdata(void)
             "Dial M for Murder"
         };
 
-        roomnamechange(46, 51, lines, SDL_arraysize(lines));
+        roomnamechange(46, 51, lines, std::size(lines));
     }
 
     {
@@ -343,7 +343,7 @@ void mapclass::initmapdata(void)
             "Gunsmoke 1966"
         };
 
-        roomnamechange(47, 51, lines, SDL_arraysize(lines));
+        roomnamechange(47, 51, lines, std::size(lines));
     }
 
     {
@@ -357,7 +357,7 @@ void mapclass::initmapdata(void)
             "In the Margins"
         };
 
-        roomnamechange(50, 53, lines, SDL_arraysize(lines));
+        roomnamechange(50, 53, lines, std::size(lines));
     }
 
     {
@@ -371,7 +371,7 @@ void mapclass::initmapdata(void)
             "Heaven's Gate"
         };
 
-        roomnamechange(50, 54, lines, SDL_arraysize(lines));
+        roomnamechange(50, 54, lines, std::size(lines));
     }
 
     roomnameglitch(42, 51, "Rear Window", "Rear Vindow");
@@ -1457,7 +1457,7 @@ void mapclass::loadlevel(int rx, int ry)
         tileset = 1;
         extrarow = 1;
         const short* tmap = otherlevel.loadlevel(rx, ry);
-        copy_short_to_int(contents, tmap, SDL_arraysize(contents));
+        copy_short_to_int(contents, tmap, std::size(contents));
         setroomname(otherlevel.roomname);
         roomname_special = otherlevel.roomname_special;
         hiddenname = otherlevel.hiddenname;
@@ -1467,7 +1467,7 @@ void mapclass::loadlevel(int rx, int ry)
     case 2: //The Lab
     {
         const short* tmap = lablevel.loadlevel(rx, ry);
-        copy_short_to_int(contents, tmap, SDL_arraysize(contents));
+        copy_short_to_int(contents, tmap, std::size(contents));
         setroomname(lablevel.roomname);
         roomname_special = lablevel.roomname_special;
         tileset = 1;
@@ -1515,7 +1515,7 @@ void mapclass::loadlevel(int rx, int ry)
     case 4: //The Warpzone
     {
         const short* tmap = warplevel.loadlevel(rx, ry);
-        copy_short_to_int(contents, tmap, SDL_arraysize(contents));
+        copy_short_to_int(contents, tmap, std::size(contents));
         setroomname(warplevel.roomname);
         roomname_special = warplevel.roomname_special;
         tileset = 1;
@@ -1534,7 +1534,7 @@ void mapclass::loadlevel(int rx, int ry)
     case 5: //Space station
     {
         const short* tmap = spacestation2.loadlevel(rx, ry);
-        copy_short_to_int(contents, tmap, SDL_arraysize(contents));
+        copy_short_to_int(contents, tmap, std::size(contents));
         setroomname(spacestation2.roomname);
         roomname_special = spacestation2.roomname_special;
         tileset = 0;
@@ -1543,7 +1543,7 @@ void mapclass::loadlevel(int rx, int ry)
     case 6: //final level
     {
         const short* tmap = finallevel.loadlevel(rx, ry);
-        copy_short_to_int(contents, tmap, SDL_arraysize(contents));
+        copy_short_to_int(contents, tmap, std::size(contents));
         setroomname(finallevel.roomname);
         roomname_special = finallevel.roomname_special;
         tileset = 1;
@@ -1703,7 +1703,7 @@ void mapclass::loadlevel(int rx, int ry)
     case 11: //Tower Hallways //Content is held in final level routine
     {
         const short* tmap = finallevel.loadlevel(rx, ry);
-        copy_short_to_int(contents, tmap, SDL_arraysize(contents));
+        copy_short_to_int(contents, tmap, std::size(contents));
         setroomname(finallevel.roomname);
         roomname_special = finallevel.roomname_special;
         tileset = 2;
@@ -1790,7 +1790,7 @@ void mapclass::loadlevel(int rx, int ry)
         setroomname(room->roomname.c_str());
         extrarow = 1;
         const int* tmap = cl.loadlevel(rx, ry);
-        SDL_memcpy(contents, tmap, sizeof(contents));
+        memcpy(contents, tmap, sizeof(contents));
 
 
         roomtexton = false;

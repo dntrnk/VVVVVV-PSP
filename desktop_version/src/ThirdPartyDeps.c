@@ -6,12 +6,12 @@
 
 void* lodepng_malloc(size_t size)
 {
-    return SDL_malloc(size);
+    return malloc(size);
 }
 
 void* lodepng_realloc(void* ptr, size_t new_size)
 {
-    return SDL_realloc(ptr, new_size);
+    return realloc(ptr, new_size);
 }
 
 void lodepng_free(void* ptr)

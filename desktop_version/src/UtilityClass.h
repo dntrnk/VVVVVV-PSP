@@ -34,7 +34,7 @@ void VVV_fillstring(
 );
 
 #define INBOUNDS_VEC(index, vector) ((int) index >= 0 && (int) index < (int) vector.size())
-#define INBOUNDS_ARR(index, array) ((int) index >= 0 && (int) index < (int) SDL_arraysize(array))
+#define INBOUNDS_ARR(index, array) ((int) index >= 0 && (int) index < (int) std::size(array))
 
 #define WHINE_ONCE(message) \
     static bool whine = true; \
@@ -70,9 +70,9 @@ void _VVV_between(
 #define VVV_between(original, left, middle, right) \
     _VVV_between( \
         original, \
-        SDL_arraysize(left) - 1, \
+        std::size(left) - 1, \
         middle, \
-        SDL_arraysize(right) - 1, \
+        std::size(right) - 1, \
         sizeof(middle) \
     )
 

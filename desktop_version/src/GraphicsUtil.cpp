@@ -232,7 +232,7 @@ void ApplyFilter(SDL_Surface** src, SDL_Surface** dest)
             Uint8 green = G2D_GET_G(pixel);
             Uint8 blue = G2D_GET_B(pixel);
 
-            const g2dColor pixel_offset = ReadPixel(*src, SDL_min(x + red_offset, 319), sampley);
+            const g2dColor pixel_offset = ReadPixel(*src, std::min(x + red_offset, 319), sampley);
             Uint8 red = G2D_GET_R(pixel_offset);
 
             double mult;
@@ -247,11 +247,11 @@ void ApplyFilter(SDL_Surface** src, SDL_Surface** dest)
             }
 
             tmp = red + fRandom() * mult * 254;
-            red = SDL_min(tmp, 255);
+            red = std::min(tmp, 255);
             tmp = green + fRandom() * mult * 254;
-            green = SDL_min(tmp, 255);
+            green = std::min(tmp, 255);
             tmp = blue + fRandom() * mult * 254;
-            blue = SDL_min(tmp, 255);
+            blue = std::min(tmp, 255);
 
             if (y % 2 == 0)
             {
@@ -260,12 +260,12 @@ void ApplyFilter(SDL_Surface** src, SDL_Surface** dest)
                 blue = (Uint8) (blue / 1.2f);
             }
 
-            int distX = (int) ((SDL_abs(160.0f - x) / 160.0f) * 16);
-            int distY = (int) ((SDL_abs(120.0f - y) / 120.0f) * 32);
+            int distX = (int) ((std::abs(160.0f - x) / 160.0f) * 16);
+            int distY = (int) ((std::abs(120.0f - y) / 120.0f) * 32);
 
-            red = SDL_max(red - (distX + distY), 0);
-            green = SDL_max(green - (distX + distY), 0);
-            blue = SDL_max(blue - (distX + distY), 0);
+            red = std::max(red - (distX + distY), 0);
+            green = std::max(green - (distX + distY), 0);
+            blue = std::max(blue - (distX + distY), 0);
 
             const g2dColor color = G2D_RGBA(red, green, blue, G2D_GET_A(pixel));
             DrawPixel(*dest, x, y, color);

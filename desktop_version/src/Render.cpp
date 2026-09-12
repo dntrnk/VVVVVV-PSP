@@ -167,7 +167,7 @@ static void slider_get(char* buffer, size_t buffer_len, int position, int n_posi
     }
 
     int max_chars = ((target_width - font::len(0, "[]")) / font::len(0, ".")) + 2;
-    max_chars = SDL_min(max_chars, buffer_len-1);
+    max_chars = std::min((size_t) max_chars, buffer_len-1);
 
     int dots_per_position = (max_chars-2) / (n_positions-1);
     max_chars = dots_per_position * (n_positions-1) + 2;
@@ -208,7 +208,7 @@ static void volumesliderrender(void)
 
     if (game.slidermode == SLIDER_NONE)
     {
-        SDL_strlcpy(buffer, slider, sizeof(buffer));
+        strlcpy(buffer, slider, sizeof(buffer));
     }
     else
     {
@@ -235,7 +235,7 @@ static void inline drawglitchrunnertext(const int y)
         tempg /= 2;
         tempb /= 2;
 
-        SDL_strlcpy(buffer, loc::gettext("Glitchrunner mode is OFF"), sizeof(buffer));
+        strlcpy(buffer, loc::gettext("Glitchrunner mode is OFF"), sizeof(buffer));
     }
     else
     {
@@ -372,7 +372,7 @@ static void menurender(void)
                 }
 
                 font::print(title_flags | PR_2X | PR_CEN, -1, 15, title, tr, tg, tb);
-                int sp = SDL_max(10, font::height(level_flags));
+                int sp = std::max(10, font::height(level_flags));
                 graphics.print_level_creator(creator_flags, 40, creator, tr, tg, tb);
                 font::print(level_flags | PR_CEN, -1, 40+sp, cl.ListOfMetaData[tmp].website, tr, tg, tb);
                 font::print(level_flags | PR_CEN, -1, 40+sp*3, cl.ListOfMetaData[tmp].Desc1, tr, tg, tb);
@@ -582,7 +582,7 @@ static void menurender(void)
         int startidx = game.current_credits_list_index;
         int endidx = game.current_credits_list_index;
         endidx += Credits::translator_pagesize[game.translator_credits_pagenum];
-        endidx = SDL_min(endidx, (int)SDL_arraysize(Credits::translators));
+        endidx = std::min(endidx, (int)std::size(Credits::translators));
 
         int maxheight = 110;
 
@@ -616,7 +616,7 @@ static void menurender(void)
         font::print_wrap(PR_CEN, -1, 20, loc::gettext("VVVVVV is supported by the following patrons"), tr, tg, tb);
 
         int startidx = game.current_credits_list_index;
-        int endidx = SDL_min(startidx + 9, (int)SDL_arraysize(Credits::superpatrons));
+        int endidx = std::min(startidx + 9, (int)std::size(Credits::superpatrons));
 
         int xofs = 80 - 16;
         int yofs = 40 + 20;
@@ -634,7 +634,7 @@ static void menurender(void)
         font::print_wrap(PR_CEN, -1, 20, loc::gettext("and also by"), tr, tg, tb);
 
         int startidx = game.current_credits_list_index;
-        int endidx = SDL_min(startidx + 14, (int)SDL_arraysize(Credits::patrons));
+        int endidx = std::min(startidx + 14, (int)std::size(Credits::patrons));
 
         int maxheight = 10 * 14;
         int totalheight = (endidx - startidx) * 10;
@@ -654,7 +654,7 @@ static void menurender(void)
         font::print_wrap(PR_CEN, -1, 20, loc::gettext("With contributions on GitHub from"), tr, tg, tb);
 
         int startidx = game.current_credits_list_index;
-        int endidx = SDL_min(startidx + 9, (int)SDL_arraysize(Credits::githubfriends));
+        int endidx = std::min(startidx + 9, (int)std::size(Credits::githubfriends));
 
         int maxheight = 14 * 9;
         int totalheight = (endidx - startidx) * 14;
@@ -713,7 +713,7 @@ static void menurender(void)
     case Menu::controller:
     {
         int spacing = font::height(0);
-        spacing = SDL_max(spacing, 10);
+        spacing = std::max(spacing, 10);
 
         switch (game.currentmenuoption)
         {
@@ -824,7 +824,7 @@ static void menurender(void)
                     action = Action_InGame_Interact;
                 }
 
-                SDL_snprintf(
+                snprintf(
                     buffer_a, sizeof(buffer_a), "%s%s", lbl,
                     BUTTONGLYPHS_get_all_gamepad_buttons(buffer_b, sizeof(buffer_b), actionset, action)
                 );
@@ -978,7 +978,7 @@ static void menurender(void)
             );
             font::print(PR_FONT_8X8, 10, 10, buffer, tr/2, tg/2, tb/2);
 
-            int box_x = SDL_min(10, (320-overflow.max_w_px)/2);
+            int box_x = std::min(10, (320-overflow.max_w_px)/2);
             graphics.fill_rect(box_x-1, 30-1, overflow.max_w_px+2, overflow.max_h_px+2, G2D_RGB(tr/3, tg/3, tb/3));
 
             int wraplimit;
@@ -1007,7 +1007,7 @@ static void menurender(void)
         int coldiv;
 
         #define stat_line(y, filename, untranslated_counter) \
-            SDL_snprintf(buffer, sizeof(buffer), line_template, \
+            snprintf(buffer, sizeof(buffer), line_template, \
                 untranslated_counter \
             ); \
             coldiv = untranslated_counter > 0 ? 1 : 2; \
@@ -1431,7 +1431,7 @@ static void menurender(void)
     {
         font::print(PR_3X | PR_CEN, -1, 25, loc::gettext("GAME OVER"), tr, tg, tb);
 
-        for (size_t i = 0; i < SDL_arraysize(game.ndmresultcrewstats); i++)
+        for (size_t i = 0; i < std::size(game.ndmresultcrewstats); i++)
         {
             graphics.drawcrewman(169-(3*42)+(i*42), 68, i, game.ndmresultcrewstats[i], true);
         }
@@ -1496,7 +1496,7 @@ static void menurender(void)
     {
         font::print(PR_4X | PR_CEN | PR_CJK_LOW, -1, 8, loc::gettext("WOW"), tr, tg, tb);
 
-        for (size_t i = 0; i < SDL_arraysize(game.ndmresultcrewstats); i++)
+        for (size_t i = 0; i < std::size(game.ndmresultcrewstats); i++)
         {
             graphics.drawcrewman(169-(3*42)+(i*42), 68, i, game.ndmresultcrewstats[i], true);
         }
@@ -1728,17 +1728,17 @@ static void menurender(void)
             }
             else
             {
-                int sp = SDL_max(10, font::height(0));
+                int sp = std::max(10, font::height(0));
 
                 font::print(PR_RTL_XFLIP, 32, 65, loc::gettext("RECORDS"), tr, tg, tb);
                 const char* label = loc::gettext("TIME");
                 int label_len = font::len(0, label);
                 font::print(PR_RTL_XFLIP, 32, 65+sp, label, tr, tg, tb);
                 label = loc::gettext("SHINY");
-                label_len = SDL_max(label_len, font::len(0, label));
+                label_len = std::max(label_len, font::len(0, label));
                 font::print(PR_RTL_XFLIP, 32, 65+sp*2, label, tr, tg, tb);
                 label = loc::gettext("LIVES");
-                label_len = SDL_max(label_len, font::len(0, label));
+                label_len = std::max(label_len, font::len(0, label));
                 font::print(PR_RTL_XFLIP, 32, 65+sp*3, label, tr, tg, tb);
 
                 char buffer[SCREEN_WIDTH_CHARS + 1];
@@ -2093,7 +2093,7 @@ void gamecompleterender(void)
     {
         const char* text = loc::gettext("Localisation Project Led by");
         int x = SCREEN_WIDTH_PIXELS - font::len(0, text);
-        x = SDL_min(x, 40);
+        x = std::min(x, 40);
         font::print(PR_CJK_HIGH, x, creditOffset + position, text, tr, tg, tb);
         font::print(PR_2X | PR_FONT_8X8, 60, creditOffset + position + 10, "Dav999", tr, tg, tb);
     }
@@ -2102,7 +2102,7 @@ void gamecompleterender(void)
     {
         const char* text = loc::gettext("Pan-European Font Design by");
         int x = SCREEN_WIDTH_PIXELS - font::len(0, text);
-        x = SDL_min(x, 40);
+        x = std::min(x, 40);
         font::print(PR_CJK_HIGH, x, creditOffset + position, text, tr, tg, tb);
         font::print(PR_2X | PR_FONT_8X8, 60, creditOffset + position + 10, "Reese Rivers", tr, tg, tb);
     }
@@ -2111,7 +2111,7 @@ void gamecompleterender(void)
     {
         const char* text = loc::gettext("With contributions on GitHub from");
         int x = SCREEN_WIDTH_PIXELS - font::len(0, text);
-        x = SDL_min(x, 40);
+        x = std::min(x, 40);
         font::print(PR_CJK_HIGH, x, creditOffset + position, text, tr, tg, tb);
         font::print(PR_2X | PR_FONT_8X8, 60, creditOffset + position + 10, "Alexandra Fox", tr, tg, tb);
         font::print(PR_2X | PR_FONT_8X8, 60, creditOffset + position + 30, "mothbeanie", tr, tg, tb);
@@ -2122,7 +2122,7 @@ void gamecompleterender(void)
         font::print(PR_2X | PR_CJK_HIGH | PR_CEN, -1, creditOffset + position, loc::gettext("Translators"), tr, tg, tb);
     }
     creditOffset += 40;
-    for (size_t i = 0; i < SDL_arraysize(Credits::translators); i += 1)
+    for (size_t i = 0; i < std::size(Credits::translators); i += 1)
     {
         if (graphics.onscreen(creditOffset + position))
         {
@@ -2154,7 +2154,7 @@ void gamecompleterender(void)
 
     creditOffset += 50;
 
-    for (size_t i = 0; i < SDL_arraysize(Credits::superpatrons); i += 1)
+    for (size_t i = 0; i < std::size(Credits::superpatrons); i += 1)
     {
         if (graphics.onscreen(creditOffset + position))
         {
@@ -2170,7 +2170,7 @@ void gamecompleterender(void)
     }
     creditOffset += 20;
 
-    for (size_t i = 0; i < SDL_arraysize(Credits::patrons); i += 1)
+    for (size_t i = 0; i < std::size(Credits::patrons); i += 1)
     {
         if (graphics.onscreen(creditOffset + position))
         {
@@ -2186,7 +2186,7 @@ void gamecompleterender(void)
     }
     creditOffset += 30;
 
-    for (size_t i = 0; i < SDL_arraysize(Credits::githubfriends); i += 1)
+    for (size_t i = 0; i < std::size(Credits::githubfriends); i += 1)
     {
         if (graphics.onscreen(creditOffset + position))
         {
@@ -2299,7 +2299,7 @@ static void mode_indicator_text(const int alpha)
     {
         const char* english = "Invincibility mode enabled";
         const char* text = loc::gettext(english);
-        if (loc::lang != "en" && SDL_strcmp(english, text) == 0)
+        if (loc::lang != "en" && strcmp(english, text) == 0)
         {
             /* Substitute text */
             text = loc::gettext("Invincibility");
@@ -2314,10 +2314,10 @@ static void mode_indicator_text(const int alpha)
         char buffer[SCREEN_WIDTH_CHARS + 1];
         const char* english = "Glitchrunner mode enabled ({version})";
         const char* text = loc::gettext(english);
-        if (loc::lang != "en" && SDL_strcmp(english, text) == 0)
+        if (loc::lang != "en" && strcmp(english, text) == 0)
         {
             /* Substitute text */
-            SDL_strlcpy(buffer, loc::gettext("Glitchrunner Mode"), sizeof(buffer));
+            strlcpy(buffer, loc::gettext("Glitchrunner Mode"), sizeof(buffer));
         }
         else
         {
@@ -2332,7 +2332,7 @@ static void mode_indicator_text(const int alpha)
     {
         const char* english = "Flip Mode enabled";
         const char* text = loc::gettext(english);
-        if (loc::lang != "en" && SDL_strcmp(english, text) == 0)
+        if (loc::lang != "en" && strcmp(english, text) == 0)
         {
             /* Substitute text */
             text = loc::gettext("Flip Mode");
@@ -2689,10 +2689,10 @@ void gamerender(void)
             int label_len = font::len(0, tempstring);
             font::print(PR_BOR | PR_RTL_XFLIP, 6, 18, tempstring,  255,255,255);
             tempstring = loc::gettext("DEATH:");
-            label_len = SDL_max(label_len, font::len(0, tempstring));
+            label_len = std::max(label_len, font::len(0, tempstring));
             font::print(PR_BOR | PR_RTL_XFLIP, 6, 30, tempstring,  255,255,255);
             tempstring = loc::gettext("SHINY:");
-            label_len = SDL_max(label_len, font::len(0, tempstring));
+            label_len = std::max(label_len, font::len(0, tempstring));
             font::print(PR_BOR | PR_RTL_XFLIP, 6, 42, tempstring,  255,255,255);
 
             if(game.timetrialparlost)
@@ -3169,7 +3169,7 @@ void maprender(void)
             uint32_t creator_flags = meta.creator_is_gettext ? PR_FONT_INTERFACE : PR_FONT_LEVEL;
 
             font::print(title_flags | PR_2X | PR_CEN, -1, FLIP(45, 8) + offset, meta.title, 196, 196, 255 - help.glow);
-            int sp = SDL_max(10, font::height(PR_FONT_LEVEL));
+            int sp = std::max(10, font::height(PR_FONT_LEVEL));
             graphics.print_level_creator(creator_flags, FLIP(70, 8) + offset, meta.creator, 196, 196, 255 - help.glow);
             font::print(PR_FONT_LEVEL | PR_CEN, -1, FLIP(70+sp, 8) + offset, meta.website, 196, 196, 255 - help.glow);
             font::print(PR_FONT_LEVEL | PR_CEN, -1, FLIP(70+sp*3, 8) + offset, meta.Desc1, 196, 196, 255 - help.glow);
@@ -3366,7 +3366,7 @@ void maprender(void)
                 loc::gettext_roomname_special(map.currentarea(game.last_quicksave.saverx, game.last_quicksave.savery)),
                 25, 255 - help.glow/2, 255 - help.glow/2
             );
-            for (i = 0; i < SDL_arraysize(game.crewstats); ++i)
+            for (i = 0; i < std::size(game.crewstats); ++i)
             {
                 /* Crewmates are annoying. Their height is 21 pixels, but to flip them,
                  * we also have to account for their 2-pixel y-offset (and multiply it by 2). */

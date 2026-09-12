@@ -1,7 +1,5 @@
 #include "Textbook.h"
 
-#include <SDL.h>
-
 #include "Alloc.h"
 #include "Vlogging.h"
 
@@ -77,7 +75,7 @@ const void* textbook_store_raw(Textbook* textbook, const void* data, size_t data
             return NULL;
         }
 
-        textbook->page[found_page] = (char*) SDL_malloc(TEXTBOOK_PAGE_SIZE);
+        textbook->page[found_page] = (char*) malloc(TEXTBOOK_PAGE_SIZE);
         if (textbook->page[found_page] == NULL)
         {
             return NULL;
@@ -89,7 +87,7 @@ const void* textbook_store_raw(Textbook* textbook, const void* data, size_t data
 
     size_t cursor = textbook->page_len[found_page];
     char* added_text = &textbook->page[found_page][cursor];
-    SDL_memcpy(added_text, data, data_len);
+    memcpy(added_text, data, data_len);
     textbook->page_len[found_page] += data_len;
 
     return added_text;
@@ -108,5 +106,5 @@ const char* textbook_store(Textbook* textbook, const char* text)
         return "";
     }
 
-    return (const char*) textbook_store_raw(textbook, text, SDL_strlen(text)+1);
+    return (const char*) textbook_store_raw(textbook, text, strlen(text)+1);
 }

@@ -326,7 +326,7 @@ namespace level_debugger
             int x = 0;
             int y = 0;
 
-            for (int i = 0; i < (int) SDL_arraysize(obj.flags); i++)
+            for (int i = 0; i < (int) std::size(obj.flags); i++)
             {
                 g2dColor color = obj.flags[i] ? on : off;
                 font::print(PR_BOR | PR_FONT_8X8, 48 + x * 24, 48 + y * 16, help.String(i), G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color));

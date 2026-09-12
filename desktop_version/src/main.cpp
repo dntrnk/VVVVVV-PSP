@@ -130,7 +130,7 @@ static const inline struct ImplFunc* get_gamestate_funcs(
 #define FUNC_LIST_END \
             {Func_fixed, focused_end} \
         }; \
-        *num_implfuncs = SDL_arraysize(implfuncs); \
+        *num_implfuncs = std::size(implfuncs); \
         return implfuncs; \
     }
 
@@ -248,7 +248,7 @@ static const struct ImplFunc unfocused_func_list[] = {
     }
 };
 static const struct ImplFunc* unfocused_funcs = unfocused_func_list;
-static int num_unfocused_funcs = SDL_arraysize(unfocused_func_list);
+static int num_unfocused_funcs = std::size(unfocused_func_list);
 static int unfocused_func_index = 0; // This does not get incremented on start, do NOT use -1!
 
 static enum IndexCode increment_unfocused_func_index(void)
@@ -349,7 +349,7 @@ static void inline fixedloop(void)
             break;
         }
 
-        meta_func_index = (meta_func_index + 1) % SDL_arraysize(meta_funcs);
+        meta_func_index = (meta_func_index + 1) % std::size(meta_funcs);
     }
 }
 
@@ -400,7 +400,7 @@ int main(int argc, char *argv[])
 
     for (int i = 1; i < argc; ++i)
     {
-#define ARG(name) (SDL_strcmp(argv[i], name) == 0)
+#define ARG(name) (strcmp(argv[i], name) == 0)
 #define ARG_INNER(code) \
     if (i + 1 < argc) \
     { \

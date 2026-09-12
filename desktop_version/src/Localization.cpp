@@ -134,7 +134,7 @@ std::string getnumber(int n, const char* number_class)
 
     // FIXME: implement a more flexible system later, where translators define the classes
     std::string (*number_ptr)[101];
-    if (SDL_strcmp(number_class, "wordy2") == 0)
+    if (strcmp(number_class, "wordy2") == 0)
     {
         number_ptr = &number2;
     }
@@ -151,7 +151,7 @@ std::string getnumber(int n, const char* number_class)
 
 static bool is_script_custom(const char* script_id)
 {
-    return SDL_strncmp(script_id, "custom_", 7) == 0;
+    return strncmp(script_id, "custom_", 7) == 0;
 }
 
 const TextboxFormat* gettext_cutscene(const std::string& script_id, const std::string& eng, char textcase)
@@ -175,7 +175,7 @@ const TextboxFormat* gettext_cutscene(const std::string& script_id, const std::s
     }
 
     uintptr_t ptr_cutscene_map;
-    bool found = hashmap_get(map, map_script_key, SDL_strlen(map_script_key), &ptr_cutscene_map);
+    bool found = hashmap_get(map, map_script_key, strlen(map_script_key), &ptr_cutscene_map);
     hashmap* cutscene_map = (hashmap*) ptr_cutscene_map;
 
     if (!found || cutscene_map == NULL)
@@ -307,7 +307,7 @@ bool is_cutscene_translated(const std::string& script_id)
     }
 
     uintptr_t ptr_unused;
-    return hashmap_get(map, map_script_key, SDL_strlen(map_script_key), &ptr_unused);
+    return hashmap_get(map, map_script_key, strlen(map_script_key), &ptr_unused);
 }
 
 uint32_t toupper_ch(uint32_t ch)

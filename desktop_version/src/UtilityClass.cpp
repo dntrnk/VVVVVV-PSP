@@ -25,7 +25,7 @@ int ss_toi(const std::string& str)
             continue;
         }
 
-        if (SDL_isdigit(chr))
+        if (std::isdigit(chr))
         {
             retval *= radix;
             retval += chr - '0';
@@ -90,11 +90,11 @@ bool next_split_s(
 
     if (retval)
     {
-        /* Using SDL_strlcpy() here results in calling SDL_strlen() */
+        /* Using strlcpy() here results in calling strlen() */
         /* on the whole string, which results in a visible freeze */
         /* if it's a very large string */
-        const size_t length = SDL_min(buffer_size - 1, len);
-        SDL_memcpy(buffer, &str[prev_start], length);
+        const size_t length = std::min(buffer_size - 1, len);
+        memcpy(buffer, &str[prev_start], length);
         buffer[length] = '\0';
     }
 
@@ -122,7 +122,7 @@ int UtilityClass::Int(const char* str, int fallback /*= 0*/)
         return fallback;
     }
 
-    return (int) SDL_strtol(str, NULL, 0);
+    return (int) strtol(str, NULL, 0);
 }
 
 int UtilityClass::hms_to_seconds(int h, int m, int s)
@@ -256,7 +256,7 @@ void UtilityClass::updateglow(void)
 
 bool is_number(const char* str)
 {
-    if (!SDL_isdigit(str[0]) && str[0] != '-')
+    if (!std::isdigit(str[0]) && str[0] != '-')
     {
         return false;
     }
@@ -268,7 +268,7 @@ bool is_number(const char* str)
 
     for (size_t i = 1; str[i] != '\0'; ++i)
     {
-        if (!SDL_isdigit(str[i]))
+        if (!std::isdigit(str[i]))
         {
             return false;
         }
@@ -288,14 +288,14 @@ bool is_positive_num(const char* str, const bool hex)
     {
         if (hex)
         {
-            if (!SDL_isxdigit(str[i]))
+            if (!std::isxdigit(str[i]))
             {
                 return false;
             }
         }
         else
         {
-            if (!SDL_isdigit(str[i]))
+            if (!std::isdigit(str[i]))
             {
                 return false;
             }
@@ -307,15 +307,15 @@ bool is_positive_num(const char* str, const bool hex)
 
 bool endsWith(const char* str, const char* suffix)
 {
-    const size_t str_size = SDL_strlen(str);
-    const size_t suffix_size = SDL_strlen(suffix);
+    const size_t str_size = strlen(str);
+    const size_t suffix_size = strlen(suffix);
 
     if (str_size < suffix_size)
     {
         return false;
     }
 
-    return SDL_strcmp(&str[str_size - suffix_size], suffix) == 0;
+    return strcmp(&str[str_size - suffix_size], suffix) == 0;
 }
 
 void VVV_fillstring(
@@ -323,7 +323,7 @@ void VVV_fillstring(
     const size_t buffer_size,
     const char fillchar
 ) {
-    SDL_memset(buffer, fillchar, buffer_size - 1);
+    memset(buffer, fillchar, buffer_size - 1);
     buffer[buffer_size - 1] = '\0';
 }
 void _VVV_between(
@@ -333,11 +333,11 @@ void _VVV_between(
     const size_t right_length,
     const size_t middle_size
 ) {
-    size_t middle_length = SDL_strlen(original);
+    size_t middle_length = strlen(original);
     middle_length -= left_length + right_length;
-    SDL_strlcpy(
+    strlcpy(
         middle,
         &original[left_length],
-        SDL_min(middle_length + 1, middle_size)
+        std::min(middle_length + 1, middle_size)
     );
 }

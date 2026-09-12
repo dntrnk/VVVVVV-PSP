@@ -43,12 +43,12 @@ static int PLATFORM_getOSDirectory(char* output, const size_t output_size);
 
 static void* bridged_malloc(PHYSFS_uint64 size)
 {
-    return SDL_malloc(size);
+    return malloc(size);
 }
 
 static void* bridged_realloc(void* ptr, PHYSFS_uint64 size)
 {
-    return SDL_realloc(ptr, size);
+    return realloc(ptr, size);
 }
 
 static const PHYSFS_Allocator allocator = {
@@ -78,7 +78,7 @@ static bool mount_pre_datazip(
         {
             if (out_path != NULL)
             {
-                SDL_strlcpy(out_path, user_path, MAX_PATH);
+                strlcpy(out_path, user_path, MAX_PATH);
             }
             return true;
         }
@@ -91,7 +91,7 @@ static bool mount_pre_datazip(
     bool dir_found = false;
     char buffer[MAX_PATH];
 
-    SDL_snprintf(buffer, sizeof(buffer), "%s%s%s",
+    snprintf(buffer, sizeof(buffer), "%s%s%s",
         basePath,
         real_dirname,
         pathSep
@@ -105,11 +105,11 @@ static bool mount_pre_datazip(
         /* If you're a developer, you probably want to use the language files/fonts
          * from the repo, otherwise it's a pain to keep everything in sync.
          * And who knows how deep in build folders our binary is. */
-        size_t buf_reserve = SDL_strlen(real_dirname)+1;
-        SDL_strlcpy(buffer, basePath, sizeof(buffer)-buf_reserve);
+        size_t buf_reserve = strlen(real_dirname)+1;
+        strlcpy(buffer, basePath, sizeof(buffer)-buf_reserve);
 
         char needle[32];
-        SDL_snprintf(needle, sizeof(needle), "%sdesktop_version%s",
+        snprintf(needle, sizeof(needle), "%sdesktop_version%s",
             pathSep,
             pathSep
         );
@@ -117,7 +117,7 @@ static bool mount_pre_datazip(
         /* We want the last match */
         char* match_last = NULL;
         char* match = buffer;
-        while ((match = SDL_strstr(match, needle)))
+        while ((match = strstr(match, needle)))
         {
             match_last = match;
             match = &match[1];
@@ -127,14 +127,14 @@ static bool mount_pre_datazip(
         {
             /* strstr only gives us a pointer and not a remaining buffer length, but that's
              * why we pretended the buffer was `buf_reserve` chars shorter than it was! */
-            SDL_strlcpy(&match_last[SDL_strlen(needle)], real_dirname, buf_reserve);
-            SDL_strlcat(buffer, pathSep, sizeof(buffer));
+            strlcpy(&match_last[strlen(needle)], real_dirname, buf_reserve);
+            strlcat(buffer, pathSep, sizeof(buffer));
 
             if (PHYSFS_mount(buffer, mount_point, 1))
             {
                 dir_found = true;
 
-                if (SDL_strcmp(real_dirname, "lang") == 0)
+                if (strcmp(real_dirname, "lang") == 0)
                 {
                     loc::show_translator_menu = true;
                     isMainLangDirFromRepo = true;
@@ -147,7 +147,7 @@ static bool mount_pre_datazip(
     {
         if (out_path != NULL)
         {
-            SDL_strlcpy(out_path, buffer, MAX_PATH);
+            strlcpy(out_path, buffer, MAX_PATH);
         }
     }
     else
@@ -181,9 +181,9 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
     if (baseDir && baseDir[0] != '\0')
     {
         /* We later append to this path and assume it ends in a slash */
-        bool trailing_pathsep = SDL_strcmp(baseDir + SDL_strlen(baseDir) - SDL_strlen(pathSep), pathSep) == 0;
+        bool trailing_pathsep = strcmp(baseDir + strlen(baseDir) - strlen(pathSep), pathSep) == 0;
 
-        SDL_snprintf(output, sizeof(output), "%s%s",
+        snprintf(output, sizeof(output), "%s%s",
             baseDir,
             !trailing_pathsep ? pathSep : ""
         );
@@ -194,7 +194,7 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
     }
 
     /* Mount our base user directory */
-    SDL_strlcpy(writeDir, output, sizeof(writeDir));
+    strlcpy(writeDir, output, sizeof(writeDir));
     if (!PHYSFS_mount(writeDir, NULL, 0))
     {
         vlog_error(
@@ -216,7 +216,7 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
     vlog_info("Base directory: %s", writeDir);
 
     /* Store full save directory */
-    SDL_snprintf(saveDir, sizeof(saveDir), "%s%s%s",
+    snprintf(saveDir, sizeof(saveDir), "%s%s%s",
         writeDir,
         "saves",
         pathSep
@@ -225,7 +225,7 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
     vlog_info("Save directory: %s", saveDir);
 
     /* Store full level directory */
-    SDL_snprintf(levelDir, sizeof(levelDir), "%s%s%s",
+    snprintf(levelDir, sizeof(levelDir), "%s%s%s",
         writeDir,
         "levels",
         pathSep
@@ -234,7 +234,7 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
     vlog_info("Level directory: %s", levelDir);
 
     /* Store full screenshot directory */
-    SDL_snprintf(screenshotDir, sizeof(screenshotDir), "%s%s%s",
+    snprintf(screenshotDir, sizeof(screenshotDir), "%s%s%s",
         writeDir,
         "screenshots",
         pathSep
@@ -245,11 +245,11 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
     /* We also need to make the subdirectories */
     {
         char temp[MAX_PATH];
-        SDL_snprintf(temp, sizeof(temp), "%s%s%s",
+        snprintf(temp, sizeof(temp), "%s%s%s",
             screenshotDir, "1x", pathSep
         );
         sceIoMkdir(temp, 0777);
-        SDL_snprintf(temp, sizeof(temp), "%s%s%s",
+        snprintf(temp, sizeof(temp), "%s%s%s",
             screenshotDir, "2x", pathSep
         );
         sceIoMkdir(temp, 0777);
@@ -260,7 +260,7 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
     if (basePath == NULL)
     {
         vlog_warn("Unable to determine base path, falling back to current directory");
-        basePath = SDL_strdup("./");
+        basePath = strdup("./");
     }
 
     doesLangDirExist = mount_pre_datazip(mainLangDir, "lang", "lang/", langDir);
@@ -271,11 +271,11 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
     /* Mount the stock content last */
     if (assetsPath)
     {
-        SDL_strlcpy(output, assetsPath, sizeof(output));
+        strlcpy(output, assetsPath, sizeof(output));
     }
     else
     {
-        SDL_snprintf(output, sizeof(output), "%s%s",
+        snprintf(output, sizeof(output), "%s%s",
             basePath,
             "data.zip"
         );
@@ -300,7 +300,7 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
         return 0;
     }
 
-    SDL_snprintf(output, sizeof(output), "%s%s", basePath, "gamecontrollerdb.txt");
+    snprintf(output, sizeof(output), "%s%s", basePath, "gamecontrollerdb.txt");
     if (SDL_GameControllerAddMappingsFromFile(output) < 0)
     {
         vlog_info("gamecontrollerdb.txt not found!");
@@ -367,7 +367,7 @@ bool FILESYSTEM_restoreWriteDir(void)
 bool FILESYSTEM_setLangWriteDir(void)
 {
     const char* realLangDir = PHYSFS_getRealDir("lang");
-    if (realLangDir == NULL || SDL_strcmp(mainLangDir, realLangDir) != 0)
+    if (realLangDir == NULL || strcmp(mainLangDir, realLangDir) != 0)
     {
         vlog_error("Not setting language write dir: %s overrules %s when loading",
             realLangDir, mainLangDir
@@ -449,7 +449,7 @@ static void generateVirtualMountPath(char* path, const size_t path_size)
 {
     char random_str[6 + 1];
     generateBase36(random_str, sizeof(random_str));
-    SDL_snprintf(
+    snprintf(
         path,
         path_size,
         ".vvv-mnt-virtual-%s/custom-assets/",
@@ -503,7 +503,7 @@ static bool FILESYSTEM_mountAssetsFrom(const char *fname)
         return false;
     }
 
-    SDL_snprintf(path, sizeof(path), "%s/%s", real_dir, fname);
+    snprintf(path, sizeof(path), "%s/%s", real_dir, fname);
 
     generateVirtualMountPath(virtualMountPath, sizeof(virtualMountPath));
 
@@ -517,7 +517,7 @@ static bool FILESYSTEM_mountAssetsFrom(const char *fname)
         return false;
     }
 
-    SDL_strlcpy(assetDir, path, sizeof(assetDir));
+    strlcpy(assetDir, path, sizeof(assetDir));
     return true;
 }
 
@@ -548,7 +548,7 @@ bool FILESYSTEM_mountAssets(const char* path)
     const char* real_dir = PHYSFS_getRealDir(path);
 
     if (real_dir != NULL &&
-    SDL_strncmp(real_dir, "levels/", sizeof("levels/") - 1) == 0 &&
+    strncmp(real_dir, "levels/", sizeof("levels/") - 1) == 0 &&
     endsWith(real_dir, ".zip"))
     {
         /* This is a level zip */
@@ -569,7 +569,7 @@ bool FILESYSTEM_mountAssets(const char* path)
 
         VVV_between(path, "levels/", filename, ".vvvvvv");
 
-        SDL_snprintf(
+        snprintf(
             virtual_path,
             sizeof(virtual_path),
             "levels/%s/",
@@ -627,7 +627,7 @@ static void getMountedPath(
 
     if (assets_mounted)
     {
-        SDL_snprintf(
+        snprintf(
             mounted_path,
             sizeof(mounted_path),
             "%s%s",
@@ -645,7 +645,7 @@ static void getMountedPath(
         path = filename;
     }
 
-    SDL_strlcpy(buffer, path, buffer_size);
+    strlcpy(buffer, path, buffer_size);
 }
 
 bool FILESYSTEM_isAssetMounted(const char* filename)
@@ -668,7 +668,7 @@ bool FILESYSTEM_isAssetMounted(const char* filename)
         return false;
     }
 
-    return SDL_strcmp(assetDir, realDir) == 0;
+    return strcmp(assetDir, realDir) == 0;
 }
 
 bool FILESYSTEM_areAssetsInSameRealDir(const char* filenameA, const char* filenameB)
@@ -693,7 +693,7 @@ bool FILESYSTEM_areAssetsInSameRealDir(const char* filenameA, const char* filena
         return false;
     }
 
-    return SDL_strcmp(realDirA, realDirB) == 0;
+    return strcmp(realDirA, realDirB) == 0;
 }
 
 static void load_stdin(void)
@@ -703,7 +703,7 @@ static void load_stdin(void)
      * initial size of 1K shouldn't hurt. */
 #define INITIAL_SIZE 1024
     size_t alloc_size = INITIAL_SIZE;
-    stdin_buffer = (unsigned char*) SDL_malloc(INITIAL_SIZE);
+    stdin_buffer = (unsigned char*) malloc(INITIAL_SIZE);
 #undef INITIAL_SIZE
 
     if (stdin_buffer == NULL)
@@ -725,7 +725,7 @@ static void load_stdin(void)
         {
             unsigned char *tmp;
             alloc_size *= 2;
-            tmp = (unsigned char*) SDL_realloc((void*) stdin_buffer, alloc_size);
+            tmp = (unsigned char*) realloc((void*) stdin_buffer, alloc_size);
             if (tmp == NULL)
             {
                 VVV_exit(1);
@@ -825,7 +825,7 @@ void FILESYSTEM_loadFileToMemory(
 
     /* FIXME: Dumb hack to use `special/stdin.vvvvvv` here...
      * This is also checked elsewhere... grep for `special/stdin`! */
-    if (SDL_strcmp(name, "levels/special/stdin.vvvvvv") == 0)
+    if (strcmp(name, "levels/special/stdin.vvvvvv") == 0)
     {
         // this isn't *technically* necessary when piping directly from a file, but checking for that is annoying
         if (stdin_buffer == NULL)
@@ -833,7 +833,7 @@ void FILESYSTEM_loadFileToMemory(
             load_stdin();
         }
 
-        *mem = (unsigned char*) SDL_malloc(stdin_length + 1); /* + 1 for null */
+        *mem = (unsigned char*) malloc(stdin_length + 1); /* + 1 for null */
         if (*mem == NULL)
         {
             VVV_exit(1);
@@ -844,7 +844,7 @@ void FILESYSTEM_loadFileToMemory(
             *len = stdin_length;
         }
 
-        SDL_memcpy((void*) *mem, (void*) stdin_buffer, stdin_length + 1);
+        memcpy((void*) *mem, (void*) stdin_buffer, stdin_length + 1);
         return;
     }
 
@@ -868,7 +868,7 @@ void FILESYSTEM_loadFileToMemory(
         *len = length;
     }
 
-    *mem = (unsigned char *) SDL_calloc(length + 1, 1);
+    *mem = (unsigned char *) calloc(length + 1, 1);
     if (*mem == NULL)
     {
         VVV_exit(1);
@@ -943,7 +943,7 @@ bool FILESYSTEM_loadBinaryBlob(binaryBlob* blob, const char* filename)
     valid = 0;
     offset = sizeof(blob->m_headers);
 
-    for (i = 0; i < SDL_arraysize(blob->m_headers); ++i)
+    for (i = 0; i < std::size(blob->m_headers); ++i)
     {
         resourceheader* header = &blob->m_headers[i];
         char** memblock = &blob->m_memblocks[i];
@@ -988,7 +988,7 @@ bool FILESYSTEM_loadBinaryBlob(binaryBlob* blob, const char* filename)
         }
 
         PHYSFS_seek(handle, offset);
-        *memblock = (char*) SDL_malloc(header->size);
+        *memblock = (char*) malloc(header->size);
         if (*memblock == NULL)
         {
             VVV_exit(1); /* Oh god we're out of memory, just bail */
@@ -1011,7 +1011,7 @@ fail:
 
     vlog_debug("The complete reloaded file size: %lli", size);
 
-    for (i = 0; i < SDL_arraysize(blob->m_headers); ++i)
+    for (i = 0; i < std::size(blob->m_headers); ++i)
     {
         const resourceheader* header = &blob->m_headers[i];
 
@@ -1092,7 +1092,7 @@ static PHYSFS_EnumerateCallbackResult enumerateCallback(
     void (*callback)(const char*) = wrapper->callback;
     char builtLocation[MAX_PATH];
 
-    SDL_snprintf(
+    snprintf(
         builtLocation,
         sizeof(builtLocation),
         "%s/%s",
@@ -1172,7 +1172,7 @@ const char* FILESYSTEM_enumerateAssets(const char* folder, EnumHandle* handle)
     while ((item = FILESYSTEM_enumerate(mounted_path, handle)) != NULL)
     {
         char full_name[128];
-        SDL_snprintf(full_name, sizeof(full_name), "%s/%s", mounted_path, item);
+        snprintf(full_name, sizeof(full_name), "%s/%s", mounted_path, item);
         if (FILESYSTEM_isFile(full_name) && item[0] != '.')
         {
             return item;
@@ -1192,7 +1192,7 @@ const char* FILESYSTEM_enumerateLanguageCodes(EnumHandle* handle)
     while ((item = FILESYSTEM_enumerate("lang", handle)) != NULL)
     {
         char full_name[128];
-        SDL_snprintf(full_name, sizeof(full_name), "lang/%s", item);
+        snprintf(full_name, sizeof(full_name), "lang/%s", item);
 
         if (FILESYSTEM_isDirectory(full_name) && item[0] != '.')
         {
@@ -1225,7 +1225,7 @@ static int PLATFORM_getOSDirectory(char* output, const size_t output_size)
         );
         return 0;
     }
-    SDL_strlcpy(output, prefDir, output_size);
+    strlcpy(output, prefDir, output_size);
     return 1;
 }
 
@@ -1237,7 +1237,7 @@ bool FILESYSTEM_openDirectoryEnabled(void)
 bool FILESYSTEM_openDirectory(const char *dname)
 {
     char url[MAX_PATH];
-    SDL_snprintf(url, sizeof(url), "file://%s", dname);
+    snprintf(url, sizeof(url), "file://%s", dname);
     if (SDL_OpenURL(url) == -1)
     {
         vlog_error("Error opening directory: %s", SDL_GetError());

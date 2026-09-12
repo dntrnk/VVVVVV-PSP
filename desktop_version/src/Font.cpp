@@ -146,7 +146,7 @@ static void add_glyphinfo(
 
     if (f->glyph_page[page] == NULL)
     {
-        f->glyph_page[page] = (GlyphInfo*) SDL_calloc(FONT_PAGE_SIZE, sizeof(GlyphInfo));
+        f->glyph_page[page] = (GlyphInfo*) calloc(FONT_PAGE_SIZE, sizeof(GlyphInfo));
         if (f->glyph_page[page] == NULL)
         {
             return;
@@ -250,7 +250,7 @@ static bool decode_xml_range(tinyxml2::XMLElement* elem, unsigned* start, unsign
         return false;
     }
 
-    *end = SDL_min(*end, 0x10FFFF);
+    *end = std::min(*end, 0x10FFFFu);
     return true;
 }
 
@@ -260,7 +260,7 @@ static uint8_t load_font(FontContainer* container, const char* name)
     {
         return 0;
     }
-    Font* new_fonts = (Font*) SDL_realloc(container->fonts, sizeof(Font)*(container->count+1));
+    Font* new_fonts = (Font*) realloc(container->fonts, sizeof(Font)*(container->count+1));
     if (new_fonts == NULL)
     {
         return 0;
@@ -274,11 +274,11 @@ static uint8_t load_font(FontContainer* container, const char* name)
     char name_png[256];
     char name_txt[256];
     char name_xml[256];
-    SDL_snprintf(name_png, sizeof(name_png), "graphics/%s.png", name);
-    SDL_snprintf(name_txt, sizeof(name_txt), "graphics/%s.txt", name);
-    SDL_snprintf(name_xml, sizeof(name_xml), "graphics/%s.fontmeta", name);
-    SDL_strlcpy(f->name, name, sizeof(f->name));
-    SDL_strlcpy(f->display_name, name, sizeof(f->display_name));
+    snprintf(name_png, sizeof(name_png), "graphics/%s.png", name);
+    snprintf(name_txt, sizeof(name_txt), "graphics/%s.txt", name);
+    snprintf(name_xml, sizeof(name_xml), "graphics/%s.fontmeta", name);
+    strlcpy(f->name, name, sizeof(f->name));
+    strlcpy(f->display_name, name, sizeof(f->display_name));
 
     f->type = FontType_FONT;
 
@@ -304,11 +304,11 @@ static uint8_t load_font(FontContainer* container, const char* name)
 
         if ((pElem = hDoc.FirstChildElement("display_name").ToElement()) != NULL)
         {
-            SDL_strlcpy(f->display_name, pElem->GetText(), sizeof(f->display_name));
+            strlcpy(f->display_name, pElem->GetText(), sizeof(f->display_name));
         }
         if ((pElem = hDoc.FirstChildElement("type").ToElement()) != NULL)
         {
-            if (SDL_strcmp(pElem->GetText(), "buttons") == 0)
+            if (strcmp(pElem->GetText(), "buttons") == 0)
             {
                 f->type = FontType_BUTTONS;
             }
@@ -328,14 +328,14 @@ static uint8_t load_font(FontContainer* container, const char* name)
         }
         if ((pElem = hDoc.FirstChildElement("fallback").ToElement()) != NULL)
         {
-            SDL_strlcpy(f->fallback_key, pElem->GetText(), sizeof(f->fallback_key));
+            strlcpy(f->fallback_key, pElem->GetText(), sizeof(f->fallback_key));
         }
     }
 
     // We use TEX_GRAYSCALE instead of TEX_COLOR so button glyphs are
     // black & white to fit the PSP style
     f->image = G2DLoadImage(name_png, white_teeth ? TEX_GRAYSCALE : TEX_WHITE, G2D_CLUT4);
-    SDL_zeroa(f->glyph_page);
+    memset(f->glyph_page, 0, sizeof(f->glyph_page));
 
     if (f->image == NULL)
     {
@@ -511,7 +511,7 @@ static bool find_font_by_name(FontContainer* container, const char* name, uint8_
     }
 
     uintptr_t i;
-    if (hashmap_get(container->map_name_idx, name, SDL_strlen(name), &i))
+    if (hashmap_get(container->map_name_idx, name, strlen(name), &i))
     {
         *idx = i;
         return true;
@@ -549,7 +549,7 @@ void set_level_font(const char* name)
         font_idx_level_is_custom = false;
         if (!find_font_by_name(&fonts_main, name, &font_idx_level))
         {
-            if (SDL_strcmp(name, "font") != 0)
+            if (strcmp(name, "font") != 0)
             {
                 set_level_font("font");
             }
@@ -560,7 +560,7 @@ void set_level_font(const char* name)
         }
     }
 
-    cl.rtl = SDL_strcmp(name, "font_ar") == 0; // FIXME: make different menu options for choosing LTR/RTL of the same font
+    cl.rtl = strcmp(name, "font_ar") == 0; // FIXME: make different menu options for choosing LTR/RTL of the same font
 }
 
 void set_level_font_interface(void)
@@ -605,7 +605,7 @@ static void fill_map_name_idx(FontContainer* container)
     for (uint8_t i = 0; i < container->count; i++)
     {
         Font* f = &container->fonts[i];
-        hashmap_set(container->map_name_idx, f->name, SDL_strlen(f->name), i);
+        hashmap_set(container->map_name_idx, f->name, strlen(f->name), i);
     }
 }
 
@@ -627,20 +627,20 @@ static void load_font_filename(bool is_custom, const char* filename)
 {
     // Load font.png, and everything that matches *.fontmeta (but not font.fontmeta)
     size_t expected_ext_start;
-    bool is_fontpng = SDL_strcmp(filename, "font.png") == 0;
+    bool is_fontpng = strcmp(filename, "font.png") == 0;
     if (is_fontpng)
     {
-        expected_ext_start = SDL_strlen(filename)-4;
+        expected_ext_start = strlen(filename)-4;
     }
     else
     {
-        expected_ext_start = SDL_strlen(filename)-9;
+        expected_ext_start = strlen(filename)-9;
     }
-    if (is_fontpng || (endsWith(filename, ".fontmeta") && SDL_strcmp(filename, "font.fontmeta") != 0))
+    if (is_fontpng || (endsWith(filename, ".fontmeta") && strcmp(filename, "font.fontmeta") != 0))
     {
         char font_name[64];
-        SDL_strlcpy(font_name, filename, sizeof(font_name));
-        font_name[SDL_min(63, expected_ext_start)] = '\0';
+        strlcpy(font_name, filename, sizeof(font_name));
+        font_name[std::min(static_cast<size_t>(63), expected_ext_start)] = '\0';
 
         uint8_t f_idx = load_font(is_custom ? &fonts_custom : &fonts_main, font_name);
 
@@ -940,9 +940,9 @@ static bool next_wrap_buf(
 
     if (retval)
     {
-        /* Like next_split_s(), don't use SDL_strlcpy() here. */
-        const size_t length = SDL_min(buffer_size - 1, len);
-        SDL_memcpy(buffer, &str[prev_start], length);
+        /* Like next_split_s(), don't use strlcpy() here. */
+        const size_t length = std::min(buffer_size - 1, len);
+        memcpy(buffer, &str[prev_start], length);
         buffer[length] = '\0';
     }
 
@@ -1177,7 +1177,7 @@ const char* get_main_font_display_name(uint8_t idx)
         if (loc::lang == "en" || loc::get_langmeta()->font_idx != font_idx_8x8)
         {
             // If you use English, or a CJK language: "english/..."
-            SDL_strlcpy(
+            strlcpy(
                 f->display_name,
                 "english/…",
                 sizeof(f->display_name)
@@ -1186,7 +1186,7 @@ const char* get_main_font_display_name(uint8_t idx)
         else
         {
             // If you use another, e.g. German: "english/deutsch/..."
-            SDL_snprintf(
+            snprintf(
                 f->display_name, sizeof(f->display_name),
                 "english/%s/…",
                 loc::get_langmeta()->nativename.c_str()
@@ -1308,11 +1308,11 @@ void print(
 
             if (!pf.rtl)
             {
-                x = SDL_max(x, 0);
+                x = std::max(x, 0);
             }
             else
             {
-                x = SDL_min(x, SCREEN_WIDTH_PIXELS - textlen);
+                x = std::min(x, SCREEN_WIDTH_PIXELS - textlen);
             }
         }
         else
@@ -1428,7 +1428,7 @@ int print_wrap(
     {
         linespacing = 10;
     }
-    linespacing = SDL_max(linespacing, pf.font_sel->glyph_h * pf.scale);
+    linespacing = std::max(linespacing, pf.font_sel->glyph_h * pf.scale);
 
     if (maxwidth == -1)
     {

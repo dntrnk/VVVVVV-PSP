@@ -163,7 +163,7 @@ void BUTTONGLYPHS_init(void)
     /* Set glyph array to strings for all the button glyph codepoints (U+EBxx) */
     for (int i = 0; i < GLYPH_TOTAL; i++)
     {
-        SDL_strlcpy(glyph[i], UTF8_encode(0xEB00+i).bytes, sizeof(glyph[i]));
+        strlcpy(glyph[i], UTF8_encode(0xEB00+i).bytes, sizeof(glyph[i]));
     }
 }
 
@@ -343,7 +343,7 @@ char* BUTTONGLYPHS_get_all_gamepad_buttons(
             buffer_len--;
         }
 
-        size_t glyph_len = SDL_strlcpy(&buffer[cur], glyph, buffer_len);
+        size_t glyph_len = strlcpy(&buffer[cur], glyph, buffer_len);
         if (glyph_len >= buffer_len)
         {
             // Truncation occurred, we're done

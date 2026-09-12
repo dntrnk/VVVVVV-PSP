@@ -58,13 +58,13 @@ void ime_render(void)
         }
         size_t before_sel_nbytes = sel_start_ptr - imebuffer_ptr;
         size_t in_sel_nbytes = sel_end_ptr - sel_start_ptr;
-        char* before_sel = (char*) SDL_malloc(before_sel_nbytes + 1);
-        char* in_sel = (char*) SDL_malloc(in_sel_nbytes + 1);
+        char* before_sel = (char*) malloc(before_sel_nbytes + 1);
+        char* in_sel = (char*) malloc(in_sel_nbytes + 1);
         if (before_sel != NULL && in_sel != NULL)
         {
-            SDL_memcpy(before_sel, imebuffer_ptr, before_sel_nbytes);
+            memcpy(before_sel, imebuffer_ptr, before_sel_nbytes);
             before_sel[before_sel_nbytes] = '\0';
-            SDL_memcpy(in_sel, sel_start_ptr, in_sel_nbytes);
+            memcpy(in_sel, sel_start_ptr, in_sel_nbytes);
             in_sel[in_sel_nbytes] = '\0';
 
             int before_sel_pixels = font::len(PR_FONT_LEVEL, before_sel) - 1;

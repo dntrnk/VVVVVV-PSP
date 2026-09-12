@@ -1,6 +1,5 @@
 #include "BinaryBlob.h"
 
-#include <SDL.h>
 #ifdef VVV_COMPILEMUSIC
 #include <stdio.h>
 #endif
@@ -16,8 +15,8 @@ binaryBlob::binaryBlob(void)
 #ifdef VVV_COMPILEMUSIC
     numberofHeaders = 0;
 #endif
-    SDL_zeroa(m_headers);
-    SDL_zeroa(m_memblocks);
+    memset(m_headers, 0, sizeof(m_headers));
+    memset(m_memblocks, 0, sizeof(m_memblocks));
 }
 
 #ifdef VVV_COMPILEMUSIC
@@ -33,7 +32,7 @@ void binaryBlob::AddFileToBinaryBlob(const char* _path)
         size = ftell(file);
         fseek(file, 0, SEEK_SET);
 
-        memblock = (char*) SDL_malloc(size);
+        memblock = (char*) malloc(size);
         if (memblock == NULL)
         {
             VVV_exit(1);
@@ -88,22 +87,22 @@ bool binaryBlob::unPackBinary(const char* name)
 
 void binaryBlob::clear(void)
 {
-    for (size_t i = 0; i < SDL_arraysize(m_headers); i += 1)
+    for (size_t i = 0; i < std::size(m_headers); i += 1)
     {
         if (m_memblocks[i] != NULL)
         {
             VVV_free(m_memblocks[i]);
         }
     }
-    SDL_zeroa(m_memblocks);
-    SDL_zeroa(m_headers);
+    memset(m_memblocks, 0, sizeof(m_memblocks));
+    memset(m_headers, 0, sizeof(m_headers));
 }
 
 int binaryBlob::getIndex(const char* _name)
 {
-    for (size_t i = 0; i < SDL_arraysize(m_headers); i += 1)
+    for (size_t i = 0; i < std::size(m_headers); i += 1)
     {
-        if (SDL_strcmp(_name, m_headers[i].name) == 0 && m_headers[i].valid)
+        if (strcmp(_name, m_headers[i].name) == 0 && m_headers[i].valid)
         {
             return i;
         }
@@ -140,10 +139,10 @@ bool binaryBlob::nextExtra(size_t* start)
         return false;
     }
 
-    for (idx = start; *idx < SDL_arraysize(m_headers); *idx += 1)
+    for (idx = start; *idx < std::size(m_headers); *idx += 1)
     {
         if (m_headers[*idx].valid
-#define FOREACH_TRACK(_, track_name) && SDL_strcmp(m_headers[*idx].name, "data/" track_name) != 0
+#define FOREACH_TRACK(_, track_name) && strcmp(m_headers[*idx].name, "data/" track_name) != 0
         TRACK_NAMES(_)
         ) {
             return true;

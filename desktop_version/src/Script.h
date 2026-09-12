@@ -10,7 +10,7 @@
 
 #include "Textbox.h"
 
-#define filllines(lines) commands.insert(commands.end(), lines, lines + SDL_arraysize(lines))
+#define filllines(lines) commands.insert(commands.end(), lines, lines + std::size(lines))
 
 #ifdef SCRIPT_DEFINITION
 #define TEXT_COLOUR(a) textbox_colours[a]

@@ -96,7 +96,7 @@ void Graphics::init(void)
     resumegamemode = false;
 
     //Fading stuff
-    SDL_memset(fadebars, 0, sizeof(fadebars));
+    memset(fadebars, 0, sizeof(fadebars));
 
     setfade(0);
     fademode = FADE_NONE;
@@ -899,7 +899,7 @@ void Graphics::drawgui(void)
             // Level complete
             const char* english = "Level Complete!";
             const char* translation = loc::gettext(english);
-            if (SDL_strcmp(english, translation) != 0
+            if (strcmp(english, translation) != 0
                 && !(flipmode && fliplevelcomplete_mounted)
                 && !(!flipmode && levelcomplete_mounted)
             )
@@ -936,7 +936,7 @@ void Graphics::drawgui(void)
             // Game complete
             const char* english = "Game Complete!";
             const char* translation = loc::gettext(english);
-            if (SDL_strcmp(english, translation) != 0
+            if (strcmp(english, translation) != 0
                 && !(flipmode && flipgamecomplete_mounted)
                 && !(!flipmode && gamecomplete_mounted)
             )
@@ -1083,7 +1083,7 @@ void Graphics::draw_texture_part(g2dImage* image, const int x, const int y, cons
     //     flip |= SDL_FLIP_VERTICAL;
     // }
     
-    g2dHelperDrawImage(image, x, y, w * SDL_abs(scalex), h * SDL_abs(scaley), color, x2, y2, w, h);
+    g2dHelperDrawImage(image, x, y, w * std::abs(scalex), h * std::abs(scaley), color, x2, y2, w, h);
 }
 
 void Graphics::draw_grid_tile(g2dImage* texture, const int t, const int x, const int y, const int width, const int height, const int scalex, const int scaley)
@@ -1159,13 +1159,13 @@ void Graphics::cutscenebarstimer(void)
     if (showcutscenebars)
     {
         cutscenebarspos += 25;
-        cutscenebarspos = SDL_min(cutscenebarspos, 361);
+        cutscenebarspos = std::min(cutscenebarspos, 361);
     }
     else if (cutscenebarspos > 0)
     {
         //disappearing
         cutscenebarspos -= 25;
-        cutscenebarspos = SDL_max(cutscenebarspos, 0);
+        cutscenebarspos = std::max(cutscenebarspos, 0);
     }
 }
 
@@ -1467,13 +1467,13 @@ void Graphics::drawfade(void)
         fill_rect(G2D_BLACK);
         break;
     case FADE_FADING_OUT:
-        for (size_t i = 0; i < SDL_arraysize(fadebars); i++)
+        for (size_t i = 0; i < std::size(fadebars); i++)
         {
             fill_rect(fadebars[i], i * 16, usethisamount, 16, G2D_BLACK);
         }
         break;
     case FADE_FADING_IN:
-        for (size_t i = 0; i < SDL_arraysize(fadebars); i++)
+        for (size_t i = 0; i < std::size(fadebars); i++)
         {
             fill_rect(fadebars[i] - usethisamount, i * 16, 500, 16, G2D_BLACK);
         }
@@ -1490,7 +1490,7 @@ void Graphics::processfade(void)
     switch (fademode)
     {
     case FADE_START_FADEOUT:
-        for (size_t i = 0; i < SDL_arraysize(fadebars); i++)
+        for (size_t i = 0; i < std::size(fadebars); i++)
         {
             fadebars[i] = -(int)(fRandom() * 12) * 8;
         }
@@ -1505,7 +1505,7 @@ void Graphics::processfade(void)
         }
         break;
     case FADE_START_FADEIN:
-        for (size_t i = 0; i < SDL_arraysize(fadebars); i++)
+        for (size_t i = 0; i < std::size(fadebars); i++)
         {
             fadebars[i] = 320 + (int)(fRandom() * 12) * 8;
         }
@@ -1630,7 +1630,7 @@ void Graphics::drawmenu(int cr, int cg, int cb, enum Menu::MenuName menu)
         }
         else
         {
-            SDL_strlcpy(buffer, loc::remove_toupper_escape_chars(opt.text).c_str(), sizeof(buffer));
+            strlcpy(buffer, loc::remove_toupper_escape_chars(opt.text).c_str(), sizeof(buffer));
         }
 
         font::print(opt.print_flags, x, y, buffer, fr, fg, fb);
@@ -1668,10 +1668,10 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
 
     if(intersection)
     {
-        int r3_left = SDL_max(r1_left, r2_left);
-        int r3_top = SDL_min(r1_top, r2_top);
-        int r3_right = SDL_min(r1_right, r2_right);
-        int r3_bottom= SDL_max(r1_bottom, r2_bottom);
+        int r3_left = std::max(r1_left, r2_left);
+        int r3_top = std::min(r1_top, r2_top);
+        int r3_right = std::min(r1_right, r2_right);
+        int r3_bottom= std::max(r1_bottom, r2_bottom);
 
         //for every pixel inside rectangle
         for(int x = r3_left; x < r3_right; x++)

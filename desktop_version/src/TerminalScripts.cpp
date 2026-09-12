@@ -1,11 +1,9 @@
 #include "Script.h"
 
-#include <SDL.h>
-
 void scriptclass::loadother(const char* t)
 {
     //loads script name t into the array
-    if (SDL_strcmp(t, "terminal_station_1") == 0)
+    if (strcmp(t, "terminal_station_1") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -36,7 +34,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "alreadyvisited") == 0)
+    else if (strcmp(t, "alreadyvisited") == 0)
     {
         static const char* lines[] = {
         "squeak(player)",
@@ -51,7 +49,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_outside_1") == 0)
+    else if (strcmp(t, "terminal_outside_1") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -102,7 +100,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_outside_2") == 0)
+    else if (strcmp(t, "terminal_outside_2") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -151,7 +149,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_outside_3") == 0)
+    else if (strcmp(t, "terminal_outside_3") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -200,7 +198,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_outside_4") == 0)
+    else if (strcmp(t, "terminal_outside_4") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -238,7 +236,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_outside_5") == 0)
+    else if (strcmp(t, "terminal_outside_5") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -287,7 +285,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_outside_6") == 0)
+    else if (strcmp(t, "terminal_outside_6") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -336,7 +334,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_finallevel") == 0)
+    else if (strcmp(t, "terminal_finallevel") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -413,7 +411,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "finalterminal_finish") == 0)
+    else if (strcmp(t, "finalterminal_finish") == 0)
     {
 
 
@@ -444,7 +442,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_station_2") == 0)
+    else if (strcmp(t, "terminal_station_2") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -472,7 +470,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_station_3") == 0)
+    else if (strcmp(t, "terminal_station_3") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -499,7 +497,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_station_4") == 0)
+    else if (strcmp(t, "terminal_station_4") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -526,7 +524,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_warp_1") == 0)
+    else if (strcmp(t, "terminal_warp_1") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -553,7 +551,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_warp_2") == 0)
+    else if (strcmp(t, "terminal_warp_2") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -581,7 +579,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_lab_1") == 0)
+    else if (strcmp(t, "terminal_lab_1") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -619,7 +617,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_lab_2") == 0)
+    else if (strcmp(t, "terminal_lab_2") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -638,7 +636,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_secretlab") == 0)
+    else if (strcmp(t, "terminal_secretlab") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -669,7 +667,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_shipcomputer") == 0)
+    else if (strcmp(t, "terminal_shipcomputer") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -699,7 +697,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_letsgo") == 0)
+    else if (strcmp(t, "terminal_letsgo") == 0)
     {
         static const char* lines[] = {
         "squeak(player)",
@@ -729,7 +727,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_radio") == 0)
+    else if (strcmp(t, "terminal_radio") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -751,7 +749,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_jukebox") == 0)
+    else if (strcmp(t, "terminal_jukebox") == 0)
     {
         static const char* lines[] = {
         "cutscene()",
@@ -785,7 +783,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_jukeunlock1") == 0)
+    else if (strcmp(t, "terminal_jukeunlock1") == 0)
     {
         static const char* lines[] = {
         "squeak(terminal)",
@@ -803,7 +801,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_jukeunlock2") == 0)
+    else if (strcmp(t, "terminal_jukeunlock2") == 0)
     {
         static const char* lines[] = {
         "squeak(terminal)",
@@ -821,7 +819,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_jukeunlock3") == 0)
+    else if (strcmp(t, "terminal_jukeunlock3") == 0)
     {
         static const char* lines[] = {
         "squeak(terminal)",
@@ -839,7 +837,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_jukeunlock4") == 0)
+    else if (strcmp(t, "terminal_jukeunlock4") == 0)
     {
         static const char* lines[] = {
         "squeak(terminal)",
@@ -857,7 +855,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_jukeunlock41") == 0)
+    else if (strcmp(t, "terminal_jukeunlock41") == 0)
     {
         static const char* lines[] = {
         "squeak(terminal)",
@@ -875,7 +873,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_jukeunlock5") == 0)
+    else if (strcmp(t, "terminal_jukeunlock5") == 0)
     {
         static const char* lines[] = {
         "squeak(terminal)",
@@ -893,7 +891,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_jukeunlock6") == 0)
+    else if (strcmp(t, "terminal_jukeunlock6") == 0)
     {
         static const char* lines[] = {
         "squeak(terminal)",
@@ -911,7 +909,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_jukeunlock7") == 0)
+    else if (strcmp(t, "terminal_jukeunlock7") == 0)
     {
         static const char* lines[] = {
         "squeak(terminal)",
@@ -929,7 +927,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_juke1") == 0)
+    else if (strcmp(t, "terminal_juke1") == 0)
     {
         static const char* lines[] = {
         "play(4)",
@@ -938,7 +936,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_juke2") == 0)
+    else if (strcmp(t, "terminal_juke2") == 0)
     {
         static const char* lines[] = {
         "play(1)",
@@ -947,7 +945,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_juke3") == 0)
+    else if (strcmp(t, "terminal_juke3") == 0)
     {
         static const char* lines[] = {
         "play(2)",
@@ -956,7 +954,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_juke4") == 0)
+    else if (strcmp(t, "terminal_juke4") == 0)
     {
         static const char* lines[] = {
         "play(6)",
@@ -965,7 +963,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_juke5") == 0)
+    else if (strcmp(t, "terminal_juke5") == 0)
     {
         static const char* lines[] = {
         "play(3)",
@@ -974,7 +972,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_juke6") == 0)
+    else if (strcmp(t, "terminal_juke6") == 0)
     {
         static const char* lines[] = {
         "play(8)",
@@ -983,7 +981,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_juke7") == 0)
+    else if (strcmp(t, "terminal_juke7") == 0)
     {
         static const char* lines[] = {
         "play(11)",
@@ -992,7 +990,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_juke8") == 0)
+    else if (strcmp(t, "terminal_juke8") == 0)
     {
         static const char* lines[] = {
         "play(10)",
@@ -1001,7 +999,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_juke9") == 0)
+    else if (strcmp(t, "terminal_juke9") == 0)
     {
         static const char* lines[] = {
         "play(12)",
@@ -1010,7 +1008,7 @@ void scriptclass::loadother(const char* t)
         };
         filllines(lines);
     }
-    else if (SDL_strcmp(t, "terminal_juke10") == 0)
+    else if (strcmp(t, "terminal_juke10") == 0)
     {
         static const char* lines[] = {
         "play(9)",

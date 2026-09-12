@@ -85,7 +85,7 @@ void scriptclass::tokenize( const std::string& t )
     std::string temprawword;
     char currentletter;
 
-    SDL_zeroa(argexists);
+    memset(argexists, 0, sizeof(argexists));
 
     for (size_t i = 0; i < t.length(); i++)
     {
@@ -113,13 +113,13 @@ void scriptclass::tokenize( const std::string& t )
             tempword += currentletter;
             temprawword += currentletter;
         }
-        if (j >= (int) SDL_arraysize(words))
+        if (j >= (int) std::size(words))
         {
             break;
         }
     }
 
-    if (j < (int) SDL_arraysize(words))
+    if (j < (int) std::size(words))
     {
         const bool lastargexists = tempword != "";
         if (lastargexists)
@@ -1413,7 +1413,7 @@ void scriptclass::run(void)
             {
                 game.unlocknum(Unlock_SECRETLAB);
                 game.insecretlab = true;
-                SDL_memset(map.explored, true, sizeof(map.explored));
+                memset(map.explored, true, sizeof(map.explored));
             }
             else if (words[0] == "leavesecretlab")
             {
@@ -1802,7 +1802,7 @@ void scriptclass::run(void)
                 music.playef(Sound_TRINKET);
 
                 size_t trinket = ss_toi(words[1]);
-                if (trinket < SDL_arraysize(obj.collect))
+                if (trinket < std::size(obj.collect))
                 {
                     obj.collect[trinket] = true;
                 }
@@ -2712,7 +2712,7 @@ void scriptclass::startgamemode(const enum StartMode mode)
         {
             game.timetrialcountdown = 0;
             game.timetrialparlost = true;
-            SDL_memset(map.explored, true, sizeof(map.explored));
+            memset(map.explored, true, sizeof(map.explored));
         }
 
         graphics.fademode = FADE_START_FADEIN;
@@ -2722,9 +2722,9 @@ void scriptclass::startgamemode(const enum StartMode mode)
         game.startspecial(0);
 
         /* Unlock the entire map */
-        SDL_memset(obj.collect, true, sizeof(obj.collect[0]) * 20);
+        memset(obj.collect, true, sizeof(obj.collect[0]) * 20);
         /* Give all 20 trinkets */
-        SDL_memset(map.explored, true, sizeof(map.explored));
+        memset(map.explored, true, sizeof(map.explored));
         i = 400; /* previously a nested for-loop set this */
         game.insecretlab = true;
         map.showteleporters = true;
@@ -3089,7 +3089,7 @@ void scriptclass::hardreset(void)
     game.nodeathmode = false;
     game.nocutscenes = false;
 
-    for (i = 0; i < (int) SDL_arraysize(game.crewstats); i++)
+    for (i = 0; i < (int) std::size(game.crewstats); i++)
     {
         game.crewstats[i] = false;
     }
@@ -3217,8 +3217,8 @@ void scriptclass::hardreset(void)
     graphics.towerbg.scrolldir = 0;
     map.customshowmm=true;
 
-    SDL_memset(map.roomdeaths, 0, sizeof(map.roomdeaths));
-    SDL_memset(map.roomdeathsfinal, 0, sizeof(map.roomdeathsfinal));
+    memset(map.roomdeaths, 0, sizeof(map.roomdeaths));
+    memset(map.roomdeathsfinal, 0, sizeof(map.roomdeathsfinal));
     map.resetmap();
     //entityclass
     obj.nearelephant = false;
@@ -3231,12 +3231,12 @@ void scriptclass::hardreset(void)
 
     obj.resetallflags();
 
-    for (i = 0; i < (int) SDL_arraysize(obj.customcrewmoods); i++){
+    for (i = 0; i < (int) std::size(obj.customcrewmoods); i++){
         obj.customcrewmoods[i]=true;
     }
 
-    SDL_memset(obj.collect, false, sizeof(obj.collect));
-    SDL_memset(obj.customcollect, false, sizeof(obj.customcollect));
+    memset(obj.collect, false, sizeof(obj.collect));
+    memset(obj.customcollect, false, sizeof(obj.customcollect));
     i = 100; //previously a for-loop iterating over collect/customcollect set this to 100
 
     int theplayer = obj.getplayer();

@@ -50,7 +50,7 @@ tinyxml2::XMLComment* update_comment(tinyxml2::XMLNode* parent, const char* text
 
 // XMLElement* elem, const char* expect
 #define EXPECT_ELEM(elem, expect) \
-    if (SDL_strcmp(elem->Value(), expect) != 0) \
+    if (strcmp(elem->Value(), expect) != 0) \
     { \
         continue; \
     } \

@@ -1,4 +1,3 @@
-#include <SDL.h>
 #include <tinyxml2.h>
 
 namespace xml
@@ -83,7 +82,7 @@ tinyxml2::XMLElement* update_tag(tinyxml2::XMLNode* parent, const char* name, co
 tinyxml2::XMLElement* update_tag(tinyxml2::XMLNode* parent, const char* name, const int value)
 {
     char string[16];
-    SDL_snprintf(string, sizeof(string), "%i", value);
+    snprintf(string, sizeof(string), "%i", value);
 
     return update_tag(parent, name, string);
 }

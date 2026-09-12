@@ -69,7 +69,7 @@ editorclass::editorclass(void)
     };
 
     std::vector<int> basic_vec;
-    basic_vec.assign(basic, basic + SDL_arraysize(basic));
+    basic_vec.assign(basic, basic + std::size(basic));
     autotile_types["basic"] = basic_vec;
 
     static const short lab_cyan[] = {
@@ -90,7 +90,7 @@ editorclass::editorclass(void)
     };
 
     std::vector<int> lab_cyan_vec;
-    lab_cyan_vec.assign(lab_cyan, lab_cyan + SDL_arraysize(lab_cyan));
+    lab_cyan_vec.assign(lab_cyan, lab_cyan + std::size(lab_cyan));
     autotile_types["lab_cyan"] = lab_cyan_vec;
 
     static const short lab_red[] = {
@@ -111,7 +111,7 @@ editorclass::editorclass(void)
     };
 
     std::vector<int> lab_red_vec;
-    lab_red_vec.assign(lab_red, lab_red + SDL_arraysize(lab_red));
+    lab_red_vec.assign(lab_red, lab_red + std::size(lab_red));
     autotile_types["lab_red"] = lab_red_vec;
 
     static const short lab_pink[] = {
@@ -132,7 +132,7 @@ editorclass::editorclass(void)
     };
 
     std::vector<int> lab_pink_vec;
-    lab_pink_vec.assign(lab_pink, lab_pink + SDL_arraysize(lab_pink));
+    lab_pink_vec.assign(lab_pink, lab_pink + std::size(lab_pink));
     autotile_types["lab_pink"] = lab_pink_vec;
 
     static const short lab_yellow[] = {
@@ -154,7 +154,7 @@ editorclass::editorclass(void)
     };
 
     std::vector<int> lab_yellow_vec;
-    lab_yellow_vec.assign(lab_yellow, lab_yellow + SDL_arraysize(lab_yellow));
+    lab_yellow_vec.assign(lab_yellow, lab_yellow + std::size(lab_yellow));
     autotile_types["lab_yellow"] = lab_yellow_vec;
 
     static const short lab_green[] = {
@@ -176,7 +176,7 @@ editorclass::editorclass(void)
     };
 
     std::vector<int> lab_green_vec;
-    lab_green_vec.assign(lab_green, lab_green + SDL_arraysize(lab_green));
+    lab_green_vec.assign(lab_green, lab_green + std::size(lab_green));
     autotile_types["lab_green"] = lab_green_vec;
 
     static const short outside[] = {
@@ -193,20 +193,20 @@ editorclass::editorclass(void)
     };
 
     std::vector<int> outside_vec;
-    outside_vec.assign(outside, outside + SDL_arraysize(outside));
+    outside_vec.assign(outside, outside + std::size(outside));
     autotile_types["outside"] = outside_vec;
 
     // Everything gets initialized to 0 by default
     static const short none[256] = {};
 
     std::vector<int> none_vec;
-    none_vec.assign(none, none + SDL_arraysize(none));
+    none_vec.assign(none, none + std::size(none));
     autotile_types["none"] = none_vec;
 
-    SDL_zeroa(tileset_min_colour);
-    SDL_zeroa(tileset_max_colour);
-    SDL_zeroa(tileset_min_colour_direct);
-    SDL_zeroa(tileset_max_colour_direct);
+    memset(tileset_min_colour, 0, sizeof(tileset_min_colour));
+    memset(tileset_max_colour, 0, sizeof(tileset_max_colour));
+    memset(tileset_min_colour_direct, 0, sizeof(tileset_min_colour_direct));
+    memset(tileset_max_colour_direct, 0, sizeof(tileset_max_colour_direct));
 
     register_tileset(EditorTileset_SPACE_STATION, "Space Station");
     register_tileset(EditorTileset_OUTSIDE, "Outside");
@@ -309,12 +309,12 @@ void editorclass::register_tilecol(
 
     if (!direct)
     {
-        tileset_min_colour[tileset] = SDL_min(tileset_min_colour[tileset], index);
-        tileset_max_colour[tileset] = SDL_max(tileset_max_colour[tileset], index);
+        tileset_min_colour[tileset] = std::min(tileset_min_colour[tileset], index);
+        tileset_max_colour[tileset] = std::max(tileset_max_colour[tileset], index);
     }
 
-    tileset_min_colour_direct[tileset] = SDL_min(tileset_min_colour_direct[tileset], index);
-    tileset_max_colour_direct[tileset] = SDL_max(tileset_max_colour_direct[tileset], index);
+    tileset_min_colour_direct[tileset] = std::min(tileset_min_colour_direct[tileset], index);
+    tileset_max_colour_direct[tileset] = std::max(tileset_max_colour_direct[tileset], index);
 }
 
 void editorclass::register_tilecol(
@@ -387,7 +387,7 @@ void editorclass::reset(void)
     entframe = 0;
     entframedelay = 0;
 
-    SDL_zeroa(kludgewarpdir);
+    memset(kludgewarpdir, 0, sizeof(kludgewarpdir));
 
     script_buffer.clear();
 
@@ -570,7 +570,7 @@ static void editormenurender(int tr, int tg, int tb)
             creator = loc::gettext(creator);
         }
 
-        int sp = SDL_max(10, font::height(PR_FONT_LEVEL));
+        int sp = std::max(10, font::height(PR_FONT_LEVEL));
         graphics.print_level_creator((creator_is_gettext ? PR_FONT_INTERFACE : PR_FONT_LEVEL), 60, creator, tr, tg, tb);
 
         font::print(PR_CEN | PR_FONT_LEVEL, -1, 60 + sp, (ed.current_text_mode == TEXT_WEBSITE) ? input_text : cl.website, tr, tg, tb);
@@ -1285,7 +1285,7 @@ static void draw_cursor(void)
         if (ed.f_modifier)
         {
             bool connected[SCREEN_HEIGHT_TILES][SCREEN_WIDTH_TILES];
-            SDL_zeroa(connected);
+            memset(connected, 0, sizeof(connected));
 
             ed.get_tile_fill(ed.tilex, ed.tiley, cl.gettile(ed.levx, ed.levy, ed.tilex, ed.tiley), connected);
 
@@ -1455,7 +1455,7 @@ static void draw_tile_drawer(int tileset)
     {
         short labellen = 2 + font::len(0, loc::gettext("Tile:"));
         int y = 2 + font::height(0);
-        y = SDL_max(y, 12);
+        y = std::max(y, 12);
         font::print(PR_BOR, 2, y, loc::gettext("Tile:"), 196, 196, 255 - help.glow);
         font::print(PR_BOR, labellen + 16, y, help.String(ed.direct_mode_tile), 196, 196, 255 - help.glow);
         graphics.fill_rect(labellen + 2, y - 1, 10, 10, G2D_RGB(255 - help.glow, 196, 196));
@@ -1532,7 +1532,7 @@ static void draw_note()
     {
         short lines;
         std::string wrapped = font::string_wordwrap(0, ed.note, 304, &lines);
-        short textheight = 8 + (lines - 1) * SDL_max(10, font::height(0));
+        short textheight = 8 + (lines - 1) * std::max(10, font::height(0));
         short banner_y = 120 - textheight / 2 - 5;
 
         float alpha = graphics.lerp(ed.old_note_timer, ed.note_timer);
@@ -1555,7 +1555,7 @@ static void draw_toolbox(const char* coords)
 
     const int page = ed.current_tool / 10;
     const int max_pages = SDL_ceil(NUM_EditorTools / 10);
-    const int page_tool_count = SDL_min(10, NUM_EditorTools - (page * 10));
+    const int page_tool_count = std::min(10, NUM_EditorTools - (page * 10));
 
     for (int i = 0; i < page_tool_count; i++)
     {
@@ -1577,7 +1577,7 @@ static void draw_toolbox(const char* coords)
 
     // Draw the page number, limit is 1 digit, so the max is 9 pages
     char buffer[4];
-    SDL_snprintf(buffer, sizeof(buffer), "%d/%d", page + 1, max_pages + 1);
+    snprintf(buffer, sizeof(buffer), "%d/%d", page + 1, max_pages + 1);
     font::print(PR_CJK_HIGH, 4, 232, buffer, 196, 196, 255 - help.glow);
 
     // Draw the button hint text
@@ -1591,7 +1591,7 @@ static void draw_toolbox(const char* coords)
 
     // Draw the current tool name
     char toolname_english[SCREEN_WIDTH_CHARS + 1];
-    SDL_snprintf(toolname_english, sizeof(toolname_english), "%s: %s", ed.tool_key_chars[ed.current_tool], ed.tool_names[ed.current_tool]);
+    snprintf(toolname_english, sizeof(toolname_english), "%s: %s", ed.tool_key_chars[ed.current_tool], ed.tool_names[ed.current_tool]);
 
     const char* toolname = loc::gettext(toolname_english);
 
@@ -1615,7 +1615,7 @@ static void draw_main_ui(void)
     const RoomProperty* const room = cl.getroomprop(ed.levx, ed.levy);
 
     char coords[8];
-    SDL_snprintf(coords, sizeof(coords), "(%d,%d)", ed.levx + 1, ed.levy + 1);
+    snprintf(coords, sizeof(coords), "(%d,%d)", ed.levx + 1, ed.levy + 1);
 
     if (ed.toolbox_open)
     {
@@ -1667,7 +1667,7 @@ static void draw_main_ui(void)
             loc::gettext("E: Change Roomname"),
         };
         int menuwidth = 0;
-        for (size_t i = 0; i < SDL_arraysize(shiftmenuoptions); i++)
+        for (size_t i = 0; i < std::size(shiftmenuoptions); i++)
         {
             int len = font::len(0, shiftmenuoptions[i]);
             if (len > menuwidth)
@@ -1675,12 +1675,12 @@ static void draw_main_ui(void)
         }
 
         int lineheight = font::height(0);
-        lineheight = SDL_max(10, lineheight);
-        int left_y = 230 - SDL_arraysize(shiftmenuoptions) * lineheight;
+        lineheight = std::max(10, lineheight);
+        int left_y = 230 - std::size(shiftmenuoptions) * lineheight;
 
         graphics.draw_rect(0, left_y - 3, menuwidth + 17, 240, G2D_RGB(64, 64, 64));
         graphics.fill_rect(0, left_y - 2, menuwidth + 16, 240, G2D_BLACK);
-        for (size_t i = 0; i < SDL_arraysize(shiftmenuoptions); i++)
+        for (size_t i = 0; i < std::size(shiftmenuoptions); i++)
             font::print(0, 4, left_y + i * lineheight, shiftmenuoptions[i], 164, 164, 164);
 
         graphics.draw_rect(220, 207, 100, 60, G2D_RGB(64, 64, 64));
@@ -1800,7 +1800,7 @@ void editorrender(void)
 
             // Draw the current tool name
             char toolname_english[SCREEN_WIDTH_CHARS + 1];
-            SDL_snprintf(toolname_english, sizeof(toolname_english), "%s: %s", ed.tool_key_chars[ed.current_tool], ed.tool_names[ed.current_tool]);
+            snprintf(toolname_english, sizeof(toolname_english), "%s: %s", ed.tool_key_chars[ed.current_tool], ed.tool_names[ed.current_tool]);
 
             const char* toolname = loc::gettext(toolname_english);
 
@@ -1982,7 +1982,7 @@ void editorrenderfixed(void)
             ed.current_ghosts++;
         }
 
-        ed.current_ghosts = SDL_min(ed.current_ghosts, ed.ghosts.size());
+        ed.current_ghosts = std::min(ed.current_ghosts, static_cast<int>(ed.ghosts.size()));
     }
 
     switch (ed.state)
@@ -2078,18 +2078,18 @@ static void input_submitted(void)
         char coord_x[16];
         char coord_y[16];
 
-        const char* comma = SDL_strchr(key.keybuffer.c_str(), ',');
+        const char* comma = strchr(key.keybuffer.c_str(), ',');
 
         bool valid_input = comma != NULL;
 
         if (valid_input)
         {
-            SDL_strlcpy(
+            strlcpy(
                 coord_x,
                 key.keybuffer.c_str(),
-                SDL_min((size_t) (comma - key.keybuffer.c_str() + 1), sizeof(coord_x))
+                std::min((size_t) (comma - key.keybuffer.c_str() + 1), sizeof(coord_x))
             );
-            SDL_strlcpy(coord_y, &comma[1], sizeof(coord_y));
+            strlcpy(coord_y, &comma[1], sizeof(coord_y));
 
             valid_input = is_number(coord_x) && is_number(coord_y);
         }
@@ -2226,7 +2226,7 @@ void editorlogic(void)
     }
 
     ed.old_note_timer = ed.note_timer;
-    ed.note_timer = SDL_max(ed.note_timer - 1, 0);
+    ed.note_timer = std::max(ed.note_timer - 1, 0);
 
     update_entities();
 
@@ -2288,7 +2288,7 @@ static void set_tile_interpolated(const int x1, const int x2, const int y1, cons
     const int dx = x2 - x1;
     const int dy = y2 - y1;
 
-    const int steps = SDL_max(SDL_abs(dx), SDL_abs(dy));
+    const int steps = std::max(std::abs(dx), std::abs(dy));
 
     if (steps == 0)
     {
@@ -2342,7 +2342,7 @@ void editorclass::handle_tile_placement(const int tile)
     if (f_modifier)
     {
         bool connected[SCREEN_HEIGHT_TILES][SCREEN_WIDTH_TILES];
-        SDL_zeroa(connected);
+        memset(connected, 0, sizeof(connected));
 
         get_tile_fill(tilex, tiley, cl.gettile(levx, levy, tilex, tiley), connected);
 
@@ -3726,7 +3726,7 @@ void editorinput(void)
                     ed.load_script_in_editor(ed.current_script);
 
                     ed.script_cursor_y = ed.script_buffer.size() - 1;
-                    ed.script_offset = SDL_max(ed.script_cursor_y - (ed.lines_visible - SCRIPT_LINE_PADDING), 0);
+                    ed.script_offset = std::max(ed.script_cursor_y - (ed.lines_visible - SCRIPT_LINE_PADDING), 0);
 
                     key.keybuffer = ed.script_buffer[ed.script_cursor_y];
                     ed.script_cursor_x = UTF8_total_codepoints(ed.script_buffer[ed.script_cursor_y].c_str());
@@ -3755,7 +3755,7 @@ void editorinput(void)
             if (up_pressed && ed.keydelay <= 0)
             {
                 ed.keydelay = 3;
-                ed.script_cursor_y = SDL_max(0, ed.script_cursor_y - 1);
+                ed.script_cursor_y = std::max(0, ed.script_cursor_y - 1);
 
                 key.keybuffer = ed.script_buffer[ed.script_cursor_y];
             }
@@ -3763,7 +3763,7 @@ void editorinput(void)
             if (down_pressed && ed.keydelay <= 0)
             {
                 ed.keydelay = 3;
-                ed.script_cursor_y = SDL_min((int) ed.script_buffer.size() - 1, ed.script_cursor_y + 1);
+                ed.script_cursor_y = std::min((int) ed.script_buffer.size() - 1, ed.script_cursor_y + 1);
 
                 key.keybuffer = ed.script_buffer[ed.script_cursor_y];
             }
@@ -3778,7 +3778,7 @@ void editorinput(void)
             {
                 //Remove this line completely
                 ed.remove_line(ed.script_cursor_y);
-                ed.script_cursor_y = SDL_max(0, ed.script_cursor_y - 1);
+                ed.script_cursor_y = std::max(0, ed.script_cursor_y - 1);
                 key.keybuffer = ed.script_buffer[ed.script_cursor_y];
                 ed.keydelay = 6;
             }
@@ -3819,12 +3819,12 @@ void editorinput(void)
 
             if (ed.script_cursor_y < ed.script_offset + SCRIPT_LINE_PADDING)
             {
-                ed.script_offset = SDL_max(0, ed.script_cursor_y - SCRIPT_LINE_PADDING);
+                ed.script_offset = std::max(0, ed.script_cursor_y - SCRIPT_LINE_PADDING);
             }
 
             if (ed.script_cursor_y > ed.script_offset + ed.lines_visible - SCRIPT_LINE_PADDING)
             {
-                ed.script_offset = SDL_min((int) ed.script_buffer.size() - ed.lines_visible + SCRIPT_LINE_PADDING, ed.script_cursor_y - ed.lines_visible + SCRIPT_LINE_PADDING);
+                ed.script_offset = std::min((int) ed.script_buffer.size() - ed.lines_visible + SCRIPT_LINE_PADDING, ed.script_cursor_y - ed.lines_visible + SCRIPT_LINE_PADDING);
             }
 
             break;

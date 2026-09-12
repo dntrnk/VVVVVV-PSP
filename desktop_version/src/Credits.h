@@ -1,7 +1,7 @@
 #ifndef CREDITS_H
 #define CREDITS_H
 
-#include <SDL.h>
+#include <array>
 
 namespace Credits {
 
@@ -198,8 +198,8 @@ static const char* githubfriends[] = {
 
 /* Calculate credits length, finally. */
 static const int creditmaxposition = 1348 + (10 * (
-    SDL_arraysize(superpatrons) + SDL_arraysize(patrons) + SDL_arraysize(githubfriends)
-)) + (12 * SDL_arraysize(translators));
+    std::size(superpatrons) + std::size(patrons) + std::size(githubfriends)
+)) + (12 * std::size(translators));
 
 } /* namespace Credits */
 

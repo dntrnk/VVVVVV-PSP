@@ -1,7 +1,5 @@
 #include "BlockV.h"
 
-#include <SDL_stdinc.h>
-
 #include "Script.h"
 #include "Font.h"
 

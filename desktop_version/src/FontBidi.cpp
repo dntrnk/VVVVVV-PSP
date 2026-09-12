@@ -529,8 +529,8 @@ const char* bidi_transform(const bool rtl, const char* text)
             }
 
             UTF8_encoding enc = UTF8_encode(utf32_in[ix]);
-            size_t n_copy = SDL_min(enc.nbytes, (size_t) out_room_left);
-            SDL_memcpy(
+            size_t n_copy = std::min((size_t) enc.nbytes, (size_t) out_room_left);
+            memcpy(
                 &utf8_out[utf8_out_cur],
                 enc.bytes,
                 n_copy

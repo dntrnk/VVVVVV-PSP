@@ -32,7 +32,7 @@ const char* GlitchrunnerMode_enum_to_string(const enum GlitchrunnerMode mode)
 enum GlitchrunnerMode GlitchrunnerMode_string_to_enum(const char* string)
 {
 #define FOREACH_ENUM(MODE, STRING) \
-    if (SDL_strcmp(STRING, string) == 0) \
+    if (strcmp(STRING, string) == 0) \
     { \
         return MODE; \
     }

@@ -1,6 +1,5 @@
 #include "Tower.h"
 
-#include <SDL_stdinc.h>
 #include <stddef.h>
 
 #include "Constants.h"
@@ -11,9 +10,9 @@ towerclass::towerclass(void)
 {
     minitowermode = false;
     //We create a blank map
-    SDL_memset(contents, 0, sizeof(contents));
-    SDL_memset(back, 0, sizeof(back));
-    SDL_memset(minitower, 0, sizeof(minitower));
+    memset(contents, 0, sizeof(contents));
+    memset(back, 0, sizeof(back));
+    memset(minitower, 0, sizeof(minitower));
 
     loadbackground();
     loadmap();
@@ -185,7 +184,7 @@ void towerclass::loadminitower1(void)
     12,12,12,12,12,12,12,12,21,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,12,12,12,12,12,
     };
 
-    SDL_memcpy(minitower, tmap, sizeof(minitower));
+    memcpy(minitower, tmap, sizeof(minitower));
 #endif
 }
 
@@ -295,7 +294,7 @@ void towerclass::loadminitower2(void)
     12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,21,28,28,0,0,0,0,0,0,0,0,0,20,12,12,12,12,12,
     };
 
-    SDL_memcpy(minitower, tmap, sizeof(minitower));
+    memcpy(minitower, tmap, sizeof(minitower));
 #endif
 }
 
@@ -425,7 +424,7 @@ void towerclass::loadbackground(void)
     1,1,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,1,2,0,0,3,1,1,2,3,1,1,2,0,0,0,0,
     1,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,1,2,0,0,0,0,3,2,0,0,3,2,0,0,0,0,0,
     };
-    SDL_memcpy(back, tmap, sizeof(back));
+    memcpy(back, tmap, sizeof(back));
 }
 
 void towerclass::loadmap(void)
@@ -1135,6 +1134,6 @@ void towerclass::loadmap(void)
     12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,12,
     };
 
-    SDL_memcpy(contents, tmap, sizeof(contents));
+    memcpy(contents, tmap, sizeof(contents));
 #endif
 }

@@ -1617,7 +1617,7 @@ static void menuactionpress(void)
             music.playef(Sound_VIRIDIAN);
             game.translator_credits_pagenum++;
 
-            if (game.translator_credits_pagenum >= (int)SDL_arraysize(Credits::translator_pagesize))
+            if (game.translator_credits_pagenum >= (int)std::size(Credits::translator_pagesize))
             {
                 // No more translators. Move to the next credits section
                 game.current_credits_list_index = 0;
@@ -1674,7 +1674,7 @@ static void menuactionpress(void)
             music.playef(Sound_VIRIDIAN);
             game.current_credits_list_index += 9;
 
-            if (game.current_credits_list_index >= (int)SDL_arraysize(Credits::superpatrons))
+            if (game.current_credits_list_index >= (int)std::size(Credits::superpatrons))
             {
                 // No more super patrons. Move to the next credits section
                 game.current_credits_list_index = 0;
@@ -1696,7 +1696,7 @@ static void menuactionpress(void)
             if (game.current_credits_list_index < 0)
             {
                 //No more super patrons. Move to the previous credits section
-                game.translator_credits_pagenum = (int)SDL_arraysize(Credits::translator_pagesize) - 1;
+                game.translator_credits_pagenum = (int)std::size(Credits::translator_pagesize) - 1;
                 game.current_credits_list_index = 0;
                 for (int i = 0; i < game.translator_credits_pagenum; i += 1)
                 {
@@ -1729,7 +1729,7 @@ static void menuactionpress(void)
             music.playef(Sound_VIRIDIAN);
             game.current_credits_list_index += 14;
 
-            if (game.current_credits_list_index >= (int)SDL_arraysize(Credits::patrons))
+            if (game.current_credits_list_index >= (int)std::size(Credits::patrons))
             {
                 // No more patrons. Move to the next credits section
                 game.current_credits_list_index = 0;
@@ -1751,7 +1751,7 @@ static void menuactionpress(void)
             if (game.current_credits_list_index < 0)
             {
                 //No more patrons. Move to the previous credits section
-                game.current_credits_list_index = SDL_arraysize(Credits::superpatrons) - 1 - (SDL_arraysize(Credits::superpatrons)-1)%9;
+                game.current_credits_list_index = std::size(Credits::superpatrons) - 1 - (std::size(Credits::superpatrons)-1)%9;
                 game.createmenu(Menu::credits3, true);
             }
             else
@@ -1779,7 +1779,7 @@ static void menuactionpress(void)
             music.playef(Sound_VIRIDIAN);
             game.current_credits_list_index += 9;
 
-            if (game.current_credits_list_index >= (int)SDL_arraysize(Credits::githubfriends))
+            if (game.current_credits_list_index >= (int)std::size(Credits::githubfriends))
             {
                 // No more GitHub contributors. Move to the next credits section
                 game.current_credits_list_index = 0;
@@ -1801,7 +1801,7 @@ static void menuactionpress(void)
             if (game.current_credits_list_index < 0)
             {
                 //No more GitHub contributors. Move to the previous credits section
-                game.current_credits_list_index = SDL_arraysize(Credits::patrons) - 1 - (SDL_arraysize(Credits::patrons)-1)%14;
+                game.current_credits_list_index = std::size(Credits::patrons) - 1 - (std::size(Credits::patrons)-1)%14;
                 game.createmenu(Menu::credits4, true);
             }
             else
@@ -1833,7 +1833,7 @@ static void menuactionpress(void)
         case 1:
             //previous page
             music.playef(Sound_VIRIDIAN);
-            game.current_credits_list_index = SDL_arraysize(Credits::githubfriends) - 1 - (SDL_arraysize(Credits::githubfriends)-1)%9;
+            game.current_credits_list_index = std::size(Credits::githubfriends) - 1 - (std::size(Credits::githubfriends)-1)%9;
             game.createmenu(Menu::credits5, true);
             map.nexttowercolour();
             break;

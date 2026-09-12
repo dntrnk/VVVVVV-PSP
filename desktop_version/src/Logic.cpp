@@ -812,7 +812,7 @@ void gamelogic(void)
                 for (int i = obj.entities.size() - 1; i >= 0;  i--)
                 {
                     if (!obj.entities[i].isplatform
-                    || SDL_abs(obj.entities[i].vx) >= 0.000001f)
+                    || std::abs(obj.entities[i].vx) >= 0.000001f)
                     {
                         continue;
                     }
@@ -840,7 +840,7 @@ void gamelogic(void)
                 for (int ie = obj.entities.size() - 1; ie >= 0;  ie--)
                 {
                     if (!obj.entities[ie].isplatform
-                    || SDL_abs(obj.entities[ie].vy) >= 0.000001f)
+                    || std::abs(obj.entities[ie].vy) >= 0.000001f)
                     {
                         continue;
                     }

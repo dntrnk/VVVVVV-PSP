@@ -8,6 +8,12 @@
 #include "CWrappers.h"
 #include "UTF8.h"
 
+#ifndef MIN
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
+#ifndef MAX
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#endif
 
 static inline bool is_whitespace(char ch)
 {
@@ -58,7 +64,7 @@ static inline void call_with_button(format_callback callback, void* userdata, in
         callback(userdata, "[null]", 6);
         return;
     }
-    callback(userdata, button_text, SDL_strlen(button_text));
+    callback(userdata, button_text, strlen(button_text));
 }
 
 static inline void call_with_upper(format_callback callback, void* userdata, const char* string, size_t bytes)
@@ -104,8 +110,8 @@ void vformat_cb_valist(
         }
 
         /* Find the next { or }. The } is only needed now for escaping. */
-        const char* first_a = SDL_strchr(cursor, '{');
-        const char* first_b = SDL_strchr(cursor, '}');
+        const char* first_a = strchr(cursor, '{');
+        const char* first_b = strchr(cursor, '}');
         const char* next_stop = first_a;
         if (next_stop == NULL || first_b < next_stop)
         {
@@ -115,7 +121,7 @@ void vformat_cb_valist(
         if (next_stop == NULL)
         {
             /* No more placeholders or escapes in this string, run it to the end */
-            callback(userdata, cursor, SDL_strlen(cursor));
+            callback(userdata, cursor, strlen(cursor));
             return;
         }
 
@@ -159,8 +165,8 @@ void vformat_cb_valist(
             bool first_iter = true;
             do
             {
-                first_a = SDL_strchr(cursor, '|');
-                first_b = SDL_strchr(cursor, '}');
+                first_a = strchr(cursor, '|');
+                first_b = strchr(cursor, '}');
                 next_stop = first_a;
                 if (next_stop == NULL || first_b < next_stop)
                 {
@@ -170,7 +176,7 @@ void vformat_cb_valist(
                 if (next_stop == NULL)
                 {
                     /* Unterminated placeholder */
-                    callback(userdata, placeholder_start, SDL_strlen(placeholder_start));
+                    callback(userdata, placeholder_start, strlen(placeholder_start));
                     return;
                 }
 
@@ -193,7 +199,7 @@ void vformat_cb_valist(
                 else if (flag_len >= 8 && SDL_memcmp(cursor, "digits=", 7) == 0)
                 {
                     /* strtol stops on the first non-digit anyway, so... */
-                    flag_digits = SDL_strtol(cursor + 7, NULL, 10);
+                    flag_digits = strtol(cursor + 7, NULL, 10);
                 }
                 else if (flag_len == 6 && SDL_memcmp(cursor, "spaces", 6) == 0)
                 {
@@ -229,11 +235,11 @@ void vformat_cb_valist(
                     args_index_cursor++;
                 }
 
-                const char* next_comma = SDL_strchr(args_index_cursor, ',');
-                const char* next_colon = SDL_strchr(args_index_cursor, ':');
+                const char* next_comma = strchr(args_index_cursor, ',');
+                const char* next_colon = strchr(args_index_cursor, ':');
                 if (next_comma == NULL)
                 {
-                    next_comma = SDL_strchr(args_index_cursor, '\0');
+                    next_comma = strchr(args_index_cursor, '\0');
                 }
 
                 if (next_colon == NULL || next_colon > next_comma)
@@ -263,11 +269,11 @@ void vformat_cb_valist(
                             char* number = HELP_number_words(value, flag_wordy2 ? "wordy2" : "wordy");
                             if (flag_upper)
                             {
-                                call_with_upper(callback, userdata, number, SDL_strlen(number));
+                                call_with_upper(callback, userdata, number, strlen(number));
                             }
                             else
                             {
-                                callback(userdata, number, SDL_strlen(number));
+                                callback(userdata, number, strlen(number));
                             }
                             VVV_free(number);
                         }
@@ -275,8 +281,8 @@ void vformat_cb_valist(
                         {
                             const char* format = flag_spaces ? "%*d" : "%0*d";
                             char buffer[24];
-                            SDL_snprintf(buffer, sizeof(buffer), format, flag_digits, value);
-                            callback(userdata, buffer, SDL_strlen(buffer));
+                            snprintf(buffer, sizeof(buffer), format, flag_digits, value);
+                            callback(userdata, buffer, strlen(buffer));
                         }
                     }
                 }
@@ -292,11 +298,11 @@ void vformat_cb_valist(
                         }
                         else if (flag_upper)
                         {
-                            call_with_upper(callback, userdata, value, SDL_strlen(value));
+                            call_with_upper(callback, userdata, value, strlen(value));
                         }
                         else
                         {
-                            callback(userdata, value, SDL_strlen(value));
+                            callback(userdata, value, strlen(value));
                         }
                     }
                 }
@@ -375,9 +381,9 @@ static void callback_buffer_append(void* userdata, const char* string, size_t by
 
     if (buf->buffer_cursor != NULL && buf->buffer_left > 0)
     {
-        size_t copy_len = SDL_min(bytes, buf->buffer_left);
+        size_t copy_len = MIN(bytes, buf->buffer_left);
 
-        SDL_memcpy(buf->buffer_cursor, string, copy_len);
+        memcpy(buf->buffer_cursor, string, copy_len);
 
         buf->buffer_cursor += copy_len;
         buf->buffer_left -= copy_len;
@@ -446,7 +452,7 @@ char* vformat_alloc_valist(
     /* Variant of vformat_alloc which takes a va_list instead of `...` */
 
     size_t needed = vformat_buf_valist(NULL, 0, format_string, args_index, args);
-    char* buffer = (char*) SDL_malloc(needed);
+    char* buffer = (char*) malloc(needed);
     if (buffer == NULL)
     {
         return NULL;

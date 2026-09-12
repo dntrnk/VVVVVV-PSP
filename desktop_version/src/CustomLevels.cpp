@@ -188,11 +188,11 @@ static std::string find_tag(const std::string& buf, const std::string& start, co
         uint32_t character = 0;
         if (hex)
         {
-            SDL_sscanf(number.c_str(), "%" SCNx32, &character);
+            sscanf(number.c_str(), "%" SCNx32, &character);
         }
         else
         {
-            SDL_sscanf(number.c_str(), "%" SCNu32, &character);
+            sscanf(number.c_str(), "%" SCNu32, &character);
         }
         value.replace(start_pos, end - start_pos + 1, UTF8_encode(character).bytes);
     }
@@ -260,7 +260,7 @@ static void unloadZips(void)
     }
     for (char** path = list; *path != NULL; path++)
     {
-        if (SDL_strncmp(*path, "levels/", 7) == 0 && endsWith(*path, ".zip"))
+        if (strncmp(*path, "levels/", 7) == 0 && endsWith(*path, ".zip"))
         {
             PHYSFS_unmount(*path);
         }
@@ -393,7 +393,7 @@ void customlevelclass::reset(void)
         }
     }
 
-    SDL_zeroa(contents);
+    memset(contents, 0, sizeof(contents));
 
     script.clearcustom();
 
@@ -1008,7 +1008,7 @@ bool customlevelclass::load(std::string _path)
     ed.reset();
 
     static const char *levelDir = "levels/";
-    if (_path.compare(0, SDL_strlen(levelDir), levelDir) != 0)
+    if (_path.compare(0, strlen(levelDir), levelDir) != 0)
     {
         _path = levelDir + _path;
     }
@@ -1065,7 +1065,7 @@ bool customlevelclass::load(std::string _path)
             pText = "";
         }
 
-        if (SDL_strcmp(pKey, "MetaData") == 0)
+        if (strcmp(pKey, "MetaData") == 0)
         {
 
             for( tinyxml2::XMLElement* subElem = pElem->FirstChildElement(); subElem; subElem= subElem->NextSiblingElement())
@@ -1077,68 +1077,68 @@ bool customlevelclass::load(std::string _path)
                     pText_ = "";
                 }
 
-                if(SDL_strcmp(pKey_, "Creator") == 0)
+                if(strcmp(pKey_, "Creator") == 0)
                 {
                     creator = pText_;
                 }
 
-                if(SDL_strcmp(pKey_, "Title") == 0)
+                if(strcmp(pKey_, "Title") == 0)
                 {
                     title = pText_;
                 }
 
-                if(SDL_strcmp(pKey_, "Desc1") == 0)
+                if(strcmp(pKey_, "Desc1") == 0)
                 {
                     Desc1 = pText_;
                 }
 
-                if(SDL_strcmp(pKey_, "Desc2") == 0)
+                if(strcmp(pKey_, "Desc2") == 0)
                 {
                     Desc2 = pText_;
                 }
 
-                if(SDL_strcmp(pKey_, "Desc3") == 0)
+                if(strcmp(pKey_, "Desc3") == 0)
                 {
                     Desc3 = pText_;
                 }
 
-                if(SDL_strcmp(pKey_, "website") == 0)
+                if(strcmp(pKey_, "website") == 0)
                 {
                     website = pText_;
                 }
 
-                if(SDL_strcmp(pKey_, "onewaycol_override") == 0)
+                if(strcmp(pKey_, "onewaycol_override") == 0)
                 {
                     onewaycol_override = help.Int(pText_);
                 }
 
-                if(SDL_strcmp(pKey_, "font") == 0)
+                if(strcmp(pKey_, "font") == 0)
                 {
                     level_font_name = pText_;
                 }
 
-                if(SDL_strcmp(pKey_, "rtl") == 0)
+                if(strcmp(pKey_, "rtl") == 0)
                 {
                     rtl = help.Int(pText_);
                 }
             }
         }
 
-        if (SDL_strcmp(pKey, "mapwidth") == 0)
+        if (strcmp(pKey, "mapwidth") == 0)
         {
             mapwidth = help.Int(pText);
         }
-        if (SDL_strcmp(pKey, "mapheight") == 0)
+        if (strcmp(pKey, "mapheight") == 0)
         {
             mapheight = help.Int(pText);
         }
-        if (SDL_strcmp(pKey, "levmusic") == 0)
+        if (strcmp(pKey, "levmusic") == 0)
         {
             levmusic = help.Int(pText);
         }
 
 
-        if (SDL_strcmp(pKey, "contents") == 0 && pText[0] != '\0')
+        if (strcmp(pKey, "contents") == 0 && pText[0] != '\0')
         {
             int x = 0;
             int y = 0;
@@ -1166,7 +1166,7 @@ bool customlevelclass::load(std::string _path)
         }
 
 
-        if (SDL_strcmp(pKey, "edEntities") == 0)
+        if (strcmp(pKey, "edEntities") == 0)
         {
             for( tinyxml2::XMLElement* edEntityEl = pElem->FirstChildElement(); edEntityEl; edEntityEl=edEntityEl->NextSiblingElement())
             {
@@ -1177,7 +1177,7 @@ bool customlevelclass::load(std::string _path)
 
                 if (text != NULL)
                 {
-                    size_t len = SDL_strlen(text);
+                    size_t len = strlen(text);
 
                     // And now we come to the part where we have to deal with
                     // the terrible decisions of the past.
@@ -1237,7 +1237,7 @@ bool customlevelclass::load(std::string _path)
             }
         }
 
-        if (SDL_strcmp(pKey, "levelMetaData") == 0)
+        if (strcmp(pKey, "levelMetaData") == 0)
         {
             int i = 0;
             for( tinyxml2::XMLElement* edLevelClassElement = pElem->FirstChildElement(); edLevelClassElement; edLevelClassElement=edLevelClassElement->NextSiblingElement())
@@ -1273,7 +1273,7 @@ bool customlevelclass::load(std::string _path)
             }
         }
 
-        if (SDL_strcmp(pKey, "script") == 0 && pText[0] != '\0')
+        if (strcmp(pKey, "script") == 0 && pText[0] != '\0')
         {
             Script script_;
             bool headerfound = false;
@@ -1314,11 +1314,11 @@ next:
             }
         }
 
-        if (SDL_strcmp(pKey, "TextboxColours") == 0)
+        if (strcmp(pKey, "TextboxColours") == 0)
         {
             for (tinyxml2::XMLElement* textColourElement = pElem->FirstChildElement(); textColourElement; textColourElement = textColourElement->NextSiblingElement())
             {
-                if (SDL_strcmp(textColourElement->Value(), "colour") == 0)
+                if (strcmp(textColourElement->Value(), "colour") == 0)
                 {
                     int r = 255;
                     int g = 255;
@@ -1340,7 +1340,7 @@ next:
             }
         }
 
-        if (SDL_strcmp(pKey, "SpecialRoomnames") == 0)
+        if (strcmp(pKey, "SpecialRoomnames") == 0)
         {
             for (tinyxml2::XMLElement* roomnameElement = pElem->FirstChildElement(); roomnameElement; roomnameElement = roomnameElement->NextSiblingElement())
             {
@@ -1353,12 +1353,12 @@ next:
                 name.type = RoomnameType_STATIC;
                 name.progress = 0;
                 name.delay = 0;
-                if (SDL_strcmp(roomnameType, "transform") == 0)
+                if (strcmp(roomnameType, "transform") == 0)
                 {
                     name.type = RoomnameType_TRANSFORM;
                     name.delay = 2;
                 }
-                else if (SDL_strcmp(roomnameType, "glitch") == 0)
+                else if (strcmp(roomnameType, "glitch") == 0)
                 {
                     name.type = RoomnameType_GLITCH;
                     name.progress = 1;
@@ -1398,7 +1398,7 @@ next:
                     }
                     for (tinyxml2::XMLElement* textElement = roomnameElement->FirstChildElement(); textElement; textElement = textElement->NextSiblingElement())
                     {
-                        if (SDL_strcmp(textElement->Value(), "text") == 0)
+                        if (strcmp(textElement->Value(), "text") == 0)
                         {
                             const char* text = textElement->GetText();
                             if (text != NULL)
@@ -1600,7 +1600,7 @@ bool customlevelclass::save(const std::string& _path)
     msg = xml::update_element_delete_contents(data, "levelMetaData");
 
     int temp_platv[numrooms];
-    for (size_t i = 0; i < SDL_arraysize(temp_platv); ++i)
+    for (size_t i = 0; i < std::size(temp_platv); ++i)
     {
         temp_platv[i] = 4; /* default */
     }
@@ -1635,7 +1635,7 @@ bool customlevelclass::save(const std::string& _path)
         }
     }
 
-    for(size_t i = 0; i < SDL_arraysize(roomproperties); i++)
+    for(size_t i = 0; i < std::size(roomproperties); i++)
     {
         tinyxml2::XMLElement *roompropertyElement = doc.NewElement( "edLevelClass" );
         roompropertyElement->SetAttribute( "tileset", roomproperties[i].tileset);

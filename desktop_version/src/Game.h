@@ -389,7 +389,7 @@ public:
     void inline option(const char* text, bool active = true, uint32_t print_flags = PR_RTL_XFLIP)
     {
         MenuOption menuoption;
-        SDL_strlcpy(menuoption.text, text, sizeof(menuoption.text));
+        strlcpy(menuoption.text, text, sizeof(menuoption.text));
         menuoption.active = active;
         menuoption.print_flags = print_flags;
         menuoptions.push_back(menuoption);

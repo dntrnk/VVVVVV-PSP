@@ -43,7 +43,7 @@ namespace roomname_translator
         {
             use_explanation = "[explanation not yet set]";
         }
-        else if (SDL_strcmp(explanation, ".") == 0)
+        else if (strcmp(explanation, ".") == 0)
         {
             use_explanation = "[no explanation]";
         }
@@ -446,7 +446,7 @@ namespace roomname_translator
                     new_explanation = ".";
                     success_message = "Blank explanation set!";
                 }
-                else if (SDL_strcmp(old_explanation, ".") == 0)
+                else if (strcmp(old_explanation, ".") == 0)
                 {
                     new_explanation = "";
                     success_message = "Blank explanation deleted!";
