@@ -90,6 +90,10 @@ static void loadAllSounds(void)
             continue;
         }
 
+        /* Enable manual volume control so AalibSetVolume actually works */
+        AalibEnable(ch, PSPAALIB_EFFECT_VOLUME_MANUAL);
+        AalibSetVolume(ch, (AalibVolume){0.0f, 0.0f}); /* start muted until updatemutestate */
+
         /* Keep a copy so we can free it later. LoadWavFromMemory copied the
          * audio data, but it still references fmt info etc. Actually with
          * loadToRam=TRUE it copies everything it needs. So we can free mem. */
@@ -527,34 +531,43 @@ bool musicclass::halted(void)
 
 void musicclass::updatemutestate(void)
 {
+    float sound_vol;
+    float music_vol;
+
     if (game.muted)
     {
-        soundVolume = 0;
-        musicVolume = 0;
-        for (int i = 0; i < 28; i++) {
-            if (soundTracks[i].valid) {
-                AalibSetVolume(soundTracks[i].channel, (AalibVolume){0.0f, 0.0f});
-            }
-        }
+        sound_vol = 0.0f;
+        music_vol = 0.0f;
     }
     else
     {
-        float vol = (float)(VVV_MAX_VOLUME * user_sound_volume / USER_VOLUME_MAX) / VVV_MAX_VOLUME;
-        if (vol > 1.0f) vol = 1.0f;
-        soundVolume = (int)(vol * VVV_MAX_VOLUME);
-        for (int i = 0; i < 28; i++) {
-            if (soundTracks[i].valid) {
-                AalibSetVolume(soundTracks[i].channel, (AalibVolume){vol, vol});
-            }
-        }
+        sound_vol = (float)user_sound_volume / USER_VOLUME_MAX;
 
         if (game.musicmuted)
         {
-            musicVolume = 0;
+            music_vol = 0.0f;
         }
         else
         {
-            musicVolume = VVV_MAX_VOLUME * user_music_volume / USER_VOLUME_MAX;
+            /* musicVolume (0..VVV_MAX_VOLUME) is the fade-controlled value.
+             * user_music_volume scales it from the menu. */
+            music_vol = ((float)user_music_volume / USER_VOLUME_MAX)
+                      * ((float)musicVolume / VVV_MAX_VOLUME);
         }
     }
+
+    if (sound_vol > 1.0f) sound_vol = 1.0f;
+    if (music_vol > 1.0f) music_vol = 1.0f;
+
+    soundVolume = (int)(sound_vol * VVV_MAX_VOLUME);
+
+    for (int i = 0; i < 28; i++) {
+        if (soundTracks[i].valid) {
+            AalibSetVolume(soundTracks[i].channel, (AalibVolume){sound_vol, sound_vol});
+        }
+    }
+
+    /* Music volume applied to the music channel (when we implement it) */
+    /* For now, just store it in musicVolume for fades. */
+    /* musicVolume = (int)(music_vol * VVV_MAX_VOLUME); */  /* DON'T do this! */
 }
