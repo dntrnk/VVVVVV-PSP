@@ -9,7 +9,6 @@ INCDIR = \
   $(PSPDEV)/psp/include/SDL2 \
   ../third_party/ \
   ../third_party/SheenBidi/Headers \
-  ../third_party/FAudio/src \
   ../third_party/physfs/extras \
 
 OBJS = \
@@ -111,7 +110,7 @@ BUILD_PRX = 1
 PSP_FW_VERSION = 660
 
 LIBS = -lpspgu -lpspge -lpspdisplay -lpsppower -lpspctrl -lpspaudio -lpspvram \
-  -lz -lpng -lphysfs -lvorbis -lvorbisidec -lSDL2main -lSDL2 -lSDL2_mixer -lstdc++ -lGL -logg -lmodplug -lpspvfpu -lpsphprm -lFAudio -ltinyxml2
+  -lz -lpng -lphysfs -lvorbis -lvorbisidec -lSDL2main -lSDL2 -lSDL2_mixer -lstdc++ -lGL -logg -lmodplug -lpspvfpu -lpsphprm -ltinyxml2
 
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = VVVVVV
