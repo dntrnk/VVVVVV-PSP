@@ -329,8 +329,7 @@ int AalibLoadFromMemory(const unsigned char *data, int dataSize, int channel, bo
         return LoadWavFromMemory(data, dataSize, channel - PSPAALIB_CHANNEL_WAV_1, loadToRam);
     }
     if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
-        /* Not yet supported */
-        return PSPAALIB_ERROR_INVALID_CHANNEL;
+        return LoadOggFromMemory(data, dataSize, channel - PSPAALIB_CHANNEL_OGG_1, loadToRam);
     }
     return PSPAALIB_ERROR_INVALID_CHANNEL;
 }

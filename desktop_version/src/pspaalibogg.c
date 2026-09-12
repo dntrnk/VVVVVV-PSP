@@ -15,6 +15,8 @@
 extern "C" {
 #endif
 
+#include <stdlib.h>
+
 #include "pspaalibogg.h"
 
 typedef struct
@@ -33,11 +35,62 @@ typedef struct
     bool initialized;
     bool autoloop;
     bool loadToRam;
+    int loopStart;    /* sample position for loop start */
+    int loopLength;   /* sample count for loop (0 = full track) */
     AalibMetadata metadata;
     SceLwMutexWorkarea mutex;
 } OggFileInfo;
 
 OggFileInfo streamsOgg[10];
+
+static void ExtractLoopComments(OggFileInfo *ogg) {
+    vorbis_comment *vc = ov_comment(&ogg->oggVorbisFile, -1);
+    if (!vc) return;
+
+    ogg->loopStart = 0;
+    ogg->loopLength = 0;
+    int loopEnd = 0;
+
+    for (int i = 0; i < vc->comments; i++) {
+        char *comment = vc->user_comments[i];
+        int len = vc->comment_lengths[i];
+
+        char *copy = (char *)malloc(len + 1);
+        if (!copy) continue;
+        memcpy(copy, comment, len);
+        copy[len] = '\0';
+
+        /* Split at '=' */
+        char *eq = strchr(copy, '=');
+        if (eq) {
+            *eq = '\0';
+            char *key = copy;
+            char *value = eq + 1;
+
+            /* Normalize key: remove - or _ after LOOP */
+            char buf[5];
+            strlcpy(buf, key, sizeof(buf));
+            if (strcasecmp(buf, "LOOP") == 0
+                && (key[4] == '_' || key[4] == '-')) {
+                memmove(key + 4, key + 5, strlen(key) - 4);
+            }
+
+            if (strcasecmp(key, "LOOPSTART") == 0) {
+                ogg->loopStart = (int)strtoll(value, NULL, 10);
+            } else if (strcasecmp(key, "LOOPLENGTH") == 0) {
+                ogg->loopLength = (int)strtoll(value, NULL, 10);
+            } else if (strcasecmp(key, "LOOPEND") == 0) {
+                loopEnd = (int)strtoll(value, NULL, 10);
+            }
+        }
+
+        free(copy);
+    }
+
+    if (loopEnd > 0) {
+        ogg->loopLength = loopEnd - ogg->loopStart;
+    }
+}
 
 size_t OggCallbackRead(void *buf, size_t length, size_t memBlockSize, void *ch) {
     int *channel = (int *)ch;
@@ -218,7 +271,13 @@ int GetBufferOgg(short *buf, int length, float amp, int channel) {
                 sceKernelUnlockLwMutex(&(streamsOgg[channel].mutex), 1);
                 return PSPAALIB_WARNING_END_OF_STREAM_REACHED;
             }
-            RewindOgg(channel);
+            /* Loop back to loopStart (or 0 if not set) */
+            int ls = streamsOgg[channel].loopStart;
+            if (ls > 0) {
+                ov_pcm_seek(&(streamsOgg[channel].oggVorbisFile), ls);
+            } else {
+                ov_raw_seek(&(streamsOgg[channel].oggVorbisFile), 0);
+            }
         }
         streamsOgg[channel].buf = (short *)realloc(streamsOgg[channel].buf, streamsOgg[channel].bufLength + bytesRead);
         memcpy((void *)streamsOgg[channel].buf + streamsOgg[channel].bufLength, streamsOgg[channel].tempBuf, bytesRead);
@@ -479,6 +538,64 @@ int LoadOgg(char *filename, int channel, bool loadToRam) {
     streamsOgg[channel].paused = TRUE;
     streamsOgg[channel].initialized = TRUE;
     streamsOgg[channel].stopReason = PSPAALIB_STOP_JUST_LOADED;
+
+    return PSPAALIB_SUCCESS;
+}
+
+int LoadOggFromMemory(const unsigned char *data, int dataSize, int channel, bool loadToRam) {
+    if ((channel < 0) || (channel > 9)) {
+        return PSPAALIB_ERROR_OGG_INVALID_CHANNEL;
+    }
+    if (data == NULL || dataSize <= 0) {
+        return PSPAALIB_ERROR_OGG_INVALID_FILE;
+    }
+    if (streamsOgg[channel].initialized) {
+        UnloadOgg(channel);
+    }
+
+    /* We always copy into our own buffer, so the caller can free theirs. */
+    streamsOgg[channel].data = (char *)malloc(dataSize);
+    if (!streamsOgg[channel].data) {
+        return PSPAALIB_ERROR_OGG_INSUFFICIENT_RAM;
+    }
+    memcpy(streamsOgg[channel].data, data, dataSize);
+    streamsOgg[channel].dataSize = dataSize;
+    streamsOgg[channel].dataPos = 0;
+    streamsOgg[channel].loadToRam = TRUE;
+    streamsOgg[channel].file = -1;
+    streamsOgg[channel].channel = channel;
+
+    ov_callbacks oggCallbacks;
+    oggCallbacks.read_func = OggCallbackRead;
+    oggCallbacks.seek_func = OggCallbackSeek;
+    oggCallbacks.close_func = OggCallbackClose;
+    oggCallbacks.tell_func = OggCallbackTell;
+
+    if (ov_open_callbacks(&(streamsOgg[channel].channel), &(streamsOgg[channel].oggVorbisFile), NULL, 0, oggCallbacks) < 0) {
+        free(streamsOgg[channel].data);
+        streamsOgg[channel].data = NULL;
+        return PSPAALIB_ERROR_OGG_OPEN_CALLBACKS;
+    }
+
+    memset(&streamsOgg[channel].metadata, 0, sizeof(AalibMetadata));
+    streamsOgg[channel].metadata.has_cover = 0;
+
+    /* Parse loop points from comments */
+    ExtractLoopComments(&streamsOgg[channel]);
+
+    if (sceKernelCreateLwMutex(&(streamsOgg[channel].mutex), "OggMutex", 0, 0, NULL) != 0) {
+        ov_clear(&(streamsOgg[channel].oggVorbisFile));
+        free(streamsOgg[channel].data);
+        streamsOgg[channel].data = NULL;
+        return PSPAALIB_ERROR_OGG_CREATE_MUTEX;
+    }
+
+    streamsOgg[channel].bufLength = 0;
+    streamsOgg[channel].buf = NULL;
+    streamsOgg[channel].paused = TRUE;
+    streamsOgg[channel].initialized = TRUE;
+    streamsOgg[channel].stopReason = PSPAALIB_STOP_JUST_LOADED;
+    streamsOgg[channel].autoloop = FALSE;
 
     return PSPAALIB_SUCCESS;
 }

@@ -74,6 +74,9 @@ static volatile Uint64 f_time = 0;
 static volatile Uint64 f_timePrev = 0;
 #endif
 
+extern const unsigned short _ctype_b[];
+const unsigned short *__ctype_ptr__ = _ctype_b;
+
 enum FuncType
 {
     Func_null,

@@ -1026,6 +1026,99 @@ fail:
     return true;
 }
 
+bool FILESYSTEM_loadBinaryBlobResource(
+    const char* blob_filename,
+    const char* resource_name,
+    unsigned char** mem,
+    size_t* len
+) {
+    if (mem == NULL || len == NULL) {
+        return false;
+    }
+    *mem = NULL;
+    *len = 0;
+
+    char path[MAX_PATH];
+    getMountedPath(path, sizeof(path), blob_filename);
+
+    PHYSFS_File* handle = PHYSFS_openRead(path);
+    if (handle == NULL) {
+        vlog_error("Could not open blob %s: %s",
+            blob_filename,
+            PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        return false;
+    }
+
+    /* Read just the header table */
+    resourceheader headers[binaryBlob::max_headers];
+    if (PHYSFS_readBytes(handle, headers, sizeof(headers)) != sizeof(headers)) {
+        vlog_error("Could not read headers from %s", blob_filename);
+        PHYSFS_close(handle);
+        return false;
+    }
+
+    /* Find the resource */
+    int found = -1;
+    for (size_t i = 0; i < binaryBlob::max_headers; i++) {
+        if (headers[i].valid == 1 && strcmp(headers[i].name, resource_name) == 0) {
+            found = i;
+            break;
+        }
+    }
+
+    if (found < 0) {
+        vlog_warn("Resource %s not found in %s", resource_name, blob_filename);
+        PHYSFS_close(handle);
+        return false;
+    }
+
+    /* Compute the offset of this resource's data.
+     * Layout: [headers][data0][data1][data2]...
+     * So the offset is sizeof(headers) + sum of sizes of valid resources before us. */
+    PHYSFS_sint64 offset = sizeof(headers);
+    for (int i = 0; i < found; i++) {
+        if (headers[i].valid == 1) {
+            offset += headers[i].size;
+        }
+    }
+
+    int32_t data_size = headers[found].size;
+    if (data_size <= 0) {
+        vlog_error("Resource %s has invalid size %d", resource_name, data_size);
+        PHYSFS_close(handle);
+        return false;
+    }
+
+    unsigned char* buffer = (unsigned char*) malloc(data_size);
+    if (buffer == NULL) {
+        vlog_error("Out of memory allocating %d bytes for %s", data_size, resource_name);
+        PHYSFS_close(handle);
+        return false;
+    }
+
+    if (!PHYSFS_seek(handle, offset)) {
+        vlog_error("Could not seek in %s: %s",
+            blob_filename,
+            PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode()));
+        free(buffer);
+        PHYSFS_close(handle);
+        return false;
+    }
+
+    if (PHYSFS_readBytes(handle, buffer, data_size) != data_size) {
+        vlog_error("Could not read resource %s from %s", resource_name, blob_filename);
+        free(buffer);
+        PHYSFS_close(handle);
+        return false;
+    }
+
+    PHYSFS_close(handle);
+
+    *mem = buffer;
+    *len = data_size;
+    return true;
+}
+
 bool FILESYSTEM_saveTiXml2Document(const char *name, tinyxml2::XMLDocument& doc, bool sync /*= true*/)
 {
     if (!isInit)

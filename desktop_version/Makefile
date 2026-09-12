@@ -101,6 +101,7 @@ OBJS = \
   ../third_party/SheenBidi/Source/SheenBidi.o \
   ../third_party/SheenBidi/Source/StatusStack.o \
 
+LIBDIR = lib
 CFLAGS = -G0 -O3 -fomit-frame-pointer -fsingle-precision-constant -fno-math-errno -ffast-math -Wall -Wno-trigraphs
 # CFLAGS = -g3 -Wl,-Map,EBOOT.map
 CXXFLAGS = $(CFLAGS) -fno-rtti
@@ -110,7 +111,7 @@ BUILD_PRX = 1
 PSP_FW_VERSION = 660
 
 LIBS = -lpspgu -lpspge -lpspdisplay -lpsppower -lpspctrl -lpspaudio -lpspvram \
-  -lz -lpng -lphysfs -lvorbis -lvorbisidec -lSDL2main -lSDL2 -lSDL2_mixer -lstdc++ -lGL -logg -lmodplug -lpspvfpu -lpsphprm -ltinyxml2
+  -lz -lpng -lphysfs -lvorbisidec -lSDL2main -lSDL2 -lstdc++ -lGL -logg -lpspvfpu -lpsphprm -ltinyxml2
 
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = VVVVVV

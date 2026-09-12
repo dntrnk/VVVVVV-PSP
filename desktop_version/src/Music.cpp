@@ -19,6 +19,97 @@
 
 static bool soundLoaded = false;
 
+struct MusicChannel {
+    static int channel;
+    static bool loaded;
+    static unsigned char *currentData;  /* we own this */
+
+    static void Stop(void) {
+        if (channel >= 0 && loaded) {
+            AalibStop(channel);
+            AalibUnload(channel);
+        }
+        if (currentData) {
+            free(currentData);
+            currentData = NULL;
+        }
+        loaded = false;
+        channel = -1;
+    }
+
+    static void LoadAndPlay(const char *trackName) {
+        Stop();
+
+        unsigned char *data = NULL;
+        size_t size = 0;
+        if (!FILESYSTEM_loadBinaryBlobResource(
+                "vvvvvvmusic.vvv", trackName, &data, &size)) {
+            vlog_error("Could not load track %s", trackName);
+            return;
+        }
+
+        channel = PSPAALIB_CHANNEL_OGG_1;
+
+        /* AalibLoadFromMemory with loadToRam=TRUE copies into its own buffer,
+         * so we can free `data` after. */
+        int ret = AalibLoadFromMemory(data, (int)size, channel, TRUE);
+        free(data);
+
+        if (ret != PSPAALIB_SUCCESS) {
+            vlog_error("Failed to load OGG track %s: error %d", trackName, ret);
+            channel = -1;
+            return;
+        }
+
+        AalibEnable(channel, PSPAALIB_EFFECT_VOLUME_MANUAL);
+        AalibSetAutoloop(channel, TRUE);
+        AalibSetVolume(channel, (AalibVolume){0.0f, 0.0f});
+        AalibPlay(channel);
+        loaded = true;
+    }
+
+    static void SetVolume(float v) {
+        if (channel >= 0 && loaded) {
+            AalibSetVolume(channel, (AalibVolume){v, v});
+        }
+    }
+
+    static void Pause(void) {
+        if (channel >= 0 && loaded) AalibPause(channel);
+    }
+
+    static void Resume(void) {
+        if (channel >= 0 && loaded) AalibPause(channel);
+    }
+
+    static bool IsPlaying(void) {
+        if (channel < 0 || !loaded) return false;
+        return AalibGetStopReason(channel) == PSPAALIB_STOP_NOT_STOPPED;
+    }
+};
+int MusicChannel::channel = -1;
+bool MusicChannel::loaded = false;
+unsigned char *MusicChannel::currentData = NULL;
+
+static const char *trackNames[] = {
+    "data/music/0levelcomplete.ogg",
+    "data/music/1pushingonwards.ogg",
+    "data/music/2positiveforce.ogg",
+    "data/music/3potentialforanything.ogg",
+    "data/music/4passionforexploring.ogg",
+    "data/music/5intermission.ogg",
+    "data/music/6presentingvvvvvv.ogg",
+    "data/music/7gamecomplete.ogg",
+    "data/music/8predestinedfate.ogg",
+    "data/music/9positiveforcereversed.ogg",
+    "data/music/10popularpotpourri.ogg",
+    "data/music/11pipedream.ogg",
+    "data/music/12pressurecooker.ogg",
+    "data/music/13pacedenergy.ogg",
+    "data/music/14piercingthesky.ogg",
+    "data/music/predestinedfatefinallevel.ogg"
+};
+
 struct SoundTrack {
     int channel;          /* PSPAALIB channel */
     bool valid;
@@ -158,59 +249,56 @@ void musicclass::init(void)
 
     loadAllSounds();
 
-    // music init would go here (OGG from binary blob)
-    musicValid = false;
-    musicPaused = true;
-    currentMusicTrack = -1;
-    vlog_info("Music initialized (sounds only, music pending)");
+    /* We don't preload the music blob anymore.
+     * Tracks are loaded on demand from disk. */
+    num_pppppp_tracks = 16;
+    num_mmmmmm_tracks = 0;
+    mmmmmm = false;
+    usingmmmmmm = false;
+
+    vlog_info("Music initialized");
 }
 
 void musicclass::destroy(void)
 {
+    MusicChannel::Stop();
     unloadAllSounds();
-
-    pppppp_blob.clear();
-    mmmmmm_blob.clear();
     musicValid = false;
 }
 
 void musicclass::play(int t)
 {
-    if (mmmmmm && usingmmmmmm)
-    {
-        if (num_mmmmmm_tracks > 0)
-        {
-            t %= num_mmmmmm_tracks;
-        }
-    }
-    else if (num_pppppp_tracks > 0)
-    {
+    if (mmmmmm && usingmmmmmm) {
+        if (num_mmmmmm_tracks > 0) t %= num_mmmmmm_tracks;
+    } else if (num_pppppp_tracks > 0) {
         t %= num_pppppp_tracks;
     }
 
-    if (mmmmmm && !usingmmmmmm)
-    {
+    if (mmmmmm && !usingmmmmmm) {
         t += num_mmmmmm_tracks;
     }
 
     safeToProcessMusic = true;
 
-    if (currentsong == t && !m_doFadeOutVol)
-    {
+    if (currentsong == t && !m_doFadeOutVol) {
         return;
     }
 
     currentsong = t;
     haltedsong = -1;
 
-    if (t == -1)
-    {
+    if (t == -1) {
+        MusicChannel::Stop();
         return;
     }
 
-    /* Music is not yet implemented, so just do nothing.
-     * In the future, load an OGG from the binary blob and play it. */
-    vlog_info("Music play(%d) - not yet implemented", t);
+    if (t < 0 || t >= num_pppppp_tracks) {
+        vlog_error("play() out-of-bounds!");
+        currentsong = -1;
+        return;
+    }
+
+    MusicChannel::LoadAndPlay(trackNames[t]);
 
     m_doFadeInVol = false;
     m_doFadeOutVol = false;
@@ -224,7 +312,7 @@ void musicclass::resume(void)
         currentsong = haltedsong;
         haltedsong = -1;
     }
-    /* Music resume - pending */
+    MusicChannel::Resume();
 }
 
 void musicclass::resumefade(const int fadein_ms)
@@ -240,7 +328,7 @@ void musicclass::fadein(void)
 
 void musicclass::pause(void)
 {
-    /* Music pause - pending */
+    MusicChannel::Pause();
 }
 
 void musicclass::haltdasmusik(void)
@@ -250,7 +338,7 @@ void musicclass::haltdasmusik(void)
 
 void musicclass::haltdasmusik(const bool from_fade)
 {
-    pause();
+    MusicChannel::Pause();
     haltedsong = currentsong;
     currentsong = -1;
     m_doFadeInVol = false;
@@ -372,23 +460,25 @@ void musicclass::processmusicfadeout(void)
 
 void musicclass::processmusic(void)
 {
-    if (!safeToProcessMusic)
-    {
+    if (!safeToProcessMusic) {
         return;
     }
 
-    if (m_doFadeInVol)
-    {
+    if (m_doFadeInVol) {
         processmusicfadein();
     }
-
-    if (m_doFadeOutVol)
-    {
+    if (m_doFadeOutVol) {
         processmusicfadeout();
     }
 
-    if (nicefade && halted())
-    {
+    float final_vol = ((float)musicVolume / VVV_MAX_VOLUME)
+                    * ((float)user_music_volume / USER_VOLUME_MAX);
+    if (game.muted || game.musicmuted) {
+        final_vol = 0.0f;
+    }
+    MusicChannel::SetVolume(final_vol);
+
+    if (nicefade && halted()) {
         play(nicechange);
         nicechange = -1;
         nicefade = false;
@@ -525,8 +615,7 @@ void musicclass::resumeef(void)
 
 bool musicclass::halted(void)
 {
-    /* Music is halted if not playing. Since music is a stub, always true. */
-    return true;
+    return !MusicChannel::IsPlaying();
 }
 
 void musicclass::updatemutestate(void)

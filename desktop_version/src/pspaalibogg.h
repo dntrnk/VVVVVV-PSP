@@ -28,6 +28,10 @@ int RewindOgg(int channel);
 int SeekOgg(int channel, int time);
 int GetBufferOgg(short *buf, int length, float amp, int channel);
 int LoadOgg(char *filename, int channel, bool loadToRam);
+int LoadOggFromMemory(const unsigned char *data, int dataSize, int channel, bool loadToRam);
+int GetOggLoopStart(int channel);
+int GetOggLoopLength(int channel);
+int SeekOggToLoopStart(int channel);
 int UnloadOgg(int channel);
 int GetMetadataOgg(int channel, AalibMetadata *metadata);
 

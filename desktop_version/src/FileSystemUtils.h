@@ -43,6 +43,14 @@ void FILESYSTEM_loadAssetToMemory(
 
 bool FILESYSTEM_loadBinaryBlob(binaryBlob* blob, const char* filename);
 
+/* Read a single resource from a binary blob file without loading the whole blob. */
+bool FILESYSTEM_loadBinaryBlobResource(
+    const char* blob_filename,
+    const char* resource_name,
+    unsigned char** mem,
+    size_t* len
+);
+
 bool FILESYSTEM_saveTiXml2Document(const char *name, tinyxml2::XMLDocument& doc, bool sync = true);
 bool FILESYSTEM_loadTiXml2Document(const char *name, tinyxml2::XMLDocument& doc);
 bool FILESYSTEM_loadAssetTiXml2Document(const char *name, tinyxml2::XMLDocument& doc);
