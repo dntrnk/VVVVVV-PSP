@@ -35,6 +35,7 @@ typedef struct
     bool initialized;
     bool autoloop;
     bool loadToRam;
+    bool ownsData;
     int loopStart;    /* sample position for loop start */
     int loopLength;   /* sample count for loop (0 = full track) */
     AalibMetadata metadata;
@@ -152,7 +153,10 @@ long OggCallbackTell(void *ch) {
 int OggCallbackClose(void *ch) {
     int *channel = (int *)ch;
     if (streamsOgg[*channel].loadToRam) {
-        free(streamsOgg[*channel].data);
+        if (streamsOgg[*channel].ownsData) {
+            free(streamsOgg[*channel].data);
+            streamsOgg[*channel].data = NULL;
+        }
         return TRUE;
     } else {
         return sceIoClose(streamsOgg[*channel].file);
@@ -553,15 +557,21 @@ int LoadOggFromMemory(const unsigned char *data, int dataSize, int channel, bool
         UnloadOgg(channel);
     }
 
-    /* We always copy into our own buffer, so the caller can free theirs. */
-    streamsOgg[channel].data = (char *)malloc(dataSize);
-    if (!streamsOgg[channel].data) {
-        return PSPAALIB_ERROR_OGG_INSUFFICIENT_RAM;
+    if (loadToRam) {
+        streamsOgg[channel].data = (char *)malloc(dataSize);
+        if (!streamsOgg[channel].data) {
+            return PSPAALIB_ERROR_OGG_INSUFFICIENT_RAM;
+        }
+        memcpy(streamsOgg[channel].data, data, dataSize);
+        streamsOgg[channel].ownsData = true;
+    } else {
+        streamsOgg[channel].data = (char *)data;
+        streamsOgg[channel].ownsData = false;
     }
-    memcpy(streamsOgg[channel].data, data, dataSize);
+
     streamsOgg[channel].dataSize = dataSize;
     streamsOgg[channel].dataPos = 0;
-    streamsOgg[channel].loadToRam = TRUE;
+    streamsOgg[channel].loadToRam = TRUE; /* всегда читаем из RAM, но не владеем */
     streamsOgg[channel].file = -1;
     streamsOgg[channel].channel = channel;
 
@@ -571,8 +581,12 @@ int LoadOggFromMemory(const unsigned char *data, int dataSize, int channel, bool
     oggCallbacks.close_func = OggCallbackClose;
     oggCallbacks.tell_func = OggCallbackTell;
 
-    if (ov_open_callbacks(&(streamsOgg[channel].channel), &(streamsOgg[channel].oggVorbisFile), NULL, 0, oggCallbacks) < 0) {
-        free(streamsOgg[channel].data);
+    if (ov_open_callbacks(&(streamsOgg[channel].channel),
+                          &(streamsOgg[channel].oggVorbisFile),
+                          NULL, 0, oggCallbacks) < 0) {
+        if (streamsOgg[channel].ownsData) {
+            free(streamsOgg[channel].data);
+        }
         streamsOgg[channel].data = NULL;
         return PSPAALIB_ERROR_OGG_OPEN_CALLBACKS;
     }
@@ -580,12 +594,14 @@ int LoadOggFromMemory(const unsigned char *data, int dataSize, int channel, bool
     memset(&streamsOgg[channel].metadata, 0, sizeof(AalibMetadata));
     streamsOgg[channel].metadata.has_cover = 0;
 
-    /* Parse loop points from comments */
     ExtractLoopComments(&streamsOgg[channel]);
 
-    if (sceKernelCreateLwMutex(&(streamsOgg[channel].mutex), "OggMutex", 0, 0, NULL) != 0) {
+    if (sceKernelCreateLwMutex(&(streamsOgg[channel].mutex), "OggMutex",
+                               0, 0, NULL) != 0) {
         ov_clear(&(streamsOgg[channel].oggVorbisFile));
-        free(streamsOgg[channel].data);
+        if (streamsOgg[channel].ownsData) {
+            free(streamsOgg[channel].data);
+        }
         streamsOgg[channel].data = NULL;
         return PSPAALIB_ERROR_OGG_CREATE_MUTEX;
     }
@@ -611,11 +627,16 @@ int UnloadOgg(int channel) {
     streamsOgg[channel].paused = TRUE;
     sceKernelLockLwMutex(&(streamsOgg[channel].mutex), 1, NULL);
     ov_clear(&(streamsOgg[channel].oggVorbisFile));
-    sceIoClose(streamsOgg[channel].file);
+    if (streamsOgg[channel].file >= 0) {
+        sceIoClose(streamsOgg[channel].file);
+        streamsOgg[channel].file = -1;
+    }
     streamsOgg[channel].stopReason = PSPAALIB_STOP_UNLOADED;
     streamsOgg[channel].initialized = FALSE;
     sceKernelUnlockLwMutex(&(streamsOgg[channel].mutex), 1);
     sceKernelDeleteLwMutex(&(streamsOgg[channel].mutex));
+    streamsOgg[channel].data = NULL;
+    streamsOgg[channel].ownsData = false;
     return PSPAALIB_SUCCESS;
 }
 

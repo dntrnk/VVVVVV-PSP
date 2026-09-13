@@ -50,16 +50,17 @@ struct MusicChannel {
 
         channel = PSPAALIB_CHANNEL_OGG_1;
 
-        /* AalibLoadFromMemory with loadToRam=TRUE copies into its own buffer,
-         * so we can free `data` after. */
-        int ret = AalibLoadFromMemory(data, (int)size, channel, TRUE);
-        free(data);
+        /* loadToRam=FALSE: PSPAALIB will use our own buffer */
+        int ret = AalibLoadFromMemory(data, (int)size, channel, FALSE);
 
         if (ret != PSPAALIB_SUCCESS) {
             vlog_error("Failed to load OGG track %s: error %d", trackName, ret);
+            free(data);
             channel = -1;
             return;
         }
+
+        currentData = data;
 
         AalibEnable(channel, PSPAALIB_EFFECT_VOLUME_MANUAL);
         AalibSetAutoloop(channel, TRUE);
