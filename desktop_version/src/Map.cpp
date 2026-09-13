@@ -1,6 +1,8 @@
 #define MAP_DEFINITION
 #include "Map.h"
 
+#include <algorithm>
+
 #include "Alloc.h"
 #include "Constants.h"
 #include "CustomLevels.h"
@@ -1917,7 +1919,7 @@ void mapclass::loadlevel(int rx, int ry)
                     usethisy -= 8;
                 }
 
-                obj.createentity(ex, usethisy + 8, 20 + SDL_clamp(ent.p2, 0, 1), usethistile);
+                obj.createentity(ex, usethisy + 8, 20 + std::clamp(ent.p2, 0, 1), usethistile);
 
                 for (size_t i = 0; i < script.customscripts.size(); i++)
                 {

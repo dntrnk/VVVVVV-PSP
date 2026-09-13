@@ -65,7 +65,7 @@ void entclass::clear(void)
     dir = 0;
     actionframe = 0;
 
-    SDL_zero(realcol);
+    memset(&realcol, 0, sizeof(realcol));
     lerpoldxp = 0;
     lerpoldyp = 0;
 }

@@ -79,8 +79,8 @@ void ime_render(void)
             selrect.w = in_sel_pixels;
             graphics.fill_rect(&selrect, G2D_RGB(128, 64, 0));
         }
-        SDL_free(before_sel);
-        SDL_free(in_sel);
+        free(before_sel);
+        free(in_sel);
     }
 
     font::print(PR_FONT_LEVEL | PR_CJK_LOW, imebox.x + 1, imebox.y + 1, key.imebuffer, 255, 255, 255);

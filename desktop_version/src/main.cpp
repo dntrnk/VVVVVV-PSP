@@ -1,8 +1,4 @@
 #include <SDL.h>
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#include <emscripten/html5.h>
-#endif
 
 #include "ButtonGlyphs.h"
 #include "CustomLevels.h"
@@ -69,10 +65,8 @@ static volatile Uint64 time_ = 0;
 static volatile Uint64 timePrev = 0;
 static volatile Uint32 accumulator = 0;
 
-#ifndef __EMSCRIPTEN__
 static volatile Uint64 f_time = 0;
 static volatile Uint64 f_timePrev = 0;
-#endif
 
 extern const unsigned short _ctype_b[];
 const unsigned short *__ctype_ptr__ = _ctype_b;
@@ -359,15 +353,6 @@ static void inline fixedloop(void)
 static void inline deltaloop(void);
 
 static void cleanup(void);
-
-#ifdef __EMSCRIPTEN__
-static void emscriptenloop(void)
-{
-    timePrev = time_;
-    time_ = SDL_GetTicks64();
-    deltaloop();
-}
-#endif
 
 static void keep_console_open(const bool open_console)
 {
@@ -684,7 +669,7 @@ int main(int argc, char *argv[])
         // Prioritize unlock.vvv first (2.2 and below),
         // but settings have been migrated to settings.vvv (2.3 and up)
         struct ScreenSettings screen_settings;
-        SDL_zero(screen_settings);
+        memset(&screen_settings, 0, sizeof(screen_settings));
         ScreenSettings_default(&screen_settings);
         game.loadstats(&screen_settings);
         game.loadsettings(&screen_settings);
@@ -867,9 +852,6 @@ int main(int argc, char *argv[])
     gamestate_funcs = get_gamestate_funcs(game.gamestate, &num_gamestate_funcs);
     loop_assign_active_funcs();
 
-#ifdef __EMSCRIPTEN__
-    emscripten_set_main_loop(emscriptenloop, 0, 0);
-#else
     while (true)
     {
         f_time = SDL_GetTicks64();
@@ -892,7 +874,6 @@ int main(int argc, char *argv[])
     }
 
     cleanup();
-#endif
 
     return 0;
 }
@@ -942,7 +923,7 @@ static void inline deltaloop(void)
             loop_assign_active_funcs();
         }
 
-        accumulator = SDL_fmodf(accumulator, timesteplimit);
+        accumulator = std::fmodf(accumulator, timesteplimit);
 
         /* We are done rendering. */
         graphics.renderfixedpost();
@@ -1021,9 +1002,7 @@ static void unfocused_run(void)
     }
     graphics.render();
     //We are minimised, so lets put a bit of a delay to save CPU
-#ifndef __EMSCRIPTEN__
     SDL_Delay(100);
-#endif
 }
 
 static void focused_begin(void)

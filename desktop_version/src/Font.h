@@ -26,6 +26,8 @@
 #ifndef FONT_H
 #define FONT_H
 
+#include <algorithm>
+
 #include <SDL.h>
 #include <stdint.h>
 #include <string>
@@ -43,9 +45,9 @@
 #define PR_FONT_LEVEL (1 << 3) /* use level-specific font (room names, cutscene dialogue, etc) */
 #define PR_FONT_8X8 (2 << 3) /* use 8x8 font no matter what */
 #define PR_FONT_IDX(idx, rtl) /* use given font index */\
-    (((SDL_clamp(idx, 0, 28) + 3) << 3) | (rtl ? PR_RTL_FORCE : 0))
+    (((std::clamp((int)idx, 0, 28) + 3) << 3) | (rtl ? PR_RTL_FORCE : 0))
 #define PR_BRIGHTNESS(value) /* use this brightness 0-255 for the text (accounts for button glyphs correctly) */\
-    (((~SDL_clamp((int)(value), 0, 255) & 0xff) << 8))
+    (((~std::clamp((int)(value), 0, 255) & 0xff) << 8))
 #define PR_FULLBOR (1 << 16) /* draw a black border around the text, filling in the corners (for the map legend) */
 #define PR_BOR (1 << 17) /* draw a black border around the text (was bprint/bigbprint) */
 #define PR_LEFT (0 << 18) /* default, left-align text/place at x coordinate */

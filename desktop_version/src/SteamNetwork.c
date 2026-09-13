@@ -243,7 +243,7 @@ void STEAM_update(void)
 
     SteamAPI_ManualDispatch_RunFrame(steamPipe);
     struct CallbackMsg_t callback;
-    SDL_zero(callback);
+    memset(&callback, 0, sizeof(callback));
     while (SteamAPI_ManualDispatch_GetNextCallback(steamPipe, &callback))
     {
         if (callback.m_iCallback == iScreenshotRequested)

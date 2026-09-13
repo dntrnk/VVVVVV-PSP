@@ -325,7 +325,7 @@ void KeyPoll::Poll(void)
             imebuffer = evt.editExt.text;
             imebuffer_start = evt.editExt.start;
             imebuffer_length = evt.editExt.length;
-            SDL_free(evt.editExt.text);
+            free(evt.editExt.text);
             break;
 
         /* Mouse Input */

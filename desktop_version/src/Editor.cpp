@@ -1,6 +1,7 @@
 #define ED_DEFINITION
 #include "Editor.h"
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
@@ -1932,9 +1933,9 @@ void editorrender(void)
             graphics.clear();
         }
 
-        int tr = SDL_clamp(graphics.titlebg.r - (help.glow / 4) - int(fRandom() * 4), 0, 255);
-        int tg = SDL_clamp(graphics.titlebg.g - (help.glow / 4) - int(fRandom() * 4), 0, 255);
-        int tb = SDL_clamp(graphics.titlebg.b - (help.glow / 4) - int(fRandom() * 4), 0, 255);
+        int tr = std::clamp(graphics.titlebg.r - (help.glow / 4) - int(fRandom() * 4), 0, 255);
+        int tg = std::clamp(graphics.titlebg.g - (help.glow / 4) - int(fRandom() * 4), 0, 255);
+        int tb = std::clamp(graphics.titlebg.b - (help.glow / 4) - int(fRandom() * 4), 0, 255);
 
         editormenurender(tr, tg, tb);
         graphics.drawmenu(tr, tg, tb, game.currentmenuname);
@@ -2100,8 +2101,8 @@ static void input_submitted(void)
             break;
         }
 
-        ed.levx = SDL_clamp(help.Int(coord_x) - 1, 0, cl.mapwidth - 1);
-        ed.levy = SDL_clamp(help.Int(coord_y) - 1, 0, cl.mapheight - 1);
+        ed.levx = std::clamp(help.Int(coord_x) - 1, 0, cl.mapwidth - 1);
+        ed.levy = std::clamp(help.Int(coord_y) - 1, 0, cl.mapheight - 1);
         graphics.foregrounddrawn = false;
         graphics.backgrounddrawn = false;
         break;
@@ -3172,8 +3173,8 @@ void editorinput(void)
     ed.old_tilex = ed.tilex;
     ed.old_tiley = ed.tiley;
 
-    ed.tilex = SDL_clamp(key.mousex, 0, SCREEN_WIDTH_PIXELS - 1) / 8;
-    ed.tiley = SDL_clamp(key.mousey, 0, SCREEN_HEIGHT_PIXELS - 1) / 8;
+    ed.tilex = std::clamp(key.mousex, 0, SCREEN_WIDTH_PIXELS - 1) / 8;
+    ed.tiley = std::clamp(key.mousey, 0, SCREEN_HEIGHT_PIXELS - 1) / 8;
 
     bool up_pressed = key.isDown(SDLK_UP) || key.isDown(SDL_CONTROLLER_BUTTON_DPAD_UP);
     bool down_pressed = key.isDown(SDLK_DOWN) || key.isDown(SDL_CONTROLLER_BUTTON_DPAD_DOWN);
@@ -3294,8 +3295,8 @@ void editorinput(void)
                     if (left_pressed) cl.mapwidth--;
                     if (right_pressed) cl.mapwidth++;
 
-                    cl.mapwidth = SDL_clamp(cl.mapwidth, 1, cl.maxwidth);
-                    cl.mapheight = SDL_clamp(cl.mapheight, 1, cl.maxheight);
+                    cl.mapwidth = std::clamp(cl.mapwidth, 1, cl.maxwidth);
+                    cl.mapheight = std::clamp(cl.mapheight, 1, cl.maxheight);
 
                     ed.updatetiles = true;
                     ed.changeroom = true;
@@ -3679,7 +3680,7 @@ void editorinput(void)
                 ed.selected_script++;
             }
 
-            ed.selected_script = SDL_clamp(ed.selected_script, 0, (int) script.customscripts.size() - 1);
+            ed.selected_script = std::clamp(ed.selected_script, 0, (int) script.customscripts.size() - 1);
 
             if (ed.selected_script < ed.script_list_offset)
             {
@@ -4051,8 +4052,8 @@ TileTypes editorclass::get_abs_tile_type(int x, int y, const bool wrap)
     }
     else
     {
-        x = SDL_clamp(x, 0, cl.mapwidth * 40 - 1);
-        y = SDL_clamp(y, 0, cl.mapheight * 30 - 1);
+        x = std::clamp(x, 0, cl.mapwidth * 40 - 1);
+        y = std::clamp(y, 0, cl.mapheight * 30 - 1);
     }
 
     const RoomProperty* const room = cl.getroomprop(x / 40, y / 30);
@@ -4099,8 +4100,8 @@ TileTypes editorclass::get_tile_type(int x, int y, bool wrap)
     }
     else
     {
-        x = SDL_clamp(x, 0, 39);
-        y = SDL_clamp(y, 0, 29);
+        x = std::clamp(x, 0, 39);
+        y = std::clamp(y, 0, 29);
     }
 
     return get_abs_tile_type(levx * 40 + x, levy * 30 + y, false);

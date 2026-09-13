@@ -3370,10 +3370,10 @@ bool entityclass::updateentities( int i )
                     }
 
                     game.activetele = true;
-                    game.teleblock.x = entities[i].xp - 32;
-                    game.teleblock.y = entities[i].yp - 32;
-                    game.teleblock.w = 160;
-                    game.teleblock.h = 160;
+                    game.teleblock_x = entities[i].xp - 32;
+                    game.teleblock_y = entities[i].yp - 32;
+                    game.teleblock_w = 160;
+                    game.teleblock_h = 160;
 
 
                     //Alright, let's set this as our savepoint too
@@ -3411,10 +3411,10 @@ bool entityclass::updateentities( int i )
                 entities[i].colour = 102;
 
                 game.activetele = true;
-                game.teleblock.x = entities[i].xp - 32;
-                game.teleblock.y = entities[i].yp - 32;
-                game.teleblock.w = 160;
-                game.teleblock.h = 160;
+                game.teleblock_x = entities[i].xp - 32;
+                game.teleblock_y = entities[i].yp - 32;
+                game.teleblock_w = 160;
+                game.teleblock_h = 160;
 
                 entities[i].state = 0;
             }
@@ -4558,8 +4558,8 @@ void entityclass::applyfriction( int t, float xrate, float yrate )
     if (entity.vx > 6.00f) entity.vx = 6.0f;
     if (entity.vx < -6.00f) entity.vx = -6.0f;
 
-    if (SDL_fabsf(entity.vx) < xrate) entity.vx = 0.0f;
-    if (SDL_fabsf(entity.vy) < yrate) entity.vy = 0.0f;
+    if (std::fabsf(entity.vx) < xrate) entity.vx = 0.0f;
+    if (std::fabsf(entity.vy) < yrate) entity.vy = 0.0f;
 }
 
 void entityclass::updateentitylogic( int t )

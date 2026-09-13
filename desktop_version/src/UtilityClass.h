@@ -110,7 +110,6 @@ public:
     std::string number_words(int _t, const char* number_class);
 
     static bool intersects(int ax, int ay, int aw, int ah, int bx, int by, int bw, int bh);
-    static bool intersects(const SDL_Rect& A, const SDL_Rect& B);
 
     void updateglow(void);
 

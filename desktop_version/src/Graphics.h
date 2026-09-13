@@ -163,23 +163,14 @@ public:
 
     void draw_texture(g2dImage* image, int x, int y, g2dColor color);
 
-    void draw_texture_part(SDL_Texture* image, int x, int y, int x2, int y2, int w, int h, int scalex, int scaley);
     void draw_texture_part(g2dImage* image, int x, int y, int x2, int y2, int w, int h, int scalex, int scaley, g2dColor color);
 
-    void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, int scalex, int scaley);
     void draw_grid_tile(g2dImage* texture, int t, int x, int y, int width, int height, int scalex, int scaley);
     void draw_grid_tile(g2dImage* texture, int t, int x, int y, int width, int height, int scalex, int scaley, g2dColor color);
-    void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height);
     void draw_grid_tile(g2dImage* texture, int t, int x, int y, int width, int height);
-    void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, int r, int g, int b, int a, int scalex, int scaley);
     void draw_grid_tile(g2dImage* texture, int t, int x, int y, int width, int height, int r, int g, int b, int a, int scalex, int scaley);
-    void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, int r, int g, int b, int a);
-    void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, int r, int g, int b, int scalex, int scaley);
     void draw_grid_tile(g2dImage* texture, int t, int x, int y, int width, int height, int r, int g, int b, int scalex, int scaley);
-    void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, int r, int g, int b);
-    void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, g2dColor color, int scalex, int scaley);
     void draw_grid_tile(g2dImage* texture, int t, int x, int y, int width, int height, g2dColor color, int scalex, int scaley);
-    void draw_grid_tile(SDL_Texture* texture, int t, int x, int y, int width, int height, g2dColor color);
     void draw_grid_tile(g2dImage* texture, int t, int x, int y, int width, int height, g2dColor color);
 
     void updatetextboxes(void);
@@ -331,7 +322,6 @@ public:
     SDL_Texture* tempShakeTexture;
     SDL_Texture* menuTexture;
     SDL_Texture* ghostTexture;
-    SDL_Texture* backgroundTexture;
     SDL_Texture* foregroundTexture;
     SDL_Texture* tempScrollingTexture;
     SDL_Surface* tempScreenshot;

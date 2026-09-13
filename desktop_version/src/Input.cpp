@@ -1,4 +1,5 @@
 #include <tinyxml2.h>
+#include <algorithm>
 #include <vector>
 
 #include "ButtonGlyphs.h"
@@ -418,7 +419,7 @@ static void slidermodeinput(void)
     {
         *user_changing_volume += USER_VOLUME_STEP;
     }
-    *user_changing_volume = SDL_clamp(*user_changing_volume, 0, USER_VOLUME_MAX);
+    *user_changing_volume = std::clamp(*user_changing_volume, 0, USER_VOLUME_MAX);
 }
 
 static void menuactionpress(void)
@@ -2694,7 +2695,7 @@ void gameinput(void)
                     if (game.activetele && game.readytotele > 20 && (!game.intimetrial || game.translator_exploring_allowtele))
                     {
                         enter_already_processed = true;
-                        if(int(SDL_fabsf(obj.entities[ie].vx))<=1 && int(obj.entities[ie].vy)==0)
+                        if(int(std::fabsf(obj.entities[ie].vx))<=1 && int(obj.entities[ie].vy)==0)
                         {
                             //wait! space station 2 debug thingy
                             if (game.teleportscript != "")
@@ -2760,7 +2761,7 @@ void gameinput(void)
                     else if (INBOUNDS_VEC(game.activeactivity, obj.blocks))
                     {
                         enter_already_processed = true;
-                        if((int(SDL_fabsf(obj.entities[ie].vx))<=1) && (int(obj.entities[ie].vy) == 0) )
+                        if((int(std::fabsf(obj.entities[ie].vx))<=1) && (int(obj.entities[ie].vy) == 0) )
                         {
                             script.load(obj.blocks[game.activeactivity].script);
                             obj.disableblock(game.activeactivity);

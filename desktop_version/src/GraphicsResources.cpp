@@ -701,7 +701,7 @@ bool SaveImage(const SDL_Surface* surface, const char* filename)
     }
 
     success = FILESYSTEM_saveFile(filename, out, outsize);
-    SDL_free(out);
+    free(out);
 
     if (!success)
     {

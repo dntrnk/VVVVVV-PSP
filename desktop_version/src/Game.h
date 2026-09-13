@@ -496,7 +496,10 @@ public:
     float inertia;
 
     int companion;
-    SDL_Rect teleblock;
+    int teleblock_x;
+    int teleblock_y;
+    int teleblock_w;
+    int teleblock_h;
     bool activetele;
     int readytotele;
     int oldreadytotele;

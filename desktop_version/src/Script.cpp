@@ -2552,7 +2552,7 @@ void scriptclass::startgamemode(const enum StartMode mode)
         int h;
     }
     player_hitbox;
-    SDL_zero(player_hitbox);
+    memset(&player_hitbox, 0, sizeof(player_hitbox));
 
     if (GlitchrunnerMode_less_than_or_equal(Glitchrunner2_2))
     {

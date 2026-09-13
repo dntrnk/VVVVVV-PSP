@@ -235,11 +235,6 @@ bool UtilityClass::intersects(int ax, int ay, int aw, int ah, int bx, int by, in
     return true;
 }
 
-bool UtilityClass::intersects(const SDL_Rect& A, const SDL_Rect& B)
-{
-    return intersects(A.x, A.y, A.w, A.h, B.x, B.y, B.w, B.h);
-}
-
 void UtilityClass::updateglow(void)
 {
     slowsine++;

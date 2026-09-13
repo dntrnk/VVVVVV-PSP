@@ -188,24 +188,24 @@ void vformat_cb_valist(
 
                     first_iter = false;
                 }
-                else if (flag_len == 5 && SDL_memcmp(cursor, "wordy", 5) == 0)
+                else if (flag_len == 5 && memcmp(cursor, "wordy", 5) == 0)
                 {
                     flag_wordy = true;
                 }
-                else if (flag_len == 6 && SDL_memcmp(cursor, "wordy2", 6) == 0)
+                else if (flag_len == 6 && memcmp(cursor, "wordy2", 6) == 0)
                 {
                     flag_wordy2 = true;
                 }
-                else if (flag_len >= 8 && SDL_memcmp(cursor, "digits=", 7) == 0)
+                else if (flag_len >= 8 && memcmp(cursor, "digits=", 7) == 0)
                 {
                     /* strtol stops on the first non-digit anyway, so... */
                     flag_digits = strtol(cursor + 7, NULL, 10);
                 }
-                else if (flag_len == 6 && SDL_memcmp(cursor, "spaces", 6) == 0)
+                else if (flag_len == 6 && memcmp(cursor, "spaces", 6) == 0)
                 {
                     flag_spaces = true;
                 }
-                else if (flag_len == 5 && SDL_memcmp(cursor, "upper", 5) == 0)
+                else if (flag_len == 5 && memcmp(cursor, "upper", 5) == 0)
                 {
                     flag_upper = true;
                 }
@@ -255,10 +255,10 @@ void vformat_cb_valist(
                 trim_whitespace(&arg_name, &arg_name_len);
                 trim_whitespace(&arg_type, &arg_type_len);
 
-                match = (arg_name_len == name_len && SDL_memcmp(arg_name, name, name_len) == 0)
+                match = (arg_name_len == name_len && memcmp(arg_name, name, name_len) == 0)
                      || (arg_name_len == 1 && arg_name[0] == '_');
 
-                if (arg_type_len == 3 && SDL_memcmp(arg_type, "int", 3) == 0)
+                if (arg_type_len == 3 && memcmp(arg_type, "int", 3) == 0)
                 {
                     int value = va_arg(args_copy, int);
 
@@ -286,7 +286,7 @@ void vformat_cb_valist(
                         }
                     }
                 }
-                else if (arg_type_len == 3 && SDL_memcmp(arg_type, "str", 3) == 0)
+                else if (arg_type_len == 3 && memcmp(arg_type, "str", 3) == 0)
                 {
                     const char* value = va_arg(args_copy, const char*);
 
@@ -306,7 +306,7 @@ void vformat_cb_valist(
                         }
                     }
                 }
-                else if (arg_type_len == 3 && SDL_memcmp(arg_type, "but", 3) == 0)
+                else if (arg_type_len == 3 && memcmp(arg_type, "but", 3) == 0)
                 {
                     int vararg_value = va_arg(args_copy, int);
 

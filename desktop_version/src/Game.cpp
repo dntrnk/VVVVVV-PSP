@@ -123,7 +123,7 @@ static struct Game::Summary get_summary(
 ) {
     tinyxml2::XMLHandle hDoc(&doc);
     struct Game::Summary summary;
-    SDL_zero(summary);
+    memset(&summary, 0, sizeof(summary));
 
     if (!FILESYSTEM_loadTiXml2Document(filename, doc))
     {
@@ -3604,11 +3604,11 @@ void Game::updatestate(void)
             activetele = true;
             if (INBOUNDS_VEC(i, obj.entities))
             {
-                teleblock.x = obj.entities[i].xp - 32;
-                teleblock.y = obj.entities[i].yp - 32;
+                teleblock_x = obj.entities[i].xp - 32;
+                teleblock_y = obj.entities[i].yp - 32;
             }
-            teleblock.w = 160;
-            teleblock.h = 160;
+            teleblock_w = 160;
+            teleblock_h = 160;
             hascontrol = true;
             advancetext = false;
             setstate(0);
@@ -4948,7 +4948,7 @@ if (strcmp(pKey, "fullscreen") == 0)
 bool Game::savestats(bool sync /*= true*/)
 {
     struct ScreenSettings screen_settings;
-    SDL_zero(screen_settings);
+    memset(&screen_settings, 0, sizeof(screen_settings));
     gameScreen.GetSettings(&screen_settings);
 
     return savestats(&screen_settings, sync);
@@ -5234,7 +5234,7 @@ void Game::loadsettings(struct ScreenSettings* screen_settings)
 bool Game::savesettings(void)
 {
     struct ScreenSettings screen_settings;
-    SDL_zero(screen_settings);
+    memset(&screen_settings, 0, sizeof(screen_settings));
     gameScreen.GetSettings(&screen_settings);
 
     return savesettings(&screen_settings);
@@ -5979,8 +5979,9 @@ void Game::loadsummary(void)
 {
     tinyxml2::XMLDocument doc;
 
-    SDL_zero(last_telesave);
-    SDL_zero(last_quicksave);
+    memset(&last_telesave, 0, sizeof(last_telesave));
+    memset(&last_quicksave, 0, sizeof(last_quicksave));
+
 
     if (FILESYSTEM_loadTiXml2Document("saves/tsave.vvv", doc))
     {
@@ -6078,7 +6079,7 @@ struct Game::Summary Game::writemaingamesave(tinyxml2::XMLDocument& doc)
     //TODO make this code a bit cleaner.
 
     struct Game::Summary summary;
-    SDL_zero(summary);
+    memset(&summary, 0, sizeof(summary));
 
     if (map.custommode || inspecial())
     {
@@ -7379,7 +7380,7 @@ void Game::deletequick(void)
     }
     else
     {
-        SDL_zero(last_quicksave);
+        memset(&last_quicksave, 0, sizeof(last_quicksave));
     }
 }
 
@@ -7396,7 +7397,7 @@ void Game::deletetele(void)
     }
     else
     {
-        SDL_zero(last_telesave);
+        memset(&last_telesave, 0, sizeof(last_telesave));
     }
 }
 

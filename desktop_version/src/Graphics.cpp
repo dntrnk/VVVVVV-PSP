@@ -109,7 +109,6 @@ void Graphics::init(void)
     menuTexture = NULL;
     ghostTexture = NULL;
     tempShakeTexture = NULL;
-    backgroundTexture = NULL;
     foregroundTexture = NULL;
     tempScreenshot = NULL;
     tempScreenshot2x = NULL;
@@ -126,15 +125,15 @@ void Graphics::init(void)
     screenshake_x = 0;
     screenshake_y = 0;
 
-    SDL_zero(col_crewred);
-    SDL_zero(col_crewyellow);
-    SDL_zero(col_crewgreen);
-    SDL_zero(col_crewcyan);
-    SDL_zero(col_crewblue);
-    SDL_zero(col_crewpurple);
-    SDL_zero(col_crewinactive);
-    SDL_zero(col_clock);
-    SDL_zero(col_trinket);
+    memset(&col_crewred, 0, sizeof(col_crewred));
+    memset(&col_crewyellow, 0, sizeof(col_crewyellow));
+    memset(&col_crewgreen, 0, sizeof(col_crewgreen));
+    memset(&col_crewcyan, 0, sizeof(col_crewcyan));
+    memset(&col_crewblue, 0, sizeof(col_crewblue));
+    memset(&col_crewpurple, 0, sizeof(col_crewpurple));
+    memset(&col_crewinactive, 0, sizeof(col_crewinactive));
+    memset(&col_clock, 0, sizeof(col_clock));
+    memset(&col_trinket, 0, sizeof(col_trinket));
     col_tr = 0;
     col_tg = 0;
     col_tb = 0;
@@ -187,7 +186,6 @@ void Graphics::create_buffers(void)
     ghostTexture = CREATE_TEXTURE;
     tempShakeTexture = CREATE_TEXTURE;
     foregroundTexture = CREATE_TEXTURE;
-    backgroundTexture = CREATE_SCROLL_TEXTURE;
     tempScrollingTexture = CREATE_SCROLL_TEXTURE;
     towerbg.texture = CREATE_SCROLL_TEXTURE;
     titlebg.texture = CREATE_SCROLL_TEXTURE;
@@ -214,7 +212,6 @@ void Graphics::destroy_buffers(void)
     VVV_freefunc(SDL_DestroyTexture, ghostTexture);
     VVV_freefunc(SDL_DestroyTexture, tempShakeTexture);
     VVV_freefunc(SDL_DestroyTexture, foregroundTexture);
-    VVV_freefunc(SDL_DestroyTexture, backgroundTexture);
     VVV_freefunc(SDL_DestroyTexture, tempScrollingTexture);
     VVV_freefunc(SDL_DestroyTexture, towerbg.texture);
     VVV_freefunc(SDL_DestroyTexture, titlebg.texture);
@@ -1113,11 +1110,7 @@ void Graphics::draw_grid_tile(
     const int r, const int g, const int b, const int a,
     const int scalex, const int scaley
 ) {
-    // set_texture_color_mod(texture, r, g, b);
-    // set_texture_alpha_mod(texture, a);
     draw_grid_tile((g2dImage*) texture, t, x, y, width, height, scalex, scaley, G2D_RGBA(r, g, b, a));
-    // set_texture_color_mod(texture, 255, 255, 255);
-    // set_texture_alpha_mod(texture, 255);
 }
 
 void Graphics::draw_grid_tile(
@@ -1662,9 +1655,10 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
     int r2_bottom  = p2.y;
     int r2_top = p2.y + surface2->h;
 
-    SDL_Rect rect1 = {p1.x, p1.y, surface1->w, surface1->h};
-    SDL_Rect rect2 = {p2.x, p2.y, surface2->w, surface2->h};
-    bool intersection = help.intersects(rect1, rect2);
+    bool intersection = help.intersects(
+        p1.x, p1.y, surface1->w, surface1->h,
+        p2.x, p2.y, surface2->w, surface2->h
+    );
 
     if(intersection)
     {
@@ -2218,8 +2212,8 @@ void Graphics::drawbackground( int t )
     {
         g2dColor bcol;
         g2dColor bcol2;
-        SDL_zero(bcol);
-        SDL_zero(bcol2);
+        memset(&bcol, 0, sizeof(bcol));
+        memset(&bcol2, 0, sizeof(bcol2));
 
         // Lab
         switch (rcol)
