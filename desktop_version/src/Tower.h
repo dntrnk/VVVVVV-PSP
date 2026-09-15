@@ -20,9 +20,10 @@ public:
 
     void loadmap(void);
 
-    short back[40 * 120];
-    short contents[40 * 700];
-    short minitower[40 * 100];
+    // Need to change to uint8_t later
+    unsigned char back[40 * 120];
+    unsigned char contents[40 * 700];
+    unsigned char minitower[40 * 100];
 
     bool minitowermode;
 };
