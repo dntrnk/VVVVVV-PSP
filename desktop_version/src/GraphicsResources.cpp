@@ -666,17 +666,7 @@ void GraphicsResources::init(void)
 
     // init_translations();
 
-    im_image12 = NULL;
-
-    // im_image12 = SDL_CreateTexture(gameScreen.m_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, 240, 180);
-
-    // if (im_image12 == NULL)
-    // {
-    //     vlog_error("Failed to create minimap texture: %s", SDL_GetError());
-    //     SDL_assert(0 && "Failed to create minimap texture! See stderr.");
-    //     return;
-    // }
-
+    im_image12 = _g2dTexCreate(240, 180, false);
 }
 
 

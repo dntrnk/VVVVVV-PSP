@@ -226,9 +226,6 @@ public:
 
     void draw_line(int x, int y, int x2, int y2, g2dColor color);
 
-    int draw_points(const SDL_Point* points, int count);
-    int draw_points(const SDL_Point* points, int count, int r, int g, int b);
-
     void map_tab(int opt, const int offset, const char* text, bool selected = false);
 
     void map_option(int opt, int num_opts, const int offset, const std::string& text, bool selected = false);

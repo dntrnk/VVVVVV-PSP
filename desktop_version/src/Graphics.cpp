@@ -659,22 +659,6 @@ void Graphics::draw_line(const int x, const int y, const int x2, const int y2, c
     g2dHelperFillRect(x, y, width, height, color);
 }
 
-int Graphics::draw_points(const SDL_Point* points, const int count)
-{
-    const int result = SDL_RenderDrawPoints(gameScreen.m_renderer, points, count);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not draw points: %s", SDL_GetError()));
-    }
-    return result;
-}
-
-int Graphics::draw_points(const SDL_Point* points, const int count, const int r, const int g, const int b)
-{
-    g2dColor color = G2D_RGB(r, g, b);
-    return draw_points(points, count);
-}
-
 void Graphics::draw_sprite(const int x, const int y, const int t, const int r, const int g, const int b)
 {
     draw_grid_tile(grphx.im_sprites, t, x, y, sprites_rect.w, sprites_rect.h, G2D_RGB(r, g, b));

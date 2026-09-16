@@ -1715,18 +1715,11 @@ void customlevelclass::generatecustomminimap(void)
 
     // Start drawing the minimap
 
-    // SDL_Texture* target = SDL_GetRenderTarget(gameScreen.m_renderer); // Not now
-    // graphics.set_render_target(graphics.images[IMAGE_CUSTOMMINIMAP]); // Not now
-    graphics.clear();
-
     // Scan over the map size
     for (int j2 = 0; j2 < mapheight; j2++)
     {
         for (int i2 = 0; i2 < mapwidth; i2++)
         {
-            std::vector<SDL_Point> dark_points;
-            std::vector<SDL_Point> light_points;
-
             bool dark = getroomprop(i2, j2)->tileset == 1;
 
             // Ok, now scan over each square
@@ -1759,32 +1752,22 @@ void customlevelclass::generatecustomminimap(void)
 
                     if (tile >= 1)
                     {
-                        // Add this pixel
-                        SDL_Point point = { (i2 * 12 * map.customzoom) + i, (j2 * 9 * map.customzoom) + j };
+                        // Draw this pixel
+                        int px = (i2 * 12 * map.customzoom) + i;
+                        int py = (j2 * 9 * map.customzoom) + j;
                         if (dark)
                         {
-                            dark_points.push_back(point);
+                            set_pixel(graphics.grphx.im_image12, px, py, G2D_RGB(96, 96, 96));
                         }
                         else
                         {
-                            light_points.push_back(point);
+                            set_pixel(graphics.grphx.im_image12, px, py, G2D_RGB(196, 196, 196));
                         }
                     }
                 }
             }
-            // Draw them all at once
-            if (!dark_points.empty())
-            {
-                graphics.draw_points(dark_points.data(), dark_points.size(), 96, 96, 96);
-            }
-            if (!light_points.empty())
-            {
-                graphics.draw_points(light_points.data(), light_points.size(), 196, 196, 196);
-            }
         }
     }
-
-    // graphics.set_render_target(target); // Not now
 }
 
 // Return a graphics-ready color based off of the given tileset and tilecol
