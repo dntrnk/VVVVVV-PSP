@@ -106,7 +106,6 @@ void Graphics::init(void)
     m = 0;
     linedelay = 0;
     gameTexture = NULL;
-    menuTexture = NULL;
     ghostTexture = NULL;
     tempShakeTexture = NULL;
     foregroundTexture = NULL;
@@ -182,7 +181,6 @@ void Graphics::create_buffers(void)
     CREATE_TEXTURE_WITH_DIMENSIONS(SCREEN_WIDTH_PIXELS + 16, SCREEN_WIDTH_PIXELS + 16)
 
     gameTexture = CREATE_TEXTURE;
-    menuTexture = CREATE_TEXTURE;
     ghostTexture = CREATE_TEXTURE;
     tempShakeTexture = CREATE_TEXTURE;
     foregroundTexture = CREATE_TEXTURE;
@@ -208,7 +206,6 @@ void Graphics::create_buffers(void)
 void Graphics::destroy_buffers(void)
 {
     VVV_freefunc(SDL_DestroyTexture, gameTexture);
-    VVV_freefunc(SDL_DestroyTexture, menuTexture);
     VVV_freefunc(SDL_DestroyTexture, ghostTexture);
     VVV_freefunc(SDL_DestroyTexture, tempShakeTexture);
     VVV_freefunc(SDL_DestroyTexture, foregroundTexture);
@@ -3167,21 +3164,16 @@ void Graphics::render(void)
     ime_render();
     draw_screenshot_border();
 
-    if (gameScreen.badSignalEffect)
-    {
-        ApplyFilter(&tempFilterSrc, &tempFilterDest);
-    }
-
-    set_render_target(NULL);
-    set_blendmode(SDL_BLENDMODE_NONE);
-
-    // draw_window_background();
+    // if (gameScreen.badSignalEffect)
+    // {
+    //     ApplyFilter(&tempFilterSrc, &tempFilterDest);
+    // }
 
     SDL_Rect stretch_info = {0, 0, 320, 240};
 
     ime_set_rect(&stretch_info);
 
-    copy_texture(gameTexture, NULL, &stretch_info, 0, NULL, flipmode ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE);
+    // copy_texture(gameTexture, NULL, &stretch_info, 0, NULL, flipmode ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE);
 }
 
 void Graphics::renderwithscreeneffects(void)

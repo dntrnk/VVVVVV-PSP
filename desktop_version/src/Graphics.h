@@ -317,7 +317,6 @@ public:
 
     SDL_Texture* gameTexture;
     SDL_Texture* tempShakeTexture;
-    SDL_Texture* menuTexture;
     SDL_Texture* ghostTexture;
     SDL_Texture* foregroundTexture;
     SDL_Texture* tempScrollingTexture;

@@ -2982,9 +2982,6 @@ void maprender(void)
         graphics.alpha = old_alpha;
     }
 
-    graphics.set_render_target(graphics.menuTexture);
-    graphics.clear();
-
     g2dHelperFillRect(0, offset, 320, 240, G2D_BLACK);
 
     draw_roomname_menu(offset);
@@ -3507,7 +3504,6 @@ void maprender(void)
         graphics.drawfade();
     }
 
-
     graphics.renderwithscreeneffects();
 }
 
@@ -3517,9 +3513,6 @@ void maprender(void)
 
 void teleporterrender(void)
 {
-    graphics.set_render_target(graphics.menuTexture);
-    graphics.clear();
-
     const int telex = map.teleporters[game.teleport_to_teleporter].x;
     const int teley = map.teleporters[game.teleport_to_teleporter].y;
 

@@ -953,8 +953,6 @@ static void inline deltaloop(void)
 
             g2dSetScissor(80, 16, 320, 240);
 
-            graphics.set_render_target(graphics.gameTexture);
-
             implfunc->func();
 
             gameScreen.RenderPresent();

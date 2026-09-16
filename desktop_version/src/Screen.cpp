@@ -70,8 +70,6 @@ void Screen::GetSettings(struct ScreenSettings* settings)
 
 void Screen::RenderPresent(void)
 {
-    // SDL_RenderPresent(m_renderer);
-    graphics.clear();
     graphics.fill_rect(-80, -16, 480, 16, G2D_BLACK);
     graphics.fill_rect(-80, 240, 480, 16, G2D_BLACK);
     graphics.fill_rect(-80, 0, 80, 240, G2D_BLACK);

@@ -153,8 +153,10 @@ public:
     //Colouring stuff
     int getwarpbackground(int rx, int ry);
 
-    static const int maxwidth = 20, maxheight = 20; //Special; the physical max the engine allows
-    static const int numrooms = maxwidth * maxheight;
+    static inline const int maxwidth = 20;
+    static inline const int maxheight = 20; //Special; the physical max the engine allows
+    static inline const int numrooms = maxwidth * maxheight;
+
     int contents[40 * 30 * numrooms];
     int numtrinkets(void);
     int numcrewmates(void);
