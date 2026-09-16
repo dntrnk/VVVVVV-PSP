@@ -21,6 +21,7 @@
 
 #include <limits.h>
 #include <pspkernel.h>
+#include <unistd.h>
 #define MAX_PATH PATH_MAX
 
 static bool isInit = false;
@@ -1309,16 +1310,14 @@ void FILESYSTEM_freeEnumerate(EnumHandle* handle)
 
 static int PLATFORM_getOSDirectory(char* output, const size_t output_size)
 {
-    const char* prefDir = PHYSFS_getPrefDir("distractionware", "VVVVVV");
-    if (prefDir == NULL)
+    char cwd[256];
+    if (getcwd(cwd, sizeof(cwd)) == NULL)
     {
-        vlog_error(
-            "Could not get OS directory: %s",
-            PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())
-        );
+        vlog_error("getcwd failed");
         return 0;
     }
-    strlcpy(output, prefDir, output_size);
+
+    snprintf(output, output_size, "%s/", cwd);
     return 1;
 }
 
