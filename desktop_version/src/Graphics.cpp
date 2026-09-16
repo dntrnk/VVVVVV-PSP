@@ -1640,24 +1640,30 @@ void Graphics::drawcoloredtile(
 }
 
 
-bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2, SDL_Point p2)
+bool Graphics::Hitest(int t1, SDL_Point p1, int t2, SDL_Point p2)
 {
+    // 384 is width of sprites.png, so there's 12 32x32 sprites
+    int srcx1 = (t1 % 12) * 32;
+    int srcy1 = (t1 / 12) * 32;
+
+    int srcx2 = (t2 % 12) * 32;
+    int srcy2 = (t2 / 12) * 32;
 
     //find rectangle where they intersect:
 
     int r1_left = p1.x;
-    int r1_right = r1_left + surface1->w;
+    int r1_right = r1_left + 32;
     int r2_left = p2.x;
-    int r2_right = r2_left + surface2->w;
+    int r2_right = r2_left + 32;
 
     int r1_bottom = p1.y;
-    int r1_top = p1.y + surface1->h;
-    int r2_bottom  = p2.y;
-    int r2_top = p2.y + surface2->h;
+    int r1_top = p1.y + 32;
+    int r2_bottom = p2.y;
+    int r2_top = p2.y + 32;
 
     bool intersection = help.intersects(
-        p1.x, p1.y, surface1->w, surface1->h,
-        p2.x, p2.y, surface2->w, surface2->h
+        p1.x, p1.y, 32, 32,
+        p2.x, p2.y, 32, 32
     );
 
     if(intersection)
@@ -1672,12 +1678,7 @@ bool Graphics::Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2
         {
             for(int y = r3_bottom; y < r3_top; y++)
             {
-                const g2dColor pixel1 = ReadPixel(surface1, x - p1.x, y - p1.y);
-                const g2dColor pixel2 = ReadPixel(surface2, x - p2.x, y - p2.y);
-                /* INTENTIONAL BUG! In previous versions, the game mistakenly
-                 * checked the red channel, not the alpha channel.
-                 * We preserve it here because some people abuse this. */
-                if (G2D_GET_R(pixel1) != 0 && G2D_GET_R(pixel2) != 0)
+                if (sprites_collision_surface_get_bit(srcx1 + x - p1.x, srcy1 + y - p1.y) && sprites_collision_surface_get_bit(srcx2 + x - p2.x, srcy2 + y - p2.y))
                 {
                     return true;
                 }

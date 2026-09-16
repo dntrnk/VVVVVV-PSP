@@ -4815,10 +4815,8 @@ void entityclass::collisioncheck(int i, int j, bool scm /*= false*/)
                 int drawframe1 = entities[i].collisiondrawframe;
                 int drawframe2 = entities[j].drawframe;
 
-                std::vector<SDL_Surface*>& spritesvec = graphics.flipmode ? graphics.flipsprites_surf : graphics.sprites_surf;
-                if (INBOUNDS_VEC(drawframe1, spritesvec) && INBOUNDS_VEC(drawframe2, spritesvec)
-                && graphics.Hitest(spritesvec[drawframe1],
-                                 colpoint1, spritesvec[drawframe2], colpoint2))
+                // std::vector<SDL_Surface*>& spritesvec = graphics.flipmode ? graphics.flipsprites_surf : graphics.sprites_surf;
+                if (graphics.Hitest(drawframe1, colpoint1, drawframe2, colpoint2))
                 {
                     //Do the collision stuff
                     game.deathseq = 30;

@@ -250,7 +250,7 @@ public:
 
     void draw_screenshot_border(void);
 
-    bool Hitest(SDL_Surface* surface1, SDL_Point p1, SDL_Surface* surface2, SDL_Point p2);
+    bool Hitest(int t1, SDL_Point p1, int t2, SDL_Point p2);
 
     void drawentities(void);
 

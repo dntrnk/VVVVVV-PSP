@@ -4,6 +4,7 @@
 #include <pspgu.h>
 #include <malloc.h>
 
+#include <inttypes.h>
 #include <time.h>
 #include <tinyxml2.h>
 
@@ -15,6 +16,24 @@
 #include "Vlogging.h"
 #include "Screen.h"
 #include "XMLUtils.h"
+
+// Need to make variant for flip!
+static uint32_t sprites_collision_surface[512][16] = {0};
+
+bool sprites_collision_surface_get_bit(int x, int y)
+{
+    return (sprites_collision_surface[y][x >> 5] >> (x & 31)) & 1u;
+}
+
+void sprites_collision_surface_set_bit(int x, int y)
+{
+    sprites_collision_surface[y][x >> 5] |= (1u << (x & 31));
+}
+
+void sprites_collision_surface_clear_bit(int x, int y)
+{
+    sprites_collision_surface[y][x >> 5] &= ~(1u << (x & 31));
+}
 
 // Copy+Paste from glib2d.c
 static int _get_or_add_palette_color(g2dColor color, g2dColor *palette, int *pal_count, int max_colors) {
@@ -305,7 +324,7 @@ static SDL_Texture* LoadTextureFromRaw(const char* filename, SDL_Surface* loaded
     return texture;
 }
 
-g2dImage* G2DLoadImage(const char* filename, const TextureLoadType loadtype, g2dTexFormat format)
+g2dImage* G2DLoadImage(const char* filename, const TextureLoadType loadtype, g2dTexFormat format, bool update_collision_surface /*= false*/)
 {
     // Load Image
     unsigned int width, height;
@@ -344,6 +363,23 @@ g2dImage* G2DLoadImage(const char* filename, const TextureLoadType loadtype, g2d
     for (unsigned int y = 0; y < height; y++)
     {
         memcpy((char*) tempTex->data + y * dstRowSize, rgbaData + y * srcRowSize, srcRowSize);
+    }
+
+    if (update_collision_surface) {
+        for (int y = 0; y < 512; y++)
+        {
+            for (int x = 0; x < 512; x++)
+            {
+                if (G2D_GET_A(get_pixel(tempTex, x, y)) != 0)
+                {
+                    sprites_collision_surface_set_bit(x, y);
+                }
+                else
+                {
+                    sprites_collision_surface_clear_bit(x, y);
+                }
+            }
+        }
     }
 
     // Apply Format
@@ -606,7 +642,7 @@ void GraphicsResources::init(void)
     G2DLoadVariants("graphics/tiles2.png", G2D_CLUT8, &im_tiles2, NULL, &im_tiles2_tint);
     G2DLoadVariants("graphics/entcolours.png", G2D_CLUT8, &im_entcolours, NULL, &im_entcolours_tint);
 
-    im_sprites = G2DLoadImage("graphics/sprites.png", TEX_WHITE, G2D_CLUT4);
+    im_sprites = G2DLoadImage("graphics/sprites.png", TEX_WHITE, G2D_CLUT4, true);
     im_flipsprites = G2DLoadImage("graphics/flipsprites.png", TEX_WHITE, G2D_CLUT4);
 
     im_tiles3 = G2DLoadImage("graphics/tiles3.png", G2D_CLUT8);
