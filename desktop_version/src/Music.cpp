@@ -37,7 +37,7 @@ struct MusicChannel {
         channel = -1;
     }
 
-    static void LoadAndPlay(const char *trackName) {
+    static bool LoadAndPlay(const char *trackName, bool loop) {
         Stop();
 
         unsigned char *data = NULL;
@@ -45,7 +45,7 @@ struct MusicChannel {
         if (!FILESYSTEM_loadBinaryBlobResource(
                 "vvvvvvmusic.vvv", trackName, &data, &size)) {
             vlog_error("Could not load track %s", trackName);
-            return;
+            return false;
         }
 
         channel = PSPAALIB_CHANNEL_OGG_1;
@@ -57,16 +57,17 @@ struct MusicChannel {
             vlog_error("Failed to load OGG track %s: error %d", trackName, ret);
             free(data);
             channel = -1;
-            return;
+            return false;
         }
 
         currentData = data;
 
         AalibEnable(channel, PSPAALIB_EFFECT_VOLUME_MANUAL);
-        AalibSetAutoloop(channel, TRUE);
+        AalibSetAutoloop(channel, loop ? TRUE : FALSE);
         AalibSetVolume(channel, (AalibVolume){0.0f, 0.0f});
         AalibPlay(channel);
         loaded = true;
+        return true;
     }
 
     static void SetVolume(float v) {
@@ -299,11 +300,35 @@ void musicclass::play(int t)
         return;
     }
 
-    MusicChannel::LoadAndPlay(trackNames[t]);
+    bool no_fade_no_loop =
+        currentsong == Music_PATHCOMPLETE ||
+        currentsong == Music_PLENARY ||
+        (!map.custommode && (currentsong == Music_PATHCOMPLETE + num_mmmmmm_tracks
+                             || currentsong == Music_PLENARY + num_mmmmmm_tracks));
 
-    m_doFadeInVol = false;
-    m_doFadeOutVol = false;
-    musicVolume = VVV_MAX_VOLUME;
+    if (no_fade_no_loop) {
+        if (MusicChannel::LoadAndPlay(trackNames[t], false)) {
+            m_doFadeInVol = false;
+            m_doFadeOutVol = false;
+            musicVolume = VVV_MAX_VOLUME;
+        }
+    } else {
+        if (m_doFadeOutVol) {
+            nicechange = t;
+            nicefade = true;
+            currentsong = -1;
+
+            if (quick_fade) {
+                fadeMusicVolumeOut(500);
+            } else {
+                quick_fade = true;
+            }
+        } else if (MusicChannel::LoadAndPlay(trackNames[t], true)) {
+            m_doFadeInVol = false;
+            m_doFadeOutVol = false;
+            fadeMusicVolumeIn(3000);
+        }
+    }
 }
 
 void musicclass::resume(void)
