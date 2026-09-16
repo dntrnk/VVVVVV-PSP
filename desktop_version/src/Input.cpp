@@ -960,10 +960,11 @@ static void menuactionpress(void)
 
         if (game.currentmenuoption == gameplayoptionsoffset + 0)
         {
-            //Toggle 30+ FPS
-            music.playef(Sound_VIRIDIAN);
-            game.over30mode = !game.over30mode;
-            game.savestatsandsettings_menu();
+            // //Toggle 30+ FPS
+            // music.playef(Sound_VIRIDIAN);
+            // game.over30mode = !game.over30mode; // "Over 30 FPS mode" is disabled for now
+            // game.savestatsandsettings_menu();
+            music.playef(Sound_CRY);
         }
         else if (game.currentmenuoption == gameplayoptionsoffset + 1)
         {

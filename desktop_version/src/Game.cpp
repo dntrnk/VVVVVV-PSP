@@ -356,7 +356,8 @@ void Game::init(void)
     fadetolab = false;
     fadetolabdelay = 0;
 
-    over30mode = true;
+    // over30mode = true; // "Over 30 FPS mode" is disabled for now
+    over30mode = false;
     showingametimer = false;
 
     ingame_titlemode = false;
@@ -4817,7 +4818,8 @@ if (strcmp(pKey, "fullscreen") == 0)
 
         if (strcmp(pKey, "over30mode") == 0)
         {
-            over30mode = help.Int(pText);
+            // over30mode = help.Int(pText); // "Over 30 FPS mode" is disabled for now
+            over30mode = false;
         }
 
         if (strcmp(pKey, "inputdelay") == 0)
