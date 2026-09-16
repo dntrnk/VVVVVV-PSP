@@ -164,9 +164,6 @@ void Graphics::destroy(void)
 #undef CLEAR_ARRAY
 }
 
-static SDL_Surface* tempFilterSrc = NULL;
-static SDL_Surface* tempFilterDest = NULL;
-
 void Graphics::create_buffers(void)
 {
 #define CREATE_TEXTURE_WITH_DIMENSIONS(w, h) \
@@ -184,9 +181,6 @@ void Graphics::create_buffers(void)
     ghostTexture = CREATE_TEXTURE;
     tempShakeTexture = CREATE_TEXTURE;
     foregroundTexture = CREATE_TEXTURE;
-    tempScrollingTexture = CREATE_SCROLL_TEXTURE;
-    towerbg.texture = CREATE_SCROLL_TEXTURE;
-    titlebg.texture = CREATE_SCROLL_TEXTURE;
 
 #undef CREATE_SCROLL_TEXTURE
 #undef CREATE_TEXTURE
@@ -209,11 +203,6 @@ void Graphics::destroy_buffers(void)
     VVV_freefunc(SDL_DestroyTexture, ghostTexture);
     VVV_freefunc(SDL_DestroyTexture, tempShakeTexture);
     VVV_freefunc(SDL_DestroyTexture, foregroundTexture);
-    VVV_freefunc(SDL_DestroyTexture, tempScrollingTexture);
-    VVV_freefunc(SDL_DestroyTexture, towerbg.texture);
-    VVV_freefunc(SDL_DestroyTexture, titlebg.texture);
-    VVV_freefunc(SDL_FreeSurface, tempFilterSrc);
-    VVV_freefunc(SDL_FreeSurface, tempFilterDest);
     VVV_freefunc(SDL_FreeSurface, tempScreenshot);
     VVV_freefunc(SDL_FreeSurface, tempScreenshot2x);
 }
@@ -3134,7 +3123,7 @@ void Graphics::screenshake(void)
 {
     // if (gameScreen.badSignalEffect)
     // {
-    //     ApplyFilter(&tempFilterSrc, &tempFilterDest);
+    //     ApplyFilter();
     // }
 
     // draw_screenshot_border();
@@ -3166,7 +3155,7 @@ void Graphics::render(void)
 
     // if (gameScreen.badSignalEffect)
     // {
-    //     ApplyFilter(&tempFilterSrc, &tempFilterDest);
+    //     ApplyFilter();
     // }
 
     SDL_Rect stretch_info = {0, 0, 320, 240};

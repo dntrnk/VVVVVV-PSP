@@ -319,7 +319,6 @@ public:
     SDL_Texture* tempShakeTexture;
     SDL_Texture* ghostTexture;
     SDL_Texture* foregroundTexture;
-    SDL_Texture* tempScrollingTexture;
     SDL_Surface* tempScreenshot;
     SDL_Surface* tempScreenshot2x;
 

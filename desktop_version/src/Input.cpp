@@ -688,10 +688,11 @@ static void menuactionpress(void)
         if (game.currentmenuoption == offset + 0)
         {
             processed = true;
-            //change smoothing
-            music.playef(Sound_VIRIDIAN);
-            gameScreen.badSignalEffect= !gameScreen.badSignalEffect;
-            game.savestatsandsettings_menu();
+            // //change smoothing
+            // music.playef(Sound_VIRIDIAN);
+            // gameScreen.badSignalEffect= !gameScreen.badSignalEffect; // badSignalEffect is disabled for now
+            // game.savestatsandsettings_menu();
+            music.playef(Sound_CRY);
         }
         if (!processed)
         {
