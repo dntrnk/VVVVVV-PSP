@@ -1083,6 +1083,9 @@ void loadlanguagelist(void)
     const char* code;
     while ((code = FILESYSTEM_enumerateLanguageCodes(&handle)) != NULL)
     {
+        // Don't load languages with BIG fonts (for now)
+        if ((strcmp(code, "JA") == 0) || (strcmp(code, "KO") == 0) || (strcmp(code, "ZH") == 0) || (strcmp(code, "zh_TW") == 0)) continue;
+
         LangMeta meta;
         loadmeta(meta, code);
         if (meta.active)
