@@ -61,12 +61,12 @@ static std::string playassets;
 
 static std::string playtestname;
 
-static volatile Uint64 time_ = 0;
-static volatile Uint64 timePrev = 0;
+static volatile Uint32 time_ = 0;
+static volatile Uint32 timePrev = 0;
 static volatile Uint32 accumulator = 0;
 
-static volatile Uint64 f_time = 0;
-static volatile Uint64 f_timePrev = 0;
+static volatile Uint32 f_time = 0;
+static volatile Uint32 f_timePrev = 0;
 
 extern const unsigned short _ctype_b[];
 const unsigned short *__ctype_ptr__ = _ctype_b;
@@ -854,21 +854,21 @@ int main(int argc, char *argv[])
 
     while (true)
     {
-        f_time = SDL_GetTicks64();
+        f_time = SDL_GetTicks();
 
-        const Uint64 f_timetaken = f_time - f_timePrev;
+        const Uint32 f_timetaken = f_time - f_timePrev;
         const int timestep = game.get_timestep();
-        if (!game.over30mode && f_timetaken < (Uint64) timestep)
+        if (!game.over30mode && f_timetaken < (Uint32) timestep)
         {
-            const volatile Uint64 f_delay = timestep - f_timetaken;
+            const volatile Uint32 f_delay = timestep - f_timetaken;
             SDL_Delay((Uint32) f_delay);
-            f_time = SDL_GetTicks64();
+            f_time = SDL_GetTicks();
         }
 
         f_timePrev = f_time;
 
         timePrev = time_;
-        time_ = SDL_GetTicks64();
+        time_ = SDL_GetTicks();
 
         deltaloop();
     }
