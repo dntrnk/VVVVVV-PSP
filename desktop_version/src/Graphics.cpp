@@ -107,8 +107,6 @@ void Graphics::init(void)
     linedelay = 0;
     gameTexture = NULL;
     ghostTexture = NULL;
-    tempShakeTexture = NULL;
-    foregroundTexture = NULL;
     tempScreenshot = NULL;
     tempScreenshot2x = NULL;
     towerbg = TowerBG();
@@ -179,8 +177,6 @@ void Graphics::create_buffers(void)
 
     gameTexture = CREATE_TEXTURE;
     ghostTexture = CREATE_TEXTURE;
-    tempShakeTexture = CREATE_TEXTURE;
-    foregroundTexture = CREATE_TEXTURE;
 
 #undef CREATE_SCROLL_TEXTURE
 #undef CREATE_TEXTURE
@@ -190,19 +186,12 @@ void Graphics::create_buffers(void)
         gameTexture,
         gameScreen.isFiltered ? SDL_ScaleModeLinear : SDL_ScaleModeNearest
     );
-
-    SDL_SetTextureScaleMode(
-        tempShakeTexture,
-        gameScreen.isFiltered ? SDL_ScaleModeLinear : SDL_ScaleModeNearest
-    );
 }
 
 void Graphics::destroy_buffers(void)
 {
     VVV_freefunc(SDL_DestroyTexture, gameTexture);
     VVV_freefunc(SDL_DestroyTexture, ghostTexture);
-    VVV_freefunc(SDL_DestroyTexture, tempShakeTexture);
-    VVV_freefunc(SDL_DestroyTexture, foregroundTexture);
     VVV_freefunc(SDL_FreeSurface, tempScreenshot);
     VVV_freefunc(SDL_FreeSurface, tempScreenshot2x);
 }

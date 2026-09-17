@@ -316,9 +316,7 @@ public:
     bool notextoutline;
 
     SDL_Texture* gameTexture;
-    SDL_Texture* tempShakeTexture;
     SDL_Texture* ghostTexture;
-    SDL_Texture* foregroundTexture;
     SDL_Surface* tempScreenshot;
     SDL_Surface* tempScreenshot2x;
 
