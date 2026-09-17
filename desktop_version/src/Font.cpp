@@ -1381,6 +1381,16 @@ void print(
     uint32_t codepoint;
     while ((codepoint = UTF8_next(&text)))
     {
+        if (codepoint == 0x02)
+        {
+            // Skip the following bytes until we hit ASCII or end of string
+            while (*text != '\0' && (unsigned char)*text >= 0x80)
+            {
+                text++;
+            }
+            continue;
+        }
+        
         position += font::print_char(
             pf.font_sel,
             codepoint,

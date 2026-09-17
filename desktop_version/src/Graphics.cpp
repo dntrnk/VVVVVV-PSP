@@ -408,7 +408,7 @@ void Graphics::print_level_creator(
         sprite_x = 103;
         print_flags |= PR_RIGHT;
     }
-    draw_texture_part(grphx.im_sprites, face_x, y - 1, sprite_x, 2, 10, 10, 1, 1, G2D_WHITE);
+    draw_texture_part(grphx.im_sprites, face_x, y - 1, sprite_x, 2, 10, 10, 1, 1, G2D_RGB(r, g, b));
     font::print(print_flags, text_x, y, creator, r, g, b);
 }
 
