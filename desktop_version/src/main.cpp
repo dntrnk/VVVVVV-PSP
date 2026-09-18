@@ -900,7 +900,7 @@ static void cleanup(void)
     FILESYSTEM_deinit();
 }
 
-SDL_NORETURN void VVV_exit(const int exit_code)
+__attribute__((noreturn)) void VVV_exit(const int exit_code)
 {
     cleanup();
     exit(exit_code);

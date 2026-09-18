@@ -1946,7 +1946,7 @@ g2dColor customlevelclass::getonewaycol(void)
     return G2D_WHITE;
 }
 
-static SDL_INLINE bool inbounds(const CustomEntity* entity)
+static inline bool inbounds(const CustomEntity* entity)
 {
     extern customlevelclass cl;
     return entity->x >= 0
