@@ -3163,7 +3163,7 @@ void Graphics::renderwithscreeneffects(void)
 
     if (game.screenshake > 0 && !game.noflashingmode)
     {
-        screenshake();
+        // screenshake();
     }
     else
     {
@@ -3176,6 +3176,11 @@ void Graphics::renderfixedpre(void)
     if (game.screenshake > 0)
     {
         updatescreenshake();
+
+        if (!game.noflashingmode)
+        {
+            screenshake();
+        }
     }
 
     if (gameScreen.badSignalEffect)
