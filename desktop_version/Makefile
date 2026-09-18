@@ -35,7 +35,6 @@ OBJS = \
   src/FontBidi.o \
   src/Game.o \
   src/GlitchrunnerMode.o \
-  src/GOGNetwork.o \
   src/Graphics.o \
   src/GraphicsResources.o \
   src/GraphicsUtil.o \
@@ -111,7 +110,7 @@ BUILD_PRX = 1
 PSP_FW_VERSION = 660
 
 LIBS = -lpspgu -lpspge -lpspdisplay -lpsppower -lpspctrl -lpspaudio -lpspvram \
-  -lz -lpng -lphysfs -lvorbisidec -lSDL2main -lSDL2 -lstdc++ -lGL -logg -lpspvfpu -lpsphprm -ltinyxml2
+  -lz -lpng -lphysfs -lvorbisidec -lSDL2main -lSDL2 -lstdc++ -lGL -lpspvfpu -lpsphprm -ltinyxml2
 
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = VVVVVV
