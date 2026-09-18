@@ -742,7 +742,7 @@ static void compute_crewmate_textbox(textboxclass* THIS)
     THIS->addline("");
     THIS->centertext();
     float spaces_per_8 = font::len(PR_FONT_INTERFACE, " ")/8.0f;
-    THIS->pad(SDL_ceilf(5/spaces_per_8), SDL_ceilf(2/spaces_per_8));
+    THIS->pad(ceilf(5/spaces_per_8), ceilf(2/spaces_per_8));
     if (!THIS->sprites.empty())
     {
         THIS->sprites[0].y = 12 + extra_cjk_height/2;

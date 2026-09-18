@@ -1555,7 +1555,7 @@ static void draw_toolbox(const char* coords)
     const int tool_gap = 32;
 
     const int page = ed.current_tool / 10;
-    const int max_pages = SDL_ceil(NUM_EditorTools / 10);
+    const int max_pages = ceil(NUM_EditorTools / 10);
     const int page_tool_count = std::min(10, NUM_EditorTools - (page * 10));
 
     for (int i = 0; i < page_tool_count; i++)

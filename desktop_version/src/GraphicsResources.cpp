@@ -302,7 +302,7 @@ static SDL_Texture* LoadTextureFromRaw(const char* filename, SDL_Surface* loaded
                 Uint8 g = G2D_GET_G(color) * 0.587;
                 Uint8 b = G2D_GET_B(color) * 0.114;
 
-                const double gray = SDL_floor(r + g + b + 0.5);
+                const double gray = floor(r + g + b + 0.5);
 
                 color = G2D_RGB(gray, gray, gray);
                 DrawPixel(loadedImage, x, y, color);
@@ -410,7 +410,7 @@ g2dImage* G2DLoadImage(const char* filename, const TextureLoadType loadtype, g2d
                 Uint8 g = G2D_GET_G(color) * 0.587;
                 Uint8 b = G2D_GET_B(color) * 0.114;
 
-                const double gray = SDL_floor(r + g + b + 0.5);
+                const double gray = floor(r + g + b + 0.5);
 
                 set_pixel(tempTex, x, y, G2D_RGBA(gray, gray, gray, G2D_GET_A(color)));
             }
