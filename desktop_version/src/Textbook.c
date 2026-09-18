@@ -51,7 +51,8 @@ const void* textbook_store_raw(Textbook* textbook, const void* data, size_t data
     short found_page = -1;
     for (short p = 0; p < textbook->pages_used; p++)
     {
-        size_t free = TEXTBOOK_PAGE_SIZE - textbook->page_len[p];
+        size_t aligned_len = (textbook->page_len[p] + 7) & ~7;
+        size_t free = TEXTBOOK_PAGE_SIZE - aligned_len;
 
         if (data_len <= free)
         {
@@ -85,10 +86,11 @@ const void* textbook_store_raw(Textbook* textbook, const void* data, size_t data
         textbook->pages_used++;
     }
 
-    size_t cursor = textbook->page_len[found_page];
+    /* Align cursor to 8 bytes for MIPS */
+    size_t cursor = (textbook->page_len[found_page] + 7) & ~7;
     char* added_text = &textbook->page[found_page][cursor];
     memcpy(added_text, data, data_len);
-    textbook->page_len[found_page] += data_len;
+    textbook->page_len[found_page] = cursor + data_len;
 
     return added_text;
 }

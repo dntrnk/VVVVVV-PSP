@@ -190,13 +190,13 @@ const TextboxFormat* gettext_cutscene(const std::string& script_id, const std::s
         return NULL;
     }
 
-    uintptr_t ptr_format;
+    uintptr_t ptr_format = 0;
     found = hashmap_get(cutscene_map, key, alloc_len-1, &ptr_format);
     const TextboxFormat* format = (TextboxFormat*) ptr_format;
 
     VVV_free(key);
 
-    if (!found)
+    if (!found || format == NULL)
     {
         return NULL;
     }
