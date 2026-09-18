@@ -71,9 +71,9 @@ static bool compare_nocase (std::string first, std::string second)
     unsigned int i=0;
     while ( (i<first.length()) && (i<second.length()) )
     {
-        if (SDL_tolower(first[i])<SDL_tolower(second[i]))
+        if (tolower(first[i])<tolower(second[i]))
             return true;
-        else if (SDL_tolower(first[i])>SDL_tolower(second[i]))
+        else if (tolower(first[i])>tolower(second[i]))
             return false;
         ++i;
     }

@@ -336,3 +336,12 @@ void _VVV_between(
         std::min(middle_length + 1, middle_size)
     );
 }
+
+int tolower(int c)
+{
+    if (c >= 'A' && c <= 'Z')
+    {
+        return c + ('a' - 'A');
+    }
+    return c;
+}

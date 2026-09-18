@@ -33,6 +33,8 @@ void VVV_fillstring(
     const char fillchar
 );
 
+int tolower(int c);
+
 #define INBOUNDS_VEC(index, vector) ((int) index >= 0 && (int) index < (int) vector.size())
 #define INBOUNDS_ARR(index, array) ((int) index >= 0 && (int) index < (int) std::size(array))
 

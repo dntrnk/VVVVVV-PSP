@@ -57,7 +57,7 @@ static const PHYSFS_Allocator allocator = {
     NULL,
     bridged_malloc,
     bridged_realloc,
-    SDL_free
+    free
 };
 
 static bool mount_pre_datazip(

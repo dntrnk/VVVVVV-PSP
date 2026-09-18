@@ -97,7 +97,7 @@ void scriptclass::tokenize( const std::string& t )
             argexists[j] = words[j] != "";
             for (size_t ii = 0; ii < words[j].length(); ii++)
             {
-                words[j][ii] = SDL_tolower(words[j][ii]);
+                words[j][ii] = tolower(words[j][ii]);
             }
             j++;
             tempword = "";
@@ -3322,7 +3322,7 @@ bool scriptclass::loadcustom(const std::string& t)
         tokenize(lines[i]);
         for (size_t ii = 0; ii < words[0].length(); ii++)
         {
-            words[0][ii] = SDL_tolower(words[0][ii]);
+            words[0][ii] = tolower(words[0][ii]);
         }
         if(words[0] == "music"){
             if(customtextmode==1){ add("endtext"); customtextmode=0;}

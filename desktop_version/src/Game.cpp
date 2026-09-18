@@ -6674,7 +6674,7 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
                     );
                     for (size_t ii = 0; text[ii] != '\0'; ++ii)
                     {
-                        text[ii] = SDL_tolower(text[ii]);
+                        text[ii] = tolower(text[ii]);
                     }
                     option(
                         text,

@@ -14,6 +14,6 @@
     } \
     while (0)
 
-#define VVV_free(obj) VVV_freefunc(SDL_free, obj)
+#define VVV_free(obj) VVV_freefunc(free, obj)
 
 #endif /* ALLOCGAME_H */
