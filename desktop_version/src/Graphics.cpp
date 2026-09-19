@@ -3181,6 +3181,9 @@ void Graphics::renderfixedpre(void)
         {
             screenshake();
         }
+    } else if (game.screenshake <= 0) {
+        g2dScreenOffsetX = 80;
+        g2dScreenOffsetY = 16;
     }
 
     if (gameScreen.badSignalEffect)
@@ -3199,11 +3202,6 @@ void Graphics::renderfixedpost(void)
     if (game.screenshake > 0)
     {
         --game.screenshake;
-
-        if (game.screenshake <= 0) {
-            g2dScreenOffsetX = 80;
-            g2dScreenOffsetY = 16;
-        }
     }
 
     game.old_screenshot_border_timer = game.screenshot_border_timer;
