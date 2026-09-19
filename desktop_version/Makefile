@@ -16,9 +16,9 @@ OBJS = \
   src/glib2d_helper.o \
   src/controls.o \
   src/pspaalib.o \
+  src/pspaalibat3.o \
   src/pspaalibcommon.o \
   src/pspaalibeffects.o \
-  src/pspaalibogg.o \
   src/pspaalibwav.o \
   src/BinaryBlob.o \
   src/BlockV.o \
@@ -110,7 +110,7 @@ BUILD_PRX = 1
 PSP_FW_VERSION = 660
 
 LIBS = -lpspgu -lpspge -lpspdisplay -lpsppower -lpspctrl -lpspaudio -lpspvram \
-  -lz -lpng -lphysfs -lvorbisidec -lSDL2main -lSDL2 -lstdc++ -lGL -lpspvfpu -lpsphprm -ltinyxml2
+  -lz -lpng -lphysfs -lpspatrac3 -lSDL2main -lSDL2 -lstdc++ -lGL -lpspvfpu -lpsphprm -ltinyxml2
 
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = VVVVVV

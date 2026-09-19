@@ -81,12 +81,12 @@ int GetRawBuffer(short *buf, int length, float amp, int channel) {
     if ((PSPAALIB_CHANNEL_WAV_1 <= channel) && (channel <= PSPAALIB_CHANNEL_WAV_32)) {
         return GetBufferWav(buf, length, amp, channel - PSPAALIB_CHANNEL_WAV_1);
     }
-    // if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
-    //     return GetBufferAt3(buf, length, amp, channel - PSPAALIB_CHANNEL_AT3_1);
-    // }
-    if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
-        return GetBufferOgg(buf, length, amp, channel - PSPAALIB_CHANNEL_OGG_1);
+    if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
+        return GetBufferAt3(buf, length, amp, channel - PSPAALIB_CHANNEL_AT3_1);
     }
+    // if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
+    //     return GetBufferOgg(buf, length, amp, channel - PSPAALIB_CHANNEL_OGG_1);
+    // }
     /*if ((PSPAALIB_CHANNEL_FLAC_1 <= channel) && (channel <= PSPAALIB_CHANNEL_FLAC_4))
     {
         return GetBufferFlac(buf, length, amp, channel - PSPAALIB_CHANNEL_FLAC_1);
@@ -173,7 +173,7 @@ Release:
 }
 
 int AalibInit() {
-    // InitAt3();
+    InitAt3();
     char c[11];
     int i;
     for (i = 0;i < 8;i++) {
@@ -274,12 +274,12 @@ int AalibUnload(int channel) {
     if ((PSPAALIB_CHANNEL_WAV_1 <= channel) && (channel <= PSPAALIB_CHANNEL_WAV_32)) {
         return UnloadWav(channel - PSPAALIB_CHANNEL_WAV_1);
     }
-    // if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
-    //     return UnloadAt3(channel - PSPAALIB_CHANNEL_AT3_1);
-    // }
-    if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
-        return UnloadOgg(channel - PSPAALIB_CHANNEL_OGG_1);
+    if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
+        return UnloadAt3(channel - PSPAALIB_CHANNEL_AT3_1);
     }
+    // if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
+    //     return UnloadOgg(channel - PSPAALIB_CHANNEL_OGG_1);
+    // }
     /*if ((PSPAALIB_CHANNEL_FLAC_1 <= channel) && (channel <= PSPAALIB_CHANNEL_FLAC_4))
     {
         return UnloadFlac(channel - PSPAALIB_CHANNEL_FLAC_1);
@@ -301,12 +301,12 @@ int AalibLoad(char *filename, int channel, bool loadToRam) {
     if ((PSPAALIB_CHANNEL_WAV_1 <= channel) && (channel <= PSPAALIB_CHANNEL_WAV_32)) {
         return LoadWav(filename, channel - PSPAALIB_CHANNEL_WAV_1, loadToRam);
     }
-    // if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
-    //     return LoadAt3(filename, channel - PSPAALIB_CHANNEL_AT3_1);
-    // }
-    if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
-        return LoadOgg(filename, channel - PSPAALIB_CHANNEL_OGG_1, loadToRam);
+    if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
+        return LoadAt3(filename, channel - PSPAALIB_CHANNEL_AT3_1);
     }
+    // if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
+    //     return LoadOgg(filename, channel - PSPAALIB_CHANNEL_OGG_1, loadToRam);
+    // }
     /*if ((PSPAALIB_CHANNEL_FLAC_1 <= channel) && (channel <= PSPAALIB_CHANNEL_FLAC_4))
     {
         return LoadFlac(filename, channel - PSPAALIB_CHANNEL_FLAC_1);
@@ -328,9 +328,9 @@ int AalibLoadFromMemory(const unsigned char *data, int dataSize, int channel, bo
     if ((PSPAALIB_CHANNEL_WAV_1 <= channel) && (channel <= PSPAALIB_CHANNEL_WAV_32)) {
         return LoadWavFromMemory(data, dataSize, channel - PSPAALIB_CHANNEL_WAV_1, loadToRam);
     }
-    if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
-        return LoadOggFromMemory(data, dataSize, channel - PSPAALIB_CHANNEL_OGG_1, loadToRam);
-    }
+    // if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
+    //     return LoadOggFromMemory(data, dataSize, channel - PSPAALIB_CHANNEL_OGG_1, loadToRam);
+    // }
     return PSPAALIB_ERROR_INVALID_CHANNEL;
 }
 
@@ -352,12 +352,12 @@ int AalibPlay(int channel) {
     if ((PSPAALIB_CHANNEL_WAV_1 <= channel) && (channel <= PSPAALIB_CHANNEL_WAV_32)) {
         return PlayWav(channel - PSPAALIB_CHANNEL_WAV_1);
     }
-    // if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
-    //     return PlayAt3(channel - PSPAALIB_CHANNEL_AT3_1);
-    // }
-    if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
-        return PlayOgg(channel - PSPAALIB_CHANNEL_OGG_1);
+    if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
+        return PlayAt3(channel - PSPAALIB_CHANNEL_AT3_1);
     }
+    // if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
+    //     return PlayOgg(channel - PSPAALIB_CHANNEL_OGG_1);
+    // }
     /*if ((PSPAALIB_CHANNEL_FLAC_1 <= channel) && (channel <= PSPAALIB_CHANNEL_FLAC_4))
     {
         return PlayFlac(channel - PSPAALIB_CHANNEL_FLAC_1);
@@ -369,12 +369,12 @@ int AalibStop(int channel) {
     if ((PSPAALIB_CHANNEL_WAV_1 <= channel) && (channel <= PSPAALIB_CHANNEL_WAV_32)) {
         return StopWav(channel - PSPAALIB_CHANNEL_WAV_1);
     }
-    // if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
-    //     return StopAt3(channel - PSPAALIB_CHANNEL_AT3_1);
-    // }
-    if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
-        return StopOgg(channel - PSPAALIB_CHANNEL_OGG_1);
+    if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
+        return StopAt3(channel - PSPAALIB_CHANNEL_AT3_1);
     }
+    // if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
+    //     return StopOgg(channel - PSPAALIB_CHANNEL_OGG_1);
+    // }
     /*if ((PSPAALIB_CHANNEL_FLAC_1 <= channel) && (channel <= PSPAALIB_CHANNEL_FLAC_4))
     {
         return StopFlac(channel - PSPAALIB_CHANNEL_FLAC_1);
@@ -386,12 +386,12 @@ int AalibPause(int channel) {
     if ((PSPAALIB_CHANNEL_WAV_1 <= channel) && (channel <= PSPAALIB_CHANNEL_WAV_32)) {
         return PauseWav(channel - PSPAALIB_CHANNEL_WAV_1);
     }
-    // if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
-    //     return PauseAt3(channel - PSPAALIB_CHANNEL_AT3_1);
-    // }
-    if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
-        return PauseOgg(channel - PSPAALIB_CHANNEL_OGG_1);
+    if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
+        return PauseAt3(channel - PSPAALIB_CHANNEL_AT3_1);
     }
+    // if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
+    //     return PauseOgg(channel - PSPAALIB_CHANNEL_OGG_1);
+    // }
     /*if ((PSPAALIB_CHANNEL_FLAC_1 <= channel) && (channel <= PSPAALIB_CHANNEL_FLAC_4))
     {
         return PauseFlac(channel - PSPAALIB_CHANNEL_FLAC_1);
@@ -403,12 +403,12 @@ int AalibRewind(int channel) {
     if ((PSPAALIB_CHANNEL_WAV_1 <= channel) && (channel <= PSPAALIB_CHANNEL_WAV_32)) {
         return RewindWav(channel - PSPAALIB_CHANNEL_WAV_1);
     }
-    // if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
-    //     return RewindAt3(channel - PSPAALIB_CHANNEL_AT3_1);
-    // }
-    if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
-        return RewindOgg(channel - PSPAALIB_CHANNEL_OGG_1);
+    if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
+        return RewindAt3(channel - PSPAALIB_CHANNEL_AT3_1);
     }
+    // if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
+    //     return RewindOgg(channel - PSPAALIB_CHANNEL_OGG_1);
+    // }
     /*if ((PSPAALIB_CHANNEL_FLAC_1 <= channel) && (channel <= PSPAALIB_CHANNEL_FLAC_4))
     {
         return RewindFlac(channel - PSPAALIB_CHANNEL_FLAC_1);
@@ -420,9 +420,9 @@ int AalibSeek(int channel, int time) {
     if ((PSPAALIB_CHANNEL_WAV_1 <= channel) && (channel <= PSPAALIB_CHANNEL_WAV_32)) {
         return SeekWav(channel - PSPAALIB_CHANNEL_WAV_1, time);
     }
-    if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
-        return SeekOgg(channel - PSPAALIB_CHANNEL_OGG_1, time);
-    }
+    // if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
+    //     return SeekOgg(channel - PSPAALIB_CHANNEL_OGG_1, time);
+    // }
 
     return PSPAALIB_ERROR_INVALID_CHANNEL;
 }
@@ -431,12 +431,12 @@ int AalibSetAutoloop(int channel, bool autoloop) {
     if ((PSPAALIB_CHANNEL_WAV_1 <= channel) && (channel <= PSPAALIB_CHANNEL_WAV_32)) {
         return SetAutoloopWav(channel - PSPAALIB_CHANNEL_WAV_1, autoloop);
     }
-    // if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
-    //     return SetAutoloopAt3(channel - PSPAALIB_CHANNEL_AT3_1, autoloop);
-    // }
-    if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
-        return SetAutoloopOgg(channel - PSPAALIB_CHANNEL_OGG_1, autoloop);
+    if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
+        return SetAutoloopAt3(channel - PSPAALIB_CHANNEL_AT3_1, autoloop);
     }
+    // if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
+    //     return SetAutoloopOgg(channel - PSPAALIB_CHANNEL_OGG_1, autoloop);
+    // }
     /*if ((PSPAALIB_CHANNEL_FLAC_1 <= channel) && (channel <= PSPAALIB_CHANNEL_FLAC_4))
     {
         return SetAutoloopFlac(channel - PSPAALIB_CHANNEL_FLAC_1, autoloop);
@@ -448,12 +448,12 @@ int AalibGetStopReason(int channel) {
     if ((PSPAALIB_CHANNEL_WAV_1 <= channel) && (channel <= PSPAALIB_CHANNEL_WAV_32)) {
         return GetStopReasonWav(channel - PSPAALIB_CHANNEL_WAV_1);
     }
-    // if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
-    //     return GetStopReasonAt3(channel - PSPAALIB_CHANNEL_AT3_1);
-    // }
-    if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
-        return GetStopReasonOgg(channel - PSPAALIB_CHANNEL_OGG_1);
+    if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
+        return GetStopReasonAt3(channel - PSPAALIB_CHANNEL_AT3_1);
     }
+    // if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
+    //     return GetStopReasonOgg(channel - PSPAALIB_CHANNEL_OGG_1);
+    // }
     /*if ((PSPAALIB_CHANNEL_FLAC_1 <= channel) && (channel <= PSPAALIB_CHANNEL_FLAC_4))
     {
         return GetStopReasonFlac(channel - PSPAALIB_CHANNEL_FLAC_1);
@@ -477,24 +477,24 @@ int AalibGetStatus(int channel) {
             return PSPAALIB_STATUS_PLAYING;
         }
     }
-    // if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
-    //     if (GetStopReasonAt3(channel - PSPAALIB_CHANNEL_AT3_1)) {
-    //         return PSPAALIB_STATUS_STOPPED;
-    //     } else if (GetPausedAt3(channel - PSPAALIB_CHANNEL_AT3_1)) {
-    //         return PSPAALIB_STATUS_PAUSED;
-    //     } else {
-    //         return PSPAALIB_STATUS_PLAYING;
-    //     }
-    // }
-    if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
-        if (GetStopReasonOgg(channel - PSPAALIB_CHANNEL_OGG_1)) {
+    if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
+        if (GetStopReasonAt3(channel - PSPAALIB_CHANNEL_AT3_1)) {
             return PSPAALIB_STATUS_STOPPED;
-        } else if (GetPausedOgg(channel - PSPAALIB_CHANNEL_OGG_1)) {
+        } else if (GetPausedAt3(channel - PSPAALIB_CHANNEL_AT3_1)) {
             return PSPAALIB_STATUS_PAUSED;
         } else {
             return PSPAALIB_STATUS_PLAYING;
         }
     }
+    // if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
+    //     if (GetStopReasonOgg(channel - PSPAALIB_CHANNEL_OGG_1)) {
+    //         return PSPAALIB_STATUS_STOPPED;
+    //     } else if (GetPausedOgg(channel - PSPAALIB_CHANNEL_OGG_1)) {
+    //         return PSPAALIB_STATUS_PAUSED;
+    //     } else {
+    //         return PSPAALIB_STATUS_PLAYING;
+    //     }
+    // }
     /*if ((PSPAALIB_CHANNEL_FLAC_1 <= channel) && (channel <= PSPAALIB_CHANNEL_FLAC_4))
     {
         if (GetStopReasonFlac(channel - PSPAALIB_CHANNEL_FLAC_1)) {

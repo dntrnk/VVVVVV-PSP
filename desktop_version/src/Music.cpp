@@ -22,50 +22,39 @@ static bool soundLoaded = false;
 struct MusicChannel {
     static int channel;
     static bool loaded;
-    static unsigned char *currentData;  /* we own this */
+    static bool paused;
 
     static void Stop(void) {
         if (channel >= 0 && loaded) {
             AalibStop(channel);
             AalibUnload(channel);
         }
-        if (currentData) {
-            free(currentData);
-            currentData = NULL;
-        }
         loaded = false;
+        paused = false;
         channel = -1;
     }
 
     static bool LoadAndPlay(const char *trackName, bool loop) {
         Stop();
 
-        unsigned char *data = NULL;
-        size_t size = 0;
-        if (!FILESYSTEM_loadBinaryBlobResource(
-                "vvvvvvmusic.vvv", trackName, &data, &size)) {
-            vlog_error("Could not load track %s", trackName);
-            return false;
-        }
+        channel = PSPAALIB_CHANNEL_AT3_1;
 
-        channel = PSPAALIB_CHANNEL_OGG_1;
-
-        /* loadToRam=FALSE: PSPAALIB will use our own buffer */
-        int ret = AalibLoadFromMemory(data, (int)size, channel, FALSE);
-
+        int ret = AalibLoad((char*)trackName, channel, TRUE);
         if (ret != PSPAALIB_SUCCESS) {
-            vlog_error("Failed to load OGG track %s: error %d", trackName, ret);
-            free(data);
+            vlog_error("Failed to load AT3 track %s: error %d", trackName, ret);
             channel = -1;
             return false;
         }
 
-        currentData = data;
-
         AalibEnable(channel, PSPAALIB_EFFECT_VOLUME_MANUAL);
         AalibSetAutoloop(channel, loop ? TRUE : FALSE);
         AalibSetVolume(channel, (AalibVolume){0.0f, 0.0f});
-        AalibPlay(channel);
+
+        if (AalibPlay(channel) != PSPAALIB_SUCCESS) {
+            vlog_error("Failed to play AT3 track %s", trackName);
+            return false;
+        }
+
         loaded = true;
         return true;
     }
@@ -77,39 +66,46 @@ struct MusicChannel {
     }
 
     static void Pause(void) {
-        if (channel >= 0 && loaded) AalibPause(channel);
+        if (channel >= 0 && loaded) {
+            AalibPause(channel);
+            paused = true;
+        }
     }
 
     static void Resume(void) {
-        if (channel >= 0 && loaded) AalibPause(channel);
+        if (channel >= 0 && loaded) {
+            AalibPause(channel);
+            paused = false;
+        }
     }
 
     static bool IsPlaying(void) {
         if (channel < 0 || !loaded) return false;
+        if (paused) return false;
         return AalibGetStopReason(channel) == PSPAALIB_STOP_NOT_STOPPED;
     }
 };
 int MusicChannel::channel = -1;
 bool MusicChannel::loaded = false;
-unsigned char *MusicChannel::currentData = NULL;
+bool MusicChannel::paused = false;
 
 static const char *trackNames[] = {
-    "data/music/0levelcomplete.ogg",
-    "data/music/1pushingonwards.ogg",
-    "data/music/2positiveforce.ogg",
-    "data/music/3potentialforanything.ogg",
-    "data/music/4passionforexploring.ogg",
-    "data/music/5intermission.ogg",
-    "data/music/6presentingvvvvvv.ogg",
-    "data/music/7gamecomplete.ogg",
-    "data/music/8predestinedfate.ogg",
-    "data/music/9positiveforcereversed.ogg",
-    "data/music/10popularpotpourri.ogg",
-    "data/music/11pipedream.ogg",
-    "data/music/12pressurecooker.ogg",
-    "data/music/13pacedenergy.ogg",
-    "data/music/14piercingthesky.ogg",
-    "data/music/predestinedfatefinallevel.ogg"
+    "music/0levelcomplete.at3",
+    "music/1pushingonwards.at3",
+    "music/2positiveforce.at3",
+    "music/3potentialforanything.at3",
+    "music/4passionforexploring.at3",
+    "music/5intermission.at3",
+    "music/6presentingvvvvvv.at3",
+    "music/7gamecomplete.at3",
+    "music/8predestinedfate.at3",
+    "music/9positiveforcereversed.at3",
+    "music/10popularpotpourri.at3",
+    "music/11pipedream.at3",
+    "music/12pressurecooker.at3",
+    "music/13pacedenergy.at3",
+    "music/14piercingthesky.at3",
+    "music/predestinedfatefinallevel.at3"
 };
 
 struct SoundTrack {
