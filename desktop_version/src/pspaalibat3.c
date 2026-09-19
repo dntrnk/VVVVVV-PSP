@@ -83,7 +83,6 @@ int StopAt3(int channel) {
     if (!streamsAt3[channel].initialized) {
         return PSPAALIB_ERROR_AT3_UNINITIALIZED_CHANNEL;
     }
-    RewindAt3(channel);
     streamsAt3[channel].paused = TRUE;
     streamsAt3[channel].stopReason = PSPAALIB_STOP_ON_REQUEST;
     return PSPAALIB_SUCCESS;
@@ -121,27 +120,60 @@ int GetBufferAt3(short *buf, int length, float amp, int channel) {
         memset(buf, 0, byteLength);
         return PSPAALIB_WARNING_PAUSED_BUFFER_REQUESTED;
     }
-    int num, end, remain, i;
+    int num, end, remain;
+    int decodedSomething = 0;
     while (streamsAt3[channel].bufSize < byteLength) {
-        sceAtracDecodeData(streamsAt3[channel].id, (void *)streamsAt3[channel].tempBuf, &num, &end, &remain);
+        int ret = sceAtracDecodeData(streamsAt3[channel].id, (void *)streamsAt3[channel].tempBuf, &num, &end, &remain);
+
+        if (ret < 0) break;
+        if (num == 0 && !end) break;
+
         if (end) {
             if (!streamsAt3[channel].autoloop) {
                 streamsAt3[channel].paused = TRUE;
                 streamsAt3[channel].stopReason = PSPAALIB_STOP_END_OF_STREAM;
-                memset(buf, 0, byteLength);
-                return PSPAALIB_WARNING_END_OF_STREAM_REACHED;
+
+                break;
             }
             RewindAt3(channel);
+            if (num == 0) {
+                break;
+            }
         }
-        streamsAt3[channel].buf = (unsigned short *)realloc(streamsAt3[channel].buf, streamsAt3[channel].bufSize + (4 * num));
-        memcpy((void *)streamsAt3[channel].buf + streamsAt3[channel].bufSize, streamsAt3[channel].tempBuf, 4 * num);
-        streamsAt3[channel].bufSize += 4 * num;
+
+        if (num > 0) {
+            unsigned short *newBuf = (unsigned short *)realloc(streamsAt3[channel].buf, streamsAt3[channel].bufSize + (4 * num));
+            if (newBuf == NULL) break;
+            streamsAt3[channel].buf = newBuf;
+            memcpy((void *)((char *)streamsAt3[channel].buf + streamsAt3[channel].bufSize), streamsAt3[channel].tempBuf, 4 * num);
+            streamsAt3[channel].bufSize += 4 * num;
+            decodedSomething = 1;
+        }
     }
-    for (i = 0;i < 2 * length;i++) {
-        buf[i] = streamsAt3[channel].buf[i] * amp;
+    int bytesAvailable = streamsAt3[channel].bufSize;
+    int bytesToCopy = (bytesAvailable >= byteLength) ? byteLength : bytesAvailable;
+
+    if (bytesToCopy > 0) {
+        int samples = bytesToCopy >> 1;
+        unsigned short *src = streamsAt3[channel].buf;
+        for (int i = 0; i < samples; i++) {
+            buf[i] = src[i] * amp;
+        }
+        streamsAt3[channel].bufSize -= bytesToCopy;
+        memmove(streamsAt3[channel].buf,
+                (char *)streamsAt3[channel].buf + bytesToCopy,
+                streamsAt3[channel].bufSize);
     }
-    streamsAt3[channel].bufSize -= byteLength;
-    memmove((void *)streamsAt3[channel].buf, (void *)streamsAt3[channel].buf + byteLength, streamsAt3[channel].bufSize);
+    if (bytesToCopy < byteLength) {
+        int samplesTotal = byteLength >> 1;
+        int samplesDone = bytesToCopy >> 1;
+        memset(&buf[samplesDone], 0, (samplesTotal - samplesDone) * sizeof(short));
+    }
+
+    if (streamsAt3[channel].stopReason == PSPAALIB_STOP_END_OF_STREAM) {
+        return PSPAALIB_WARNING_END_OF_STREAM_REACHED;
+    }
+
     return PSPAALIB_SUCCESS;
 }
 
