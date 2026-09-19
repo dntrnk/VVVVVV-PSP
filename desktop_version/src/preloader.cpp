@@ -4,12 +4,11 @@
 #include "Game.h"
 #include "Graphics.h"
 #include "GraphicsUtil.h"
+#include "KeyPoll.h"
 #include "Localization.h"
 #include "Maths.h"
 #include "UtilityClass.h"
 #include "VFormat.h"
-
-#include "controls.h"
 
 static int pre_fakepercent=0, pre_transition=30;
 static bool pre_startgame=false;
@@ -24,7 +23,7 @@ void preloaderinput(void)
 {
   game.press_action = false;
 
-  if (controls_pressed(PSP_CTRL_CROSS)) {
+  if (key.isDown(KEYBOARD_z) || key.isDown(KEYBOARD_SPACE) || key.isDown(KEYBOARD_v) || key.isDown(game.controllerButton_flip)) {
     game.press_action = true;
   }
 
