@@ -24,6 +24,8 @@
 #include <unistd.h>
 #define MAX_PATH PATH_MAX
 
+static char* g_argvZero = NULL;
+
 static bool isInit = false;
 
 static const char* pathSep = NULL;
@@ -176,6 +178,8 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
         return 0;
     }
 
+    g_argvZero = argvZero;
+
     PHYSFS_permitSymbolicLinks(1);
 
     /* Determine the OS user directory */
@@ -217,41 +221,42 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
     vlog_info("Base directory: %s", writeDir);
 
     /* Store full save directory */
-    snprintf(saveDir, sizeof(saveDir), "%s%s%s",
+    snprintf(saveDir, sizeof(saveDir), "%s%s",
         writeDir,
-        "saves",
-        pathSep
+        "saves"
     );
     sceIoMkdir(saveDir, 0777);
+    strlcat(saveDir, pathSep, sizeof(saveDir));
     vlog_info("Save directory: %s", saveDir);
 
     /* Store full level directory */
-    snprintf(levelDir, sizeof(levelDir), "%s%s%s",
+    snprintf(levelDir, sizeof(levelDir), "%s%s",
         writeDir,
-        "levels",
-        pathSep
+        "levels"
     );
     sceIoMkdir(levelDir, 0777);
+    strlcat(levelDir, pathSep, sizeof(levelDir));
     vlog_info("Level directory: %s", levelDir);
 
     /* Store full screenshot directory */
-    snprintf(screenshotDir, sizeof(screenshotDir), "%s%s%s",
+    snprintf(screenshotDir, sizeof(screenshotDir), "%s%s",
         writeDir,
-        "screenshots",
-        pathSep
+        "screenshots"
     );
     sceIoMkdir(screenshotDir, 0777);
+    strlcat(screenshotDir, pathSep, sizeof(screenshotDir));
     vlog_info("Screenshot directory: %s", screenshotDir);
 
     /* We also need to make the subdirectories */
     {
         char temp[MAX_PATH];
-        snprintf(temp, sizeof(temp), "%s%s%s",
-            screenshotDir, "1x", pathSep
+        snprintf(temp, sizeof(temp), "%s%s",
+            screenshotDir, "1x"
         );
         sceIoMkdir(temp, 0777);
-        snprintf(temp, sizeof(temp), "%s%s%s",
-            screenshotDir, "2x", pathSep
+
+        snprintf(temp, sizeof(temp), "%s%s",
+            screenshotDir, "2x"
         );
         sceIoMkdir(temp, 0777);
     }
@@ -1310,15 +1315,20 @@ void FILESYSTEM_freeEnumerate(EnumHandle* handle)
 
 static int PLATFORM_getOSDirectory(char* output, const size_t output_size)
 {
-    char cwd[256];
-    if (getcwd(cwd, sizeof(cwd)) == NULL)
+    if (g_argvZero != NULL && g_argvZero[0] != '\0')
     {
-        vlog_error("getcwd failed");
-        return 0;
+        strlcpy(output, g_argvZero, output_size);
+        
+        char* lastSlash = strrchr(output, '/');
+        if (lastSlash != NULL)
+        {
+            *(lastSlash + 1) = '\0';
+            vlog_info("EBOOT.PBP directory: %s", output);
+            return 1;
+        }
     }
 
-    snprintf(output, output_size, "%s/", cwd);
-    return 1;
+    return 0;
 }
 
 bool FILESYSTEM_openDirectoryEnabled(void)
