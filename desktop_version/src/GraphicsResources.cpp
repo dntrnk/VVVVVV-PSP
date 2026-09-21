@@ -35,136 +35,22 @@ void sprites_collision_surface_clear_bit(int x, int y)
     sprites_collision_surface[y][x >> 5] &= ~(1u << (x & 31));
 }
 
-// Copy+Paste from glib2d.c
-static int _get_or_add_palette_color(g2dColor color, g2dColor *palette, int *pal_count, int max_colors) {
-    for (int i = 0; i < *pal_count; i++) {
-        if (palette[i] == color) return i;
-    }
-    if (*pal_count < max_colors) {
-        palette[*pal_count] = color;
-        return (*pal_count)++;
-    }
-    return 0; // Возвращаем 0, если палитра переполнена
-}
-
-static void _g2dApplyFormat(g2dImage *tex, g2dColor *rgba_buffer, int target_hw_format) {
-    int total_pixels = tex->tw * tex->th;
-    tex->format = target_hw_format;
-
-    // Освобождаем старые данные tex->data и сразу зануляем указатель
-    if (tex->data) {
-        free(tex->data);
-        tex->data = NULL;
-    }
-    
-    // НЕ ОСВОБОЖДАЕМ rgba_buffer здесь, он нам еще нужен!
-
-    if (target_hw_format == GU_PSM_8888) {
-        tex->data = malloc(total_pixels * 4);
-        if (!tex->data) {
-            free(rgba_buffer);
-            rgba_buffer = NULL;
-            return;
-        }
-        // Теперь rgba_buffer точно существует и мы можем его копировать
-        memcpy(tex->data, rgba_buffer, total_pixels * 4);
-        tex->palette = NULL;
-        // Освобождаем rgba_buffer после использования
-        free(rgba_buffer);
-        rgba_buffer = NULL;
-    } 
-    else {
-        // Палитра ОБЯЗАТЕЛЬНО выровнена по 16 байт
-        tex->palette = (g2dColor *)memalign(16, 256 * sizeof(g2dColor));
-        if (!tex->palette) {
-            free(rgba_buffer);
-            rgba_buffer = NULL;
-            return;
-        }
-        memset(tex->palette, 0, 256 * sizeof(g2dColor));
-        
-        int pal_count = 0;
-        if (target_hw_format == GU_PSM_T8) {
-            unsigned char *indices = (unsigned char *)malloc(total_pixels);
-            if (!indices) {
-                free(tex->palette);
-                tex->palette = NULL;
-                free(rgba_buffer);
-                rgba_buffer = NULL;
-                return;
-            }
-            for (int i = 0; i < total_pixels; i++) {
-                indices[i] = (unsigned char)_get_or_add_palette_color(rgba_buffer[i], tex->palette, &pal_count, 256);
-            }
-            tex->data = (void *)indices;
-        } 
-        else if (target_hw_format == GU_PSM_T4) {
-            unsigned char *indices = (unsigned char *)malloc(total_pixels / 2);
-            if (!indices) {
-                free(tex->palette);
-                tex->palette = NULL;
-                free(rgba_buffer);
-                rgba_buffer = NULL;
-                return;
-            }
-            memset(indices, 0, total_pixels / 2);
-            for (int i = 0; i < total_pixels; i++) {
-                int idx = _get_or_add_palette_color(rgba_buffer[i], tex->palette, &pal_count, 16);
-                if (i % 2 == 0) indices[i/2] |= (idx & 0x0F);
-                else            indices[i/2] |= (idx << 4);
-            }
-            tex->data = (void *)indices;
-        }
-        
-        // Освобождаем rgba_buffer после использования для CLUT форматов
-        free(rgba_buffer);
-        rgba_buffer = NULL;
-    }
-    
-    // Сбрасываем кэш сразу после изменения данных
-    sceKernelDcacheWritebackAll();
-}
-
-static void _g2dSwizzle(g2dImage *tex) {
-    int width_in_bytes = 0;
-    if (tex->format == GU_PSM_8888) {
-        width_in_bytes = tex->tw * 4;
-    } else if (tex->format == GU_PSM_T8) {
-        width_in_bytes = tex->tw;
-    } else if (tex->format == GU_PSM_T4) {
-        width_in_bytes = tex->tw / 2;
-    } else {
-        return; // Неизвестный формат
-    }
-
-    if (width_in_bytes < 16) return; // Слишком узкая для свайзла
-
-    unsigned char *tmp = (unsigned char *)malloc(width_in_bytes * tex->th);
-    if (!tmp) {
-        // Логируем ошибку, но не прерываем выполнение
-        #ifdef DEBUG
-        printf("_g2dSwizzle: Failed to allocate memory\n");
-        #endif
-        return;
-    }
-
-    unsigned char *in = (unsigned char *)tex->data;
-    int row_blocks = width_in_bytes / 16;
-
-    for (int j = 0; j < tex->th; j++) {
-        for (int i = 0; i < row_blocks; i++) {
-            int blockx = i;
-            int blocky = j / 8;
-            int y = j % 8;
-            unsigned char *dest = tmp + (blocky * row_blocks * 128) + (blockx * 128) + (y * 16);
-            memcpy(dest, in + (j * width_in_bytes) + (i * 16), 16);
-        }
-    }
-
-    free(tex->data);
-    tex->data = (g2dColor *)tmp;
-    tex->swizzled = true;
-}
+static int _get_or_add_palette_color(g2dColor color, g2dColor *palette, int *pal_count, int max_colors);
+static void _g2dApplyFormat(g2dImage *tex, g2dColor *rgba_buffer, int target_hw_format);
+static void _g2dSwizzle(g2dImage *tex);
+static int _g2dBuildGlobalPalette(g2dColor *rgba, int total_pixels, int max_colors, g2dColor *palette);
+static int _g2dPaletteLookup(g2dColor c, g2dColor *palette, int count, int max_colors);
+static g2dImage *_g2dCreateTileFromRGBA(const g2dColor *src, int src_w,
+                                        int src_x, int src_y,
+                                        int tile_w, int tile_h,
+                                        int hw_format, bool use_swizzle);
+static g2dImage *_g2dCreateTileFromRGBA_CLUT(const g2dColor *src, int src_w,
+                                             int src_x, int src_y,
+                                             int tile_w, int tile_h,
+                                             g2dColor *global_pal, int pal_count,
+                                             int hw_format, bool use_swizzle);
+static g2dImage *_g2dTileFromRGBALinear(g2dColor *rgba, int full_w, int full_h,
+                                        int hw_format);
 
 // Used to load PNG data
 extern "C"
@@ -347,6 +233,56 @@ g2dImage* G2DLoadImage(const char* filename, const TextureLoadType loadtype, g2d
     {
         vlog_error("Could not load %s: %s", filename, lodepng_error_text(error));
         return NULL;
+    }
+
+    if (width > 512 || height > 512)
+    {
+        g2dColor* pixels = (g2dColor*) rgbaData;
+        size_t total_pixels = (size_t)width * height;
+
+        switch (loadtype)
+        {
+        case TEX_WHITE:
+            for (size_t i = 0; i < total_pixels; i++)
+            {
+                g2dColor c = pixels[i];
+                pixels[i] = G2D_RGBA(255, 255, 255, G2D_GET_A(c));
+            }
+            break;
+        case TEX_GRAYSCALE:
+            for (size_t i = 0; i < total_pixels; i++)
+            {
+                g2dColor c = pixels[i];
+                Uint8 r = G2D_GET_R(c) * 0.299;
+                Uint8 g = G2D_GET_G(c) * 0.587;
+                Uint8 b = G2D_GET_B(c) * 0.114;
+                const double gray = floor(r + g + b + 0.5);
+                pixels[i] = G2D_RGBA(gray, gray, gray, G2D_GET_A(c));
+            }
+            break;
+        default:
+            break;
+        }
+
+        if (loadtype == TEX_WHITE)
+        {
+            format = G2D_CLUT4;
+        }
+
+        int hw_format = GU_PSM_8888;
+        if (format == G2D_CLUT8)      hw_format = GU_PSM_T8;
+        else if (format == G2D_CLUT4) hw_format = GU_PSM_T4;
+
+        g2dImage* tiled = _g2dTileFromRGBALinear(
+            (g2dColor*) rgbaData, width, height, hw_format);
+        free(rgbaData);
+
+        if (tiled == NULL)
+        {
+            vlog_error("Failed to tile image: %s", filename);
+            return NULL;
+        }
+        return tiled;
     }
 
     g2dImage* tempTex = _g2dTexCreate(width, height, true);
@@ -798,4 +734,381 @@ bool SaveScreenshot(void)
 
     vlog_info("Saved screenshot %s", name);
     return true;
+}
+
+#define G2D_MAX_TEX_SIZE 512
+
+static int _get_or_add_palette_color(g2dColor color, g2dColor *palette, int *pal_count, int max_colors) {
+    for (int i = 0; i < *pal_count; i++) {
+        if (palette[i] == color) return i;
+    }
+    if (*pal_count < max_colors) {
+        palette[*pal_count] = color;
+        return (*pal_count)++;
+    }
+    return 0; // Возвращаем 0, если палитра переполнена
+}
+
+static void _g2dApplyFormat(g2dImage *tex, g2dColor *rgba_buffer, int target_hw_format) {
+    int total_pixels = tex->tw * tex->th;
+    tex->format = target_hw_format;
+
+    if (tex->data) {
+        free(tex->data);
+        tex->data = NULL;
+    }
+
+    if (target_hw_format == GU_PSM_8888) {
+        tex->data = malloc(total_pixels * 4);
+        if (!tex->data) {
+            free(rgba_buffer);
+            return;
+        }
+        memcpy(tex->data, rgba_buffer, total_pixels * 4);
+        tex->palette = NULL;
+        free(rgba_buffer);
+    }
+    else {
+        tex->palette = (g2dColor *)memalign(16, 512 * sizeof(g2dColor));
+        if (!tex->palette) {
+            free(rgba_buffer);
+            return;
+        }
+        memset(tex->palette, 0, 512 * sizeof(g2dColor));
+
+        int pal_count = 0;
+        if (target_hw_format == GU_PSM_T8) {
+            unsigned char *indices = (unsigned char *)malloc(total_pixels);
+            if (!indices) {
+                free(tex->palette);
+                tex->palette = NULL;
+                free(rgba_buffer);
+                return;
+            }
+            for (int i = 0; i < total_pixels; i++) {
+                indices[i] = (unsigned char)_get_or_add_palette_color(rgba_buffer[i], tex->palette, &pal_count, 256);
+            }
+            tex->data = (void *)indices;
+        }
+        else if (target_hw_format == GU_PSM_T4) {
+            unsigned char *indices = (unsigned char *)malloc(total_pixels / 2);
+            if (!indices) {
+                free(tex->palette);
+                tex->palette = NULL;
+                free(rgba_buffer);
+                return;
+            }
+            memset(indices, 0, total_pixels / 2);
+            for (int i = 0; i < total_pixels; i++) {
+                int idx = _get_or_add_palette_color(rgba_buffer[i], tex->palette, &pal_count, 16);
+                if (i % 2 == 0) indices[i/2] |= (idx & 0x0F);
+                else            indices[i/2] |= (idx << 4);
+            }
+            tex->data = (void *)indices;
+        }
+
+        free(rgba_buffer);
+    }
+
+    sceKernelDcacheWritebackAll();
+}
+
+static void _g2dSwizzle(g2dImage *tex) {
+    int width_in_bytes = 0;
+    if (tex->format == GU_PSM_8888) {
+        width_in_bytes = tex->tw * 4;
+    } else if (tex->format == GU_PSM_T8) {
+        width_in_bytes = tex->tw;
+    } else if (tex->format == GU_PSM_T4) {
+        width_in_bytes = tex->tw / 2;
+    } else {
+        return;
+    }
+
+    if (width_in_bytes < 16) return;
+
+    unsigned char *tmp = (unsigned char *)malloc(width_in_bytes * tex->th);
+    if (!tmp) {
+        #ifdef DEBUG
+        printf("_g2dSwizzle: Failed to allocate memory\n");
+        #endif
+        return;
+    }
+
+    unsigned char *in = (unsigned char *)tex->data;
+    int row_blocks = width_in_bytes / 16;
+
+    for (int j = 0; j < tex->th; j++) {
+        for (int i = 0; i < row_blocks; i++) {
+            int blockx = i;
+            int blocky = j / 8;
+            int y = j % 8;
+            unsigned char *dest = tmp + (blocky * row_blocks * 128) + (blockx * 128) + (y * 16);
+            memcpy(dest, in + (j * width_in_bytes) + (i * 16), 16);
+        }
+    }
+
+    free(tex->data);
+    tex->data = (g2dColor *)tmp;
+    tex->swizzled = true;
+}
+
+static int _g2dBuildGlobalPalette(g2dColor *rgba, int total_pixels,
+                                  int max_colors,
+                                  g2dColor *palette /* [512] */) {
+    memset(palette, 0, 512 * sizeof(g2dColor));
+    int count = 0;
+
+    for (int i = 0; i < total_pixels; i++) {
+        g2dColor c = rgba[i];
+        int found = -1;
+        for (int j = 0; j < count; j++) {
+            if (palette[j] == c) { found = j; break; }
+        }
+        if (found >= 0) continue;
+        if (count < max_colors) {
+            palette[count++] = c;
+        } else {
+            goto quantize;
+        }
+    }
+    return count;
+
+quantize:
+    for (int shift = 1; shift <= 4; shift++) {
+        int mask = 0xFF & ~((1 << shift) - 1);
+        count = 0;
+        memset(palette, 0, 512 * sizeof(g2dColor));
+        bool overflow = false;
+        for (int i = 0; i < total_pixels; i++) {
+            g2dColor c = rgba[i];
+            g2dColor q = G2D_RGBA(
+                G2D_GET_R(c) & mask,
+                G2D_GET_G(c) & mask,
+                G2D_GET_B(c) & mask,
+                G2D_GET_A(c) & mask);
+            int found = -1;
+            for (int j = 0; j < count; j++) {
+                if (palette[j] == q) { found = j; break; }
+            }
+            if (found >= 0) continue;
+            if (count < max_colors) {
+                palette[count++] = q;
+            } else {
+                overflow = true;
+                break;
+            }
+        }
+        if (!overflow) return count;
+    }
+    return count;
+}
+
+static int _g2dPaletteLookup(g2dColor c, g2dColor *palette, int count,
+                             int max_colors) {
+    for (int j = 0; j < count; j++) {
+        if (palette[j] == c) return j;
+    }
+    for (int shift = 1; shift <= 4; shift++) {
+        int mask = 0xFF & ~((1 << shift) - 1);
+        g2dColor q = G2D_RGBA(
+            G2D_GET_R(c) & mask,
+            G2D_GET_G(c) & mask,
+            G2D_GET_B(c) & mask,
+            G2D_GET_A(c) & mask);
+        for (int j = 0; j < count; j++) {
+            if (palette[j] == q) return j;
+        }
+    }
+    return 0;
+}
+
+static g2dImage *_g2dCreateTileFromRGBA(const g2dColor *src, int src_w,
+                                        int src_x, int src_y,
+                                        int tile_w, int tile_h,
+                                        int hw_format, bool use_swizzle) {
+    g2dImage *tile = (g2dImage *)calloc(1, sizeof(g2dImage));
+    if (!tile) return NULL;
+
+    tile->w = tile_w;
+    tile->h = tile_h;
+    tile->tw = 1; while (tile->tw < tile_w) tile->tw <<= 1;
+    tile->th = 1; while (tile->th < tile_h) tile->th <<= 1;
+    tile->ratio = (float)tile_w / (float)tile_h;
+    tile->can_blend = true;
+    tile->tiled = false;
+    tile->cols = tile->rows = 1;
+    tile->format = hw_format;
+    tile->palette = NULL;
+    tile->data = NULL;
+
+    int total_pixels = tile->tw * tile->th;
+    g2dColor *rgba = (g2dColor *)malloc(total_pixels * sizeof(g2dColor));
+    if (!rgba) { free(tile); return NULL; }
+    memset(rgba, 0, total_pixels * sizeof(g2dColor));
+
+    for (int y = 0; y < tile_h; y++) {
+        const g2dColor *srow = src + (src_y + y) * src_w + src_x;
+        g2dColor *drow = rgba + y * tile->tw;
+        memcpy(drow, srow, tile_w * sizeof(g2dColor));
+    }
+
+    _g2dApplyFormat(tile, rgba, hw_format);
+    if (!tile->data) { g2dTexFree(&tile); return NULL; }
+
+    if (use_swizzle && tile->tw >= 16) {
+        _g2dSwizzle(tile);
+    }
+    return tile;
+}
+
+static g2dImage *_g2dCreateTileFromRGBA_CLUT(const g2dColor *src, int src_w,
+                                             int src_x, int src_y,
+                                             int tile_w, int tile_h,
+                                             g2dColor *global_pal, int pal_count,
+                                             int hw_format, bool use_swizzle) {
+    g2dImage *tile = (g2dImage *)calloc(1, sizeof(g2dImage));
+    if (!tile) return NULL;
+
+    tile->w = tile_w;
+    tile->h = tile_h;
+    tile->tw = 1; while (tile->tw < tile_w) tile->tw <<= 1;
+    tile->th = 1; while (tile->th < tile_h) tile->th <<= 1;
+    tile->ratio = (float)tile_w / (float)tile_h;
+    tile->can_blend = true;
+    tile->tiled = false;
+    tile->cols = tile->rows = 1;
+    tile->format = hw_format;
+    tile->palette = NULL;
+    tile->data = NULL;
+
+    int total_pixels = tile->tw * tile->th;
+
+    if (hw_format == GU_PSM_T8) {
+        u8 *idx = (u8 *)malloc(total_pixels);
+        if (!idx) { free(tile); return NULL; }
+        memset(idx, 0, total_pixels);
+        for (int y = 0; y < tile_h; y++) {
+            const g2dColor *srow = src + (src_y + y) * src_w + src_x;
+            u8 *drow = idx + y * tile->tw;
+            for (int x = 0; x < tile_w; x++) {
+                drow[x] = (u8)_g2dPaletteLookup(srow[x], global_pal, pal_count, 256);
+            }
+        }
+        tile->data = idx;
+    } else if (hw_format == GU_PSM_T4) {
+        u8 *idx = (u8 *)malloc(total_pixels / 2);
+        if (!idx) { free(tile); return NULL; }
+        memset(idx, 0, total_pixels / 2);
+        for (int y = 0; y < tile_h; y++) {
+            const g2dColor *srow = src + (src_y + y) * src_w + src_x;
+            for (int x = 0; x < tile_w; x++) {
+                int i = y * tile->tw + x;
+                int p = _g2dPaletteLookup(srow[x], global_pal, pal_count, 16) & 0x0F;
+                if (i % 2 == 0) idx[i / 2] |= p;
+                else            idx[i / 2] |= (p << 4);
+            }
+        }
+        tile->data = idx;
+    } else {
+        free(tile);
+        return NULL;
+    }
+
+    if (use_swizzle && tile->tw >= 16) {
+        _g2dSwizzle(tile);
+    }
+    return tile;
+}
+
+static g2dImage *_g2dTileFromRGBALinear(g2dColor *rgba, int full_w, int full_h,
+                                        int hw_format) {
+    int src_w = full_w;  // линейный буфер, шаг = реальной ширине
+
+    int cols = (full_w + G2D_MAX_TEX_SIZE - 1) / G2D_MAX_TEX_SIZE;
+    int rows = (full_h + G2D_MAX_TEX_SIZE - 1) / G2D_MAX_TEX_SIZE;
+    int tile_count = cols * rows;
+
+    g2dImage *tiled = (g2dImage *)calloc(1, sizeof(g2dImage));
+    if (!tiled) return NULL;
+
+    tiled->tiled = true;
+    tiled->cols = cols;
+    tiled->rows = rows;
+    tiled->w = full_w;
+    tiled->h = full_h;
+    tiled->tw = full_w;
+    tiled->th = full_h;
+    tiled->ratio = (float)full_w / (float)full_h;
+    tiled->can_blend = true;
+    tiled->format = hw_format;
+    tiled->swizzled = false;
+    tiled->data = NULL;
+
+    tiled->tiles = (g2dImage **)malloc(tile_count * sizeof(g2dImage *));
+    if (!tiled->tiles) { free(tiled); return NULL; }
+    memset(tiled->tiles, 0, tile_count * sizeof(g2dImage *));
+
+    if (hw_format == GU_PSM_T8 || hw_format == GU_PSM_T4) {
+        int max_colors = (hw_format == GU_PSM_T8) ? 256 : 16;
+
+        tiled->palette = (g2dColor *)memalign(16, 512 * sizeof(g2dColor));
+        if (!tiled->palette) {
+            free(tiled->tiles);
+            free(tiled);
+            return NULL;
+        }
+        memset(tiled->palette, 0, 512 * sizeof(g2dColor));
+
+        int pal_count = _g2dBuildGlobalPalette(rgba, full_w * full_h,
+                                               max_colors, tiled->palette);
+
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                int sx = c * G2D_MAX_TEX_SIZE;
+                int sy = r * G2D_MAX_TEX_SIZE;
+                int tw = full_w - sx; if (tw > G2D_MAX_TEX_SIZE) tw = G2D_MAX_TEX_SIZE;
+                int th = full_h - sy; if (th > G2D_MAX_TEX_SIZE) th = G2D_MAX_TEX_SIZE;
+
+                g2dImage *tile = _g2dCreateTileFromRGBA_CLUT(
+                    rgba, src_w, sx, sy, tw, th,
+                    tiled->palette, pal_count,
+                    hw_format, true);
+
+                if (!tile) {
+                    for (int k = 0; k < tile_count; k++)
+                        if (tiled->tiles[k]) g2dTexFree(&tiled->tiles[k]);
+                    free(tiled->tiles);
+                    free(tiled->palette);
+                    free(tiled);
+                    return NULL;
+                }
+                tiled->tiles[r * cols + c] = tile;
+            }
+        }
+    } else {
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                int sx = c * G2D_MAX_TEX_SIZE;
+                int sy = r * G2D_MAX_TEX_SIZE;
+                int tw = full_w - sx; if (tw > G2D_MAX_TEX_SIZE) tw = G2D_MAX_TEX_SIZE;
+                int th = full_h - sy; if (th > G2D_MAX_TEX_SIZE) th = G2D_MAX_TEX_SIZE;
+
+                g2dImage *tile = _g2dCreateTileFromRGBA(
+                    rgba, src_w, sx, sy, tw, th, GU_PSM_8888, true);
+
+                if (!tile) {
+                    for (int k = 0; k < tile_count; k++)
+                        if (tiled->tiles[k]) g2dTexFree(&tiled->tiles[k]);
+                    free(tiled->tiles);
+                    free(tiled);
+                    return NULL;
+                }
+                tiled->tiles[r * cols + c] = tile;
+            }
+        }
+    }
+
+    sceKernelDcacheWritebackAll();
+    return tiled;
 }

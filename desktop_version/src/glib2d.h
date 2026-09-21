@@ -100,6 +100,8 @@ extern float g2dScreenOffsetX, g2dScreenOffsetY;
 #undef G2D_SWIZZLE
 #define G2D_SWIZZLE 128
 
+#define G2D_MAX_TEX_SIZE 512
+
 #define USE_VFPU
 
 #ifdef USE_PNG
@@ -282,17 +284,33 @@ G2D_RGBA((int)(luminance)*G2D_GET_R(color)/255, \
     /**
      * \struct g2dImage
      * \brief Image structure.
+     *
+     * Изображения с шириной или высотой > 512 автоматически разбиваются
+     * на тайлы 512x512. В этом случае `tiled == true`, `data` == NULL,
+     * а сами тайлы лежат в `tiles[]` (массив `cols * rows`, row-major).
+     * Для нетайлового изображения `tiled == false`, `data` указывает на пиксели,
+     * а `tiles == NULL`.
      */
-    typedef struct
+    typedef struct g2dImage
     {
-        int tw, th;         // Ширина и высота степени двойки
-        int w, h;           // Реальная ширина и высота
+        int tw, th;         // Ширина и высота степени двойки (для data; для tiled — полные w/h)
+        int w, h;           // Реальная ширина и высота (для tiled — размер всего изображения)
         float ratio;
         bool swizzled;
         bool can_blend;
-        void *data;         // Данные (могут быть u8 для T8 или полубайтами для T4)
-        g2dColor *palette;  // Палитра (всегда RGBA8888, выровнена по 16 байт)
         int format;         // g2dTexFormat (GU_PSM_XXX)
+
+        // --- Тайлинг для изображений > 512x512 ---
+        bool tiled;         // true, если изображение разбито на тайлы
+        int cols, rows;     // Количество тайлов по горизонтали/вертикали
+
+        // Указатель либо на пиксели (одиночная текстура), либо на массив тайлов.
+        union {
+            void        *data;   // Одиночная текстура: пиксели (для CLUT — индексы)
+            struct g2dImage **tiles; // Тайлы: массив указателей (cols * rows)
+        };
+
+        g2dColor *palette;  // Палитра (всегда RGBA8888, выровнена по 16 байт) — только для нетайловых CLUT
     } g2dImage;
 
     typedef enum
@@ -512,7 +530,7 @@ G2D_RGBA((int)(luminance)*G2D_GET_R(color)/255, \
      * This function loads an image file. There is support for PNG & JPEG files
      * (if USE_PNG and USE_JPEG are defined). Swizzling is enabled only for 16*16+
      * textures (useless on small textures), pass G2D_SWIZZLE to enable it.
-     * Image support up to 512*512 only (hardware limitation).
+     * Images larger than 512x512 are automatically split into 512x512 tiles.
      */
     g2dImage *g2dTexLoad(const char* path, unsigned char *data, size_t size, g2dTex_Mode mode);
 

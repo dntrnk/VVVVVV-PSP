@@ -642,9 +642,6 @@ static void load_font_filename(bool is_custom, const char* filename)
         strlcpy(font_name, filename, sizeof(font_name));
         font_name[std::min(static_cast<size_t>(63), expected_ext_start)] = '\0';
 
-        // Don't load BIG fonts (for now)
-        if ((strcmp(font_name, "font_ja") == 0) || (strcmp(font_name, "font_ko") == 0) || (strcmp(font_name, "font_sc") == 0) || (strcmp(font_name, "font_tc") == 0)) return;
-
         uint8_t f_idx = load_font(is_custom ? &fonts_custom : &fonts_main, font_name);
 
         if (is_fontpng && !is_custom)

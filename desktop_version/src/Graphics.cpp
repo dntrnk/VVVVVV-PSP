@@ -3250,17 +3250,15 @@ void Graphics::draw_screenshot_border(void)
 
 void Graphics::drawtele(int x, int y, int t, const g2dColor color)
 {
-    // Later
+    SDL_Rect telerect;
+    setRect(telerect, x, y, tele_rect.w, tele_rect.h);
 
-    // SDL_Rect telerect;
-    // setRect(telerect, x, y, tele_rect.w, tele_rect.h);
+    draw_grid_tile(grphx.im_teleporter, 0, x, y, tele_rect.w, tele_rect.h, G2D_RGB(16, 16, 16));
 
-    // draw_grid_tile(grphx.im_teleporter, 0, x, y, tele_rect.w, tele_rect.h, 16, 16, 16);
+    if (t > 9) t = 8;
+    if (t < 1) t = 1;
 
-    // if (t > 9) t = 8;
-    // if (t < 1) t = 1;
-
-    // draw_grid_tile(grphx.im_teleporter, t, x, y, tele_rect.w, tele_rect.h, color);
+    draw_grid_tile(grphx.im_teleporter, t, x, y, tele_rect.w, tele_rect.h, color);
 }
 
 g2dColor Graphics::RGBf(int r, int g, int b)
