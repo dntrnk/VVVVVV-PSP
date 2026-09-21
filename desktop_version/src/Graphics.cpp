@@ -1030,16 +1030,20 @@ void Graphics::draw_texture(g2dImage* image, const int x, const int y, g2dColor 
 
 void Graphics::draw_texture_part(g2dImage* image, const int x, const int y, const int x2, const int y2, const int w, const int h, const int scalex, const int scaley, const g2dColor color)
 {
-    // if (scalex < 0)
-    // {
-    //     flip |= SDL_FLIP_HORIZONTAL;
-    // }
-    // if (scaley < 0)
-    // {
-    //     flip |= SDL_FLIP_VERTICAL;
-    // }
+    int draw_w = w * std::abs(scalex);
+    int draw_h = h * std::abs(scaley);
     
-    g2dHelperDrawImage(image, x, y, w * std::abs(scalex), h * std::abs(scaley), color, x2, y2, w, h);
+    int draw_x = x + (scalex < 0 ? draw_w : 0);
+    int draw_y = y + (scaley < 0 ? draw_h : 0);
+    
+    g2dHelperDrawImage(
+        image,
+        draw_x, draw_y,
+        scalex < 0 ? -draw_w : draw_w,
+        scaley < 0 ? -draw_h : draw_h,
+        color,
+        x2, y2, w, h
+    );
 }
 
 void Graphics::draw_grid_tile(g2dImage* texture, const int t, const int x, const int y, const int width, const int height, const int scalex, const int scaley)
