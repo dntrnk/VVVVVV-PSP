@@ -75,19 +75,19 @@ static const char* port_made_by_strings[] = {
     [FR] = "Ce portage PSP a été réalisé par",
     [GA] = "Rinneadh an port PSP seo ag",
     [IT] = "Porting per PSP realizzato da",
-    [JA] = "",
-    [KO] = "",
+    [JA] = "PSP版の作者：",
+    [KO] = "PSP판 제작자:",
     [NL] = "Deze PSP-port is gemaakt door",
     [PL] = "Ten port na PSP został stworzony przez",
     [RU] = "Этот порт для PSP сделал",
     [SZL] = "Tyn port PSP bōł stworzōny bez",
     [TR] = "PSP portu yapımcısı:",
     [UK] = "Цей порт для PSP зробив",
-    [ZH] = "",
+    [ZH] = "PSP移植版作者：",
     [ES_AR] = "Este port para PSP fue hecho por",
     [PT_BR] = "Esta versão para PSP foi feita por",
     [PT_PT] = "Esta versão para a PSP foi feita por",
-    [ZH_TW] = ""
+    [ZH_TW] = "PSP移植版作者："
 };
 
 static LANG_CODES current_lang_code = EN;
