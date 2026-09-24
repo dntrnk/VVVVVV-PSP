@@ -119,9 +119,3 @@ PSP_EBOOT_TITLE = VVVVVV
 # PSP_EBOOT_SND0 = res/SND0.AT3
 
 include $(PSPSDK)/lib/build.mak
-
-all: EBOOT.PBP copy
-
-copy: EBOOT.PBP
-	mkdir -p build
-	mv EBOOT.PBP build/EBOOT.PBP
