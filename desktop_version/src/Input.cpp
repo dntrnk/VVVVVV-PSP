@@ -682,27 +682,7 @@ static void menuactionpress(void)
         map.nexttowercolour();
         break;
     case Menu::graphicoptions:
-    {
-        int offset = 0;
-        bool processed = false;
-        if (game.currentmenuoption == offset + 0)
-        {
-            processed = true;
-            // //change smoothing
-            // music.playef(Sound_VIRIDIAN);
-            // gameScreen.badSignalEffect= !gameScreen.badSignalEffect; // badSignalEffect is disabled for now
-            // game.savestatsandsettings_menu();
-            music.playef(Sound_CRY);
-        }
-        if (!processed)
-        {
-            //back
-            music.playef(Sound_VIRIDIAN);
-            game.returnmenu();
-            map.nexttowercolour();
-        }
         break;
-    }
     case Menu::youwannaquit:
         switch (game.currentmenuoption)
         {
@@ -1006,24 +986,18 @@ static void menuactionpress(void)
             map.nexttowercolour();
             break;
         case 1:
-            //graphic options
-            music.playef(Sound_VIRIDIAN);
-            game.createmenu(Menu::graphicoptions);
-            map.nexttowercolour();
-            break;
-        case 2:
             /* Audio options */
             music.playef(Sound_VIRIDIAN);
             game.createmenu(Menu::audiooptions);
             map.nexttowercolour();
             break;
-        case 3:
+        case 2:
             //accessibility options
             music.playef(Sound_VIRIDIAN);
             game.createmenu(Menu::accessibility);
             map.nexttowercolour();
             break;
-        case 4:
+        case 3:
             //language options
             if (game.translator_cutscene_test)
             {

@@ -6749,10 +6749,6 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         maxspacing = 15;
         break;
     case Menu::graphicoptions:
-        option(loc::gettext("toggle analogue"));
-        option(loc::gettext("return"));
-        menuyoff = -10;
-        maxspacing = 15;
         break;
     case Menu::ed_settings:
         option(loc::gettext("change description"));
@@ -6811,7 +6807,6 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
     }
     case Menu::options:
         option(loc::gettext("gameplay"));
-        option(loc::gettext("graphics"));
         option(loc::gettext("audio"));
         option(loc::gettext("accessibility"));
         option(loc::gettext("language"), !translator_cutscene_test);

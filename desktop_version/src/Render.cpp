@@ -460,10 +460,6 @@ static void menurender(void)
             font::print_wrap(PR_CEN, -1, 65, loc::gettext("Adjust various gameplay settings."), tr, tg, tb);
             break;
         case 1:
-            font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Graphics Options"), tr, tg, tb);
-            font::print_wrap(PR_CEN, -1, 65, loc::gettext("Adjust screen settings."), tr, tg, tb);
-            break;
-        case 2:
             font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Audio Options"), tr, tg, tb);
             if (music.mmmmmm)
             {
@@ -474,27 +470,21 @@ static void menurender(void)
                 font::print_wrap(PR_CEN, -1, 65, loc::gettext("Adjust volume settings."), tr, tg, tb);
             }
             break;
-        case 3:
+        case 2:
             font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Game Pad Options"), tr, tg, tb);
             font::print_wrap(PR_CEN, -1, 65, loc::gettext("Rebind your controller's buttons and adjust sensitivity."), tr, tg, tb);
             break;
-        case 4:
+        case 3:
             font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Accessibility"), tr, tg, tb);
             font::print_wrap(PR_CEN, -1, 65, loc::gettext("Disable screen effects, enable slowdown modes or invincibility."), tr, tg, tb);
             break;
-        case 5:
+        case 4:
             font::print(PR_2X | PR_CEN,  -1, 30, loc::gettext("Language"), tr, tg, tb);
             font::print_wrap(PR_CEN, -1, 65, loc::gettext("Change the language."), tr, tg, tb);
         }
         break;
     case Menu::graphicoptions:
     {
-        int offset = 0;
-        if (game.currentmenuoption == offset + 0)
-        {
-            font::print(PR_2X | PR_CEN,  -1, 30, loc::gettext("Analogue Mode"), tr, tg, tb);
-            font::print_wrap(PR_CEN, -1, 65, loc::gettext("There is nothing wrong with your television set. Do not attempt to adjust the picture."), tr, tg, tb);
-        }
         break;
     }
     case Menu::audiooptions:
