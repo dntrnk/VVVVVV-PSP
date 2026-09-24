@@ -2778,6 +2778,151 @@ void gamerender(void)
     graphics.renderwithscreeneffects();
 }
 
+void gamepausedrender(void)
+{
+    if(!game.blackout)
+    {
+        if (map.towermode)
+        {
+            if (!game.colourblindmode)
+            {
+                graphics.drawtowerbackground(graphics.towerbg);
+            }
+            else
+            {
+                graphics.clear();
+            }
+            graphics.drawtowermap();
+        }
+        else
+        {
+            if(!game.colourblindmode)
+            {
+                graphics.drawbackground(map.background);
+            }
+            else
+            {
+                graphics.clear();
+            }
+            if ((map.finalmode || map.custommode) && map.final_colormode)
+            {
+                graphics.drawfinalmap();
+            }
+            else
+            {
+                graphics.drawmap();
+            }
+        }
+
+
+        graphics.drawentities();
+        if (map.towermode)
+        {
+            graphics.drawtowerspikes();
+        }
+    }
+
+    int return_editor_alpha = 0;
+    bool draw_return_editor_text = false;
+    if (map.custommode && !map.custommodeforreal && !game.advancetext)
+    {
+        return_editor_alpha = graphics.lerp(
+            ed.old_return_message_timer, ed.return_message_timer
+        );
+        draw_return_editor_text = return_editor_alpha > 100;
+    }
+
+    int mode_indicator_alpha = graphics.lerp(
+        game.old_mode_indicator_timer, game.mode_indicator_timer
+    );
+    bool any_mode_active = map.invincibility
+        || GlitchrunnerMode_get() != GlitchrunnerNone
+        || graphics.flipmode
+        || game.slowdown < 30;
+    bool draw_mode_indicator_text = mode_indicator_alpha > 100 && any_mode_active;
+
+    if (graphics.fademode == FADE_NONE
+    && !game.intimetrial
+    && !game.isingamecompletescreen()
+    && (!game.swnmode || game.swngame != SWN_SUPERGRAVITRON)
+    && game.showingametimer
+    && !roomname_translator::enabled
+    && (!game.swnmode || game.swngame != SWN_START_GRAVITRON_STEP_3)
+    && obj.trophytext <= 0 && obj.oldtrophytext <= 0
+    && !draw_return_editor_text
+    && !draw_mode_indicator_text)
+    {
+        const char* tempstring = loc::gettext("TIME:");
+        int label_len = font::len(0, tempstring);
+        font::print(PR_BOR | PR_RTL_XFLIP, 6, 6, tempstring, 255,255,255);
+        char buffer[SCREEN_WIDTH_CHARS + 1];
+        game.timestringcenti(buffer, sizeof(buffer));
+        font::print(PR_BOR | PR_RTL_XFLIP, 6+label_len, 6, buffer, 196,196,196);
+    }
+
+    bool force_roomname_hidden = false;
+    bool roomname_untranslated = false;
+    int roomname_r = 196, roomname_g = 196, roomname_b = 255 - help.glow;
+    if (roomname_translator::enabled)
+    {
+        roomname_translator::overlay_render(
+            &force_roomname_hidden,
+            &roomname_untranslated,
+            &roomname_r, &roomname_g, &roomname_b
+        );
+    }
+
+    if ((map.extrarow==0 || (map.custommode && map.roomname[0] != '\0')) && !force_roomname_hidden)
+    {
+        const char* roomname = loc::gettext_roomname(map.custommode, game.roomx, game.roomy, map.roomname, map.roomname_special);
+
+        graphics.render_roomname(
+            roomname_untranslated ? PR_FONT_8X8 : PR_FONT_LEVEL,
+            roomname,
+            roomname_r, roomname_g, roomname_b
+        );
+    }
+
+    if (map.roomtexton)
+    {
+        //Draw room text!
+        for (size_t i = 0; i < map.roomtext.size(); i++)
+        {
+            graphics.print_roomtext(map.roomtext[i].x*8, map.roomtext[i].y*8, map.roomtext[i].text, map.roomtext[i].rtl);
+        }
+    }
+
+    if (draw_return_editor_text)
+    {
+        char buffer[SCREEN_WIDTH_CHARS + 1];
+        vformat_buf(
+            buffer, sizeof(buffer),
+            loc::gettext("[Press {button} to return to editor]"),
+            "button:but",
+            vformat_button(ActionSet_InGame, Action_InGame_Map)
+        );
+        font::print(
+            PR_BRIGHTNESS(return_editor_alpha) | PR_BOR,
+            5, 5, buffer,
+            220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2)
+        );
+    }
+
+    graphics.cutscenebars();
+    graphics.drawfade();
+
+    graphics.drawgui();
+
+    if (draw_mode_indicator_text && !draw_return_editor_text)
+    {
+        mode_indicator_text(mode_indicator_alpha);
+    }
+
+    level_debugger::render();
+
+    graphics.renderwithscreeneffects();
+}
+
 static void draw_roomname_menu(const int offset)
 {
     const char* name;
@@ -2947,7 +3092,7 @@ void maprender(void)
     {
         float old_alpha = graphics.alpha;
         graphics.alpha = graphics.frozen_alpha;
-        gamerender();
+        gamepausedrender();
         graphics.alpha = old_alpha;
     }
 
