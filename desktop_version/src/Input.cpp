@@ -786,24 +786,18 @@ static void menuactionpress(void)
             game.savestatsandsettings_menu();
             break;
         case 2:
-            /* Interact button toggle */
-            music.playef(Sound_VIRIDIAN);
-            game.separate_interact = !game.separate_interact;
-            game.savestatsandsettings_menu();
-            break;
-        case 3:
             // toggle fake load screen
             game.skipfakeload = !game.skipfakeload;
             game.savestatsandsettings_menu();
             music.playef(Sound_VIRIDIAN);
             break;
-        case 4:
+        case 3:
             // toggle in game timer
             game.showingametimer = !game.showingametimer;
             game.savestatsandsettings_menu();
             music.playef(Sound_VIRIDIAN);
             break;
-        case 5:
+        case 4:
             // english sprites
             loc::english_sprites = !loc::english_sprites;
             if (!loc::english_sprites)
@@ -1024,18 +1018,12 @@ static void menuactionpress(void)
             map.nexttowercolour();
             break;
         case 3:
-            //gamepad options
-            music.playef(Sound_VIRIDIAN);
-            game.createmenu(Menu::controller);
-            map.nexttowercolour();
-            break;
-        case 4:
             //accessibility options
             music.playef(Sound_VIRIDIAN);
             game.createmenu(Menu::accessibility);
             map.nexttowercolour();
             break;
-        case 5:
+        case 4:
             //language options
             if (game.translator_cutscene_test)
             {

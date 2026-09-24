@@ -710,7 +710,7 @@ static void menurender(void)
         font::print_wrap(PR_CEN, -1, next_y+5, loc::gettext("Would you like to disable the cutscenes during the game?"), tr, tg, tb);
         break;
     }
-    case Menu::controller:
+        case Menu::controller:
     {
         int spacing = font::height(0);
         spacing = std::max(spacing, 10);
@@ -1132,27 +1132,6 @@ static void menurender(void)
         }
         case 2:
         {
-            char buffer[SCREEN_WIDTH_CHARS + 1];
-            const char* button;
-
-            font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Interact Button"), tr, tg, tb);
-            int next_y = font::print_wrap(PR_CEN, -1, 65, loc::gettext("Toggle whether you interact with prompts using ENTER or E."), tr, tg, tb);
-
-            if (game.separate_interact)
-            {
-                button = loc::gettext("E");
-            }
-            else
-            {
-                button = loc::gettext("ENTER");
-            }
-
-            vformat_buf(buffer, sizeof(buffer), loc::gettext("Interact button: {button}"), "button:str", button);
-            font::print_wrap(PR_CEN, -1, next_y, buffer, tr, tg, tb);
-            break;
-        }
-        case 3:
-        {
             font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("Fake Load Screen"), tr, tg, tb);
             int next_y = font::print_wrap(PR_CEN, -1, 65, loc::gettext("Disable the fake loading screen which appears on game launch."), tr, tg, tb);
             if (game.skipfakeload)
@@ -1161,7 +1140,7 @@ static void menurender(void)
                 font::print_wrap(PR_CEN, -1, next_y, loc::gettext("Fake loading screen is ON"), tr, tg, tb);
             break;
         }
-        case 4:
+        case 3:
         {
             font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("In-Game Timer"), tr, tg, tb);
             int next_y = font::print_wrap(PR_CEN, -1, 65, loc::gettext("Toggle the in-game timer outside of time trials."), tr, tg, tb);
@@ -1175,7 +1154,7 @@ static void menurender(void)
             }
             break;
         }
-        case 5:
+        case 4:
         {
             font::print(PR_2X | PR_CEN, -1, 30, loc::gettext("English Sprites"), tr, tg, tb);
             int next_y = font::print_wrap(PR_CEN, -1, 65, loc::gettext("Show the original English word enemies regardless of your language setting."), tr, tg, tb);

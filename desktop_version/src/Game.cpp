@@ -4862,7 +4862,8 @@ if (strcmp(pKey, "fullscreen") == 0)
 
         if (strcmp(pKey, "separate_interact") == 0)
         {
-            separate_interact = help.Int(pText);
+            // separate_interact = help.Int(pText);
+            separate_interact = false;
         }
 
         if (strcmp(pKey, "flipButton") == 0)
@@ -6812,7 +6813,6 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         option(loc::gettext("gameplay"));
         option(loc::gettext("graphics"));
         option(loc::gettext("audio"));
-        option(loc::gettext("game pad"));
         option(loc::gettext("accessibility"));
         option(loc::gettext("language"), !translator_cutscene_test);
         option(loc::gettext("return"));
@@ -6822,7 +6822,6 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
     case Menu::speedrunneroptions:
         option(loc::gettext("glitchrunner mode"));
         option(loc::gettext("input delay"));
-        option(loc::gettext("interact button"));
         option(loc::gettext("fake load screen"));
         option(loc::gettext("toggle in-game timer"));
         option(loc::gettext("english sprites"));
@@ -6873,15 +6872,6 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         maxspacing = 15;
         break;
     case Menu::controller:
-        option(loc::gettext("analog stick sensitivity"));
-        option(loc::gettext("bind flip"));
-        option(loc::gettext("bind enter"));
-        option(loc::gettext("bind menu"));
-        option(loc::gettext("bind restart"));
-        option(loc::gettext("bind interact"), separate_interact);
-        option(loc::gettext("return"));
-        menuyoff = 12;
-        maxspacing = 10;
         break;
     case Menu::language:
         if (loc::languagelist.empty())
