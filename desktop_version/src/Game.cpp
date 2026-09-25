@@ -6591,7 +6591,6 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         option(loc::gettext("level editor"), !editor_disabled);
         if (!editor_disabled)
         {
-            option(loc::gettext("open level folder"), FILESYSTEM_openDirectoryEnabled());
             option(loc::gettext("show level folder path"));
         }
         option(loc::gettext("return"));

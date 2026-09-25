@@ -633,25 +633,11 @@ static void menuactionpress(void)
         }
         else if (!game.editor_disabled && game.currentmenuoption == 2)
         {
-            //"OPENFOLDERHOOK"
-            if (FILESYSTEM_openDirectoryEnabled()
-                && FILESYSTEM_openDirectory(FILESYSTEM_getUserLevelDirectory()))
-            {
-                music.playef(Sound_VIRIDIAN);
-                // minimize window func
-            }
-            else
-            {
-                music.playef(Sound_CRY);
-            }
-        }
-        else if (!game.editor_disabled && game.currentmenuoption == 3)
-        {
             music.playef(Sound_VIRIDIAN);
             game.createmenu(Menu::confirmshowlevelspath);
             map.nexttowercolour();
         }
-        else if (game.currentmenuoption == 4 || (game.editor_disabled && game.currentmenuoption == 2))
+        else if (game.currentmenuoption == 3 || (game.editor_disabled && game.currentmenuoption == 2))
         {
             // back
             music.playef(Sound_VIRIDIAN);
