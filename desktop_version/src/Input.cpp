@@ -1,6 +1,7 @@
 #include <tinyxml2.h>
 #include <algorithm>
 #include <vector>
+#include <cassert>
 
 #include "ButtonGlyphs.h"
 #include "Credits.h"
@@ -357,7 +358,7 @@ static void handlefadetomode(void)
     if (game.ingame_titlemode)
     {
         /* We shouldn't be here! */
-        SDL_assert(0 && "Loading a mode from in-game options!");
+        assert(0 && "Loading a mode from in-game options!");
         return;
     }
 
@@ -388,7 +389,7 @@ static void initvolumeslider(const int menuoption)
         user_changing_volume = &music.user_sound_volume;
         break;
     default:
-        SDL_assert(0 && "Unhandled volume slider option!");
+        assert(0 && "Unhandled volume slider option!");
         game.slidermode = SLIDER_NONE;
         user_changing_volume = NULL;
         return;
@@ -407,7 +408,7 @@ static void slidermodeinput(void)
 {
     if (user_changing_volume == NULL)
     {
-        SDL_assert(0 && "user_changing_volume is NULL!");
+        assert(0 && "user_changing_volume is NULL!");
         return;
     }
 
@@ -2365,14 +2366,14 @@ void titleinput(void)
                     case SLIDER_SOUNDVOLUME:
                         if (user_changing_volume == NULL)
                         {
-                            SDL_assert(0 && "user_changing_volume is NULL!");
+                            assert(0 && "user_changing_volume is NULL!");
                             break;
                         }
                         *user_changing_volume = previous_volume;
                         deinitvolumeslider();
                         break;
                     default:
-                        SDL_assert(0 && "Unhandled slider mode!");
+                        assert(0 && "Unhandled slider mode!");
                         break;
                     }
                 }
@@ -3342,7 +3343,7 @@ void teleporterinput(void)
         {
             for (size_t i = 0; i < map.teleporters.size(); i++)
             {
-                SDL_Point& tele = map.teleporters[i];
+                VVV_Point& tele = map.teleporters[i];
 
                 if (map.isexplored(tele.x, tele.y))
                 {

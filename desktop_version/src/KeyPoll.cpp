@@ -552,7 +552,7 @@ void KeyPoll::Poll(void)
         hidemouse
     );
 
-    SDL_Rect rect = {0, 0, 320, 240};
+    VVV_Rect rect = {0, 0, 320, 240};
 
     int window_width = 320;
     int window_height = 240;

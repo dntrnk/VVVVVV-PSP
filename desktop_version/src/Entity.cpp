@@ -4806,10 +4806,10 @@ void entityclass::collisioncheck(int i, int j, bool scm /*= false*/)
             if (entities[i].size == 0 && (entities[j].size == 0 || entities[j].size == 12))
             {
                 //They're both sprites, so do a per pixel collision
-                SDL_Point colpoint1;
+                VVV_Point colpoint1;
                 colpoint1.x = entities[i].xp;
                 colpoint1.y = entities[i].yp;
-                SDL_Point colpoint2;
+                VVV_Point colpoint2;
                 colpoint2.x = entities[j].xp;
                 colpoint2.y = entities[j].yp;
                 int drawframe1 = entities[i].collisiondrawframe;

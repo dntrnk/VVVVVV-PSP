@@ -3,7 +3,9 @@
 
 #include <SDL.h>
 
-void setRect(SDL_Rect& _r, int x, int y, int w, int h);
+#include "VVVCompat.h"
+
+void setRect(VVV_Rect& _r, int x, int y, int w, int h);
 
 SDL_Surface* GetSubSurface( SDL_Surface* metaSurface, int x, int y, int width, int height );
 

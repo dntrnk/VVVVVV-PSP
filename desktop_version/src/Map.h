@@ -10,6 +10,7 @@
 #include "Spacestation2.h"
 #include "Tower.h"
 #include "TowerBG.h"
+#include "VVVCompat.h"
 #include "WarpClass.h"
 
 struct Roomtext
@@ -171,8 +172,8 @@ public:
     int final_colorframe, final_colorframedelay;
 
     //Teleporters and Trinkets on the map
-    std::vector<SDL_Point> teleporters;
-    std::vector<SDL_Point> shinytrinkets;
+    std::vector<VVV_Point> teleporters;
+    std::vector<VVV_Point> shinytrinkets;
 
     bool showteleporters, showtargets, showtrinkets;
 

@@ -23,7 +23,7 @@ namespace roomname_translator
     bool help_screen = false;
 
     SDL_Surface* dimbuffer;
-    SDL_Rect fullscreen_rect;
+    VVV_Rect fullscreen_rect;
 
     void set_enabled(bool value)
     {

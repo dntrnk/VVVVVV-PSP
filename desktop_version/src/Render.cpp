@@ -1,6 +1,7 @@
 #include <SDL.h>
 
 #include <iostream>
+#include <cassert>
 
 #include "ActionSets.h"
 #include "ButtonGlyphs.h"
@@ -197,7 +198,7 @@ static void volumesliderrender(void)
         volume = music.user_sound_volume;
         break;
     default:
-        SDL_assert(0 && "Unhandled volume slider menu option!");
+        assert(0 && "Unhandled volume slider menu option!");
         return;
     }
 

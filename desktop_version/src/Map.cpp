@@ -156,7 +156,7 @@ void mapclass::setteleporter(int x, int y)
         return;
     }
 
-    SDL_Point temp;
+    VVV_Point temp;
     temp.x = x;
     temp.y = y;
     teleporters.push_back(temp);
@@ -169,7 +169,7 @@ void mapclass::settrinket(int x, int y)
         return;
     }
 
-    SDL_Point temp;
+    VVV_Point temp;
     temp.x = x;
     temp.y = y;
     shinytrinkets.push_back(temp);

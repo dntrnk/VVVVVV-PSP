@@ -2,6 +2,7 @@
 
 #include <SDL.h>
 #include <SheenBidi/SheenBidi.h>
+#include <cassert>
 
 #include "Alloc.h"
 #include "UTF8.h"
@@ -363,10 +364,10 @@ const char* bidi_transform(const bool rtl, const char* text)
         INT32_MAX,
         rtl ? SBLevelDefaultRTL : SBLevelDefaultLTR
     );
-    SDL_assert(paragraph != NULL);
+    assert(paragraph != NULL);
     SBUInteger paragraph_len = SBParagraphGetLength(paragraph);
     SBLineRef paragraph_line = SBParagraphCreateLine(paragraph, 0, paragraph_len);
-    SDL_assert(paragraph_line != NULL);
+    assert(paragraph_line != NULL);
 
     // Make sure )brackets( are mirrored correctly...
     SBMirrorLocatorRef mirror_locator = SBMirrorLocatorCreate();

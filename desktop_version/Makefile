@@ -71,6 +71,7 @@ OBJS = \
   src/UtilityClass.o \
   src/VFormat.o \
   src/Vlogging.o \
+  src/VVVCompat.o \
   src/WarpClass.o \
   src/XMLUtils.o \
   src/Xoshiro.o \
@@ -101,15 +102,15 @@ OBJS = \
   ../third_party/SheenBidi/Source/StatusStack.o \
 
 LIBDIR = lib
-CFLAGS = -G0 -O3 -fomit-frame-pointer -fsingle-precision-constant -fno-math-errno -ffast-math -Wall -Wno-trigraphs
+CFLAGS = -G0 -O3 -fomit-frame-pointer -fsingle-precision-constant -fno-math-errno -ffast-math -Wall -Wno-trigraphs -ffunction-sections -fdata-sections
 # CFLAGS = -g3 -Wl,-Map,EBOOT.map
-CXXFLAGS = $(CFLAGS) -fno-rtti
+CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden
 ASFLAGS = $(CFLAGS) -c
 
 BUILD_PRX = 1
 PSP_FW_VERSION = 660
 
-LIBS = -lpspgu -lpspge -lpspdisplay -lpsppower -lpspctrl -lpspaudio -lpspvram \
+LIBS = -Wl,--gc-sections -lpspgu -lpspge -lpspdisplay -lpsppower -lpspctrl -lpspaudio -lpspvram \
   -lz -lpng -lphysfs -lpspatrac3 -lSDL2main -lSDL2 -lstdc++ -lGL -lpspvfpu -lpsphprm -ltinyxml2
 
 EXTRA_TARGETS = EBOOT.PBP

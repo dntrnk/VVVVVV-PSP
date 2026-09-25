@@ -1,6 +1,7 @@
 #include "ButtonGlyphs.h"
 
 #include <SDL.h>
+#include <cassert>
 
 #include "Game.h"
 #include "Localization.h"
@@ -216,7 +217,7 @@ const char* BUTTONGLYPHS_sdlbutton_to_glyph(const SDL_GameControllerButton butto
 {
     if (button < 0 || button > SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
     {
-        SDL_assert(0 && "Unhandled button!");
+        assert(0 && "Unhandled button!");
         return glyph[GLYPH_UNKNOWN];
     }
 
@@ -317,7 +318,7 @@ const char* BUTTONGLYPHS_get_button(const ActionSet actionset, const Action acti
         break;
     }
 
-    SDL_assert(0 && "Trying to get label/glyph for unknown action!");
+    assert(0 && "Trying to get label/glyph for unknown action!");
     return glyph[GLYPH_UNKNOWN];
 }
 

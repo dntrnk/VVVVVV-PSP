@@ -1,6 +1,7 @@
 #include "DeferCallbacks.h"
 
 #include <SDL.h>
+#include <assert.h>
 
 /* Callbacks to be deferred to the end of each sequence of gamestate functions
  * in main. Useful for fixing frame-flicker glitches when doing a state
@@ -53,7 +54,7 @@ void DEFER_add_callback(struct DEFER_Callback* callback)
 fail:
     /* Having multiple instances of a callback isn't well-defined
      * and is a bit complicated to reason about */
-    SDL_assert(0 && "Duplicate callback added!");
+    assert(0 && "Duplicate callback added!");
 }
 
 /* Call each callback in the list, along with deleting the entire list. */

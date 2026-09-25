@@ -1,7 +1,7 @@
 #include "GlitchrunnerMode.h"
 
-#include <SDL_assert.h>
-#include <SDL_stdinc.h>
+#include <assert.h>
+#include <string.h>
 
 #define LOOKUP_TABLE \
     FOREACH_ENUM(GlitchrunnerNone, "") \
@@ -25,7 +25,7 @@ const char* GlitchrunnerMode_enum_to_string(const enum GlitchrunnerMode mode)
         break;
     }
 
-    SDL_assert(0 && "Passed non-existent GlitchrunnerMode!");
+    assert(0 && "Passed non-existent GlitchrunnerMode!");
     return GlitchrunnerMode_enum_to_string(GlitchrunnerNone);
 }
 

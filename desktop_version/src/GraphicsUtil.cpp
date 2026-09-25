@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include <cassert>
 
 #include "Alloc.h"
 #include "Constants.h"
@@ -13,7 +14,7 @@
 
 
 
-void setRect( SDL_Rect& _r, int x, int y, int w, int h )
+void setRect( VVV_Rect& _r, int x, int y, int w, int h )
 {
     _r.x = x;
     _r.y = y;
@@ -58,8 +59,8 @@ static SDL_Surface* RecreateSurfaceWithDimensions(
 
 SDL_Surface* GetSubSurface( SDL_Surface* metaSurface, int x, int y, int width, int height )
 {
-    // Create an SDL_Rect with the area of the _surface
-    SDL_Rect area;
+    // Create an VVV_Rect with the area of the _surface
+    VVV_Rect area;
     area.x = x;
     area.y = y;
     area.w = width;
@@ -73,7 +74,7 @@ SDL_Surface* GetSubSurface( SDL_Surface* metaSurface, int x, int y, int width, i
     );
 
     // Lastly, apply the area from the meta _surface onto the whole of the sub _surface.
-    SDL_BlitSurface(metaSurface, &area, preSurface, 0);
+    // SDL_BlitSurface(metaSurface, &area, preSurface, 0); // Later
 
     // Return the new Bitmap _surface
     return preSurface;
@@ -81,9 +82,9 @@ SDL_Surface* GetSubSurface( SDL_Surface* metaSurface, int x, int y, int width, i
 
 void DrawPixel(SDL_Surface* surface, const int x, const int y, const g2dColor color)
 {
-    const SDL_Point point = {x, y};
-    const SDL_Rect rect = {0, 0, surface->w, surface->h};
-    const bool inbounds = SDL_PointInRect(&point, &rect);
+    const VVV_Point point = {x, y};
+    const VVV_Rect rect = {0, 0, surface->w, surface->h};
+    const bool inbounds = VVV_PointInRect(&point, &rect);
     if (!inbounds)
     {
         WHINE_ONCE_ARGS((
@@ -91,7 +92,7 @@ void DrawPixel(SDL_Surface* surface, const int x, const int y, const g2dColor co
             "Attempted to draw to %i,%i in %ix%i surface",
             x, y, surface->w, surface->h
         ));
-        SDL_assert(0 && "Pixel draw is not inbounds!");
+        assert(0 && "Pixel draw is not inbounds!");
         return;
     }
 
@@ -104,7 +105,7 @@ void DrawPixel(SDL_Surface* surface, const int x, const int y, const g2dColor co
     {
     case 1:
     case 2:
-        SDL_assert(0 && "Colors other than 24- or 32- bit unsupported!");
+        assert(0 && "Colors other than 24- or 32- bit unsupported!");
         break;
 
     case 3:
@@ -124,9 +125,9 @@ void DrawPixel(SDL_Surface* surface, const int x, const int y, const g2dColor co
 g2dColor ReadPixel(const SDL_Surface* surface, const int x, const int y)
 {
     Uint8 color[4] = {0, 0, 0, 0};
-    const SDL_Point point = {x, y};
-    const SDL_Rect rect = {0, 0, surface->w, surface->h};
-    const bool inbounds = SDL_PointInRect(&point, &rect);
+    const VVV_Point point = {x, y};
+    const VVV_Rect rect = {0, 0, surface->w, surface->h};
+    const bool inbounds = VVV_PointInRect(&point, &rect);
     if (!inbounds)
     {
         WHINE_ONCE_ARGS((
@@ -134,7 +135,7 @@ g2dColor ReadPixel(const SDL_Surface* surface, const int x, const int y)
             "Attempted to read %i,%i in %ix%i surface",
             x, y, surface->w, surface->h
         ));
-        SDL_assert(0 && "Pixel read is not inbounds!");
+        assert(0 && "Pixel read is not inbounds!");
         return G2D_RGBA(color[0], color[1], color[2], color[3]);
     }
 
@@ -147,7 +148,7 @@ g2dColor ReadPixel(const SDL_Surface* surface, const int x, const int y)
     {
     case 1:
     case 2:
-        SDL_assert(0 && "Colors other than 24- or 32- bit unsupported!");
+        assert(0 && "Colors other than 24- or 32- bit unsupported!");
         break;
 
     case 3:
@@ -193,7 +194,7 @@ void ApplyFilter(SDL_Surface** src, SDL_Surface** dest)
 {
     if (src == NULL || dest == NULL)
     {
-        SDL_assert(0 && "NULL src or dest!");
+        assert(0 && "NULL src or dest!");
         return;
     }
 
@@ -279,7 +280,7 @@ bool TakeScreenshot(SDL_Surface** surface)
 {
     if (surface == NULL)
     {
-        SDL_assert(0 && "surface is NULL!");
+        assert(0 && "surface is NULL!");
         return false;
     }
 
@@ -307,7 +308,7 @@ bool TakeScreenshot(SDL_Surface** surface)
 
     if ((*surface)->w != width || (*surface)->h != height)
     {
-        SDL_assert(0 && "Width and height of surface and texture mismatch!");
+        assert(0 && "Width and height of surface and texture mismatch!");
         return false;
     }
 
@@ -351,12 +352,12 @@ bool UpscaleScreenshot2x(SDL_Surface* src, SDL_Surface** dest)
 {
     if (src == NULL)
     {
-        SDL_assert(0 && "src is NULL!");
+        assert(0 && "src is NULL!");
         return false;
     }
     if (dest == NULL)
     {
-        SDL_assert(0 && "dest is NULL!");
+        assert(0 && "dest is NULL!");
         return false;
     }
 

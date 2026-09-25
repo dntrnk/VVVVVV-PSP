@@ -1,4 +1,5 @@
 #include <SDL.h>
+#include <cassert>
 
 #include "ButtonGlyphs.h"
 #include "CustomLevels.h"
@@ -193,7 +194,7 @@ static const inline struct ImplFunc* get_gamestate_funcs(
 
     }
 
-    SDL_assert(0 && "Invalid gamestate!");
+    assert(0 && "Invalid gamestate!");
     return NULL;
 }
 

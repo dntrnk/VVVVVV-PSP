@@ -44,10 +44,10 @@ namespace level_debugger
         active = !active;
     }
 
-    bool mouse_within(SDL_Rect* rect)
+    bool mouse_within(VVV_Rect* rect)
     {
-        SDL_Point mouse = { key.mousex, key.mousey };
-        return SDL_PointInRect(&mouse, rect);
+        VVV_Point mouse = { key.mousex, key.mousey };
+        return VVV_PointInRect(&mouse, rect);
     }
 
     void set_forced(void)
@@ -96,7 +96,7 @@ namespace level_debugger
 
         for (int i = 0; i < (int) obj.entities.size(); i++)
         {
-            SDL_Rect bounding_box = {
+            VVV_Rect bounding_box = {
                 obj.entities[i].xp + obj.entities[i].cx,
                 obj.entities[i].yp + obj.entities[i].cy - map.ypos,
                 obj.entities[i].w,
@@ -158,7 +158,7 @@ namespace level_debugger
         {
             for (int i = 0; i < (int) obj.blocks.size(); i++)
             {
-                SDL_Rect bounding_box = {
+                VVV_Rect bounding_box = {
                     obj.blocks[i].rect_x,
                     obj.blocks[i].rect_y - map.ypos,
                     obj.blocks[i].rect_w,
@@ -261,11 +261,11 @@ namespace level_debugger
 
         int hovered = -1;
         bool hovered_entity = true;
-        SDL_Rect hover_box;
+        VVV_Rect hover_box;
 
         for (int i = 0; i < (int) obj.entities.size(); i++)
         {
-            SDL_Rect bounding_box = {
+            VVV_Rect bounding_box = {
                 obj.entities[i].xp + obj.entities[i].cx,
                 obj.entities[i].yp + obj.entities[i].cy - map.ypos,
                 obj.entities[i].w,
@@ -295,7 +295,7 @@ namespace level_debugger
 
         for (int i = 0; i < (int) obj.blocks.size(); i++)
         {
-            SDL_Rect bounding_box = {
+            VVV_Rect bounding_box = {
                 obj.blocks[i].rect_x,
                 obj.blocks[i].rect_y - map.ypos,
                 obj.blocks[i].rect_w,

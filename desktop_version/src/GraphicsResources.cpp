@@ -3,6 +3,7 @@
 #include <pspkernel.h>
 #include <pspgu.h>
 #include <malloc.h>
+#include <cassert>
 
 #include <inttypes.h>
 #include <time.h>
@@ -106,7 +107,7 @@ static SDL_Surface* LoadImageRaw(const char* filename, unsigned char** data)
     FILESYSTEM_loadAssetToMemory(filename, &fileIn, &length);
     if (fileIn == NULL)
     {
-        SDL_assert(0 && "Image file missing!");
+        assert(0 && "Image file missing!");
         return NULL;
     }
     error = lodepng_decode32(data, &width, &height, fileIn, length);
@@ -162,7 +163,7 @@ SDL_Surface* LoadImageSurface(const char* filename)
     if (optimizedImage == NULL)
     {
         vlog_error("Image not found: %s", filename);
-        SDL_assert(0 && "Image not found! See stderr.");
+        assert(0 && "Image not found! See stderr.");
     }
 
     return optimizedImage;
@@ -669,7 +670,7 @@ g2dImage* G2DLoadImage(const char* filename, const TextureLoadType loadtype, g2d
     FILESYSTEM_loadAssetToMemory(filename, &fileIn, &length);
     if (fileIn == NULL)
     {
-        SDL_assert(0 && "Image file missing!");
+        assert(0 && "Image file missing!");
         return NULL;
     }
 
@@ -863,14 +864,14 @@ static void LoadSprites(const char* filename, SDL_Texture** texture, SDL_Surface
     if (*surface == NULL)
     {
         vlog_error("Image not found: %s", filename);
-        SDL_assert(0 && "Image not found! See stderr.");
+        assert(0 && "Image not found! See stderr.");
     }
 
     *texture = LoadTextureFromRaw(filename, loadedImage, TEX_WHITE);
     if (*texture == NULL)
     {
         vlog_error("Image not found: %s", filename);
-        SDL_assert(0 && "Image not found! See stderr.");
+        assert(0 && "Image not found! See stderr.");
     }
 
     if (loadedImage != NULL)
@@ -934,17 +935,17 @@ static void LoadSpritesTranslation(
 
         int x = pElem->IntAttribute("x", 0);
         int y = pElem->IntAttribute("y", 0);
-        SDL_Rect src;
+        VVV_Rect src;
         src.x = x * sprite_w;
         src.y = y * sprite_h;
         src.w = pElem->IntAttribute("w", 1) * sprite_w;
         src.h = pElem->IntAttribute("h", 1) * sprite_h;
 
-        SDL_Rect dst;
+        VVV_Rect dst;
         dst.x = pElem->IntAttribute("dx", x) * sprite_w;
         dst.y = pElem->IntAttribute("dy", y) * sprite_h;
 
-        SDL_BlitSurface(translated, &src, working, &dst);
+        // SDL_BlitSurface(translated, &src, working, &dst); Later
     }
 
     *texture = LoadTextureFromRaw(filename, working, TEX_WHITE);

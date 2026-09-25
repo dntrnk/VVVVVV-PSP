@@ -2,6 +2,7 @@
 #include "Graphics.h"
 
 #include <SDL.h>
+#include <cassert>
 
 #include "Alloc.h"
 #include "Constants.h"
@@ -48,14 +49,14 @@ void Graphics::init(void)
     // Initialize backgrounds
     for (int i = 0; i < numstars; i++)
     {
-        const SDL_Rect star = {(int) (fRandom() * 320), (int) (fRandom() * 240), 2, 2};
+        const VVV_Rect star = {(int) (fRandom() * 320), (int) (fRandom() * 240), 2, 2};
         stars[i] = star;
         starsspeed[i] = 4 + (fRandom() * 4);
     }
 
     for (int i = 0; i < numbackboxes; i++)
     {
-        SDL_Rect bb;
+        VVV_Rect bb;
         int bvx = 0;
         int bvy = 0;
         if (fRandom() * 100 > 50)
@@ -566,11 +567,12 @@ void Graphics::post_substitute(SDL_Texture* subst)
     set_texture_alpha_mod(subst, 255);
 }
 
-int Graphics::copy_texture(SDL_Texture* texture, const SDL_Rect* src, const SDL_Rect* dest)
+int Graphics::copy_texture(SDL_Texture* texture, const VVV_Rect* src, const VVV_Rect* dest)
 {
     bool is_substituted = substitute(&texture);
 
-    const int result = SDL_RenderCopy(gameScreen.m_renderer, texture, src, dest);
+    // const int result = SDL_RenderCopy(gameScreen.m_renderer, texture, src, dest);
+    const int result = 0;
     if (result != 0)
     {
         WHINE_ONCE_ARGS(("Could not copy texture: %s", SDL_GetError()));
@@ -584,11 +586,12 @@ int Graphics::copy_texture(SDL_Texture* texture, const SDL_Rect* src, const SDL_
     return result;
 }
 
-int Graphics::copy_texture(SDL_Texture* texture, const SDL_Rect* src, const SDL_Rect* dest, const double angle, const SDL_Point* center, const SDL_RendererFlip flip)
+int Graphics::copy_texture(SDL_Texture* texture, const VVV_Rect* src, const VVV_Rect* dest, const double angle, const VVV_Point* center, const SDL_RendererFlip flip)
 {
     bool is_substituted = substitute(&texture);
 
-    const int result = SDL_RenderCopyEx(gameScreen.m_renderer, texture, src, dest, angle, center, flip);
+    // const int result = SDL_RenderCopyEx(gameScreen.m_renderer, texture, src, dest, angle, center, flip);
+    const int result = 0;
     if (result != 0)
     {
         WHINE_ONCE_ARGS(("Could not copy texture: %s", SDL_GetError()));
@@ -602,7 +605,7 @@ int Graphics::copy_texture(SDL_Texture* texture, const SDL_Rect* src, const SDL_
     return result;
 }
 
-void Graphics::fill_rect(const SDL_Rect* rect, const g2dColor color)
+void Graphics::fill_rect(const VVV_Rect* rect, const g2dColor color)
 {
     g2dHelperFillRect(rect->x, rect->y, rect->w, rect->h, color);
 }
@@ -617,7 +620,7 @@ void Graphics::fill_rect(const int x, const int y, const int w, const int h, con
     g2dHelperFillRect(x, y, w, h, color);
 }
 
-void Graphics::draw_rect(const SDL_Rect* rect, const g2dColor color)
+void Graphics::draw_rect(const VVV_Rect* rect, const g2dColor color)
 {
     g2dHelperDrawRect(rect->x, rect->y, rect->w, rect->h, color);
 }
@@ -1603,7 +1606,7 @@ void Graphics::drawcoloredtile(
 }
 
 
-bool Graphics::Hitest(int t1, SDL_Point p1, int t2, SDL_Point p2)
+bool Graphics::Hitest(int t1, VVV_Point p1, int t2, VVV_Point p2)
 {
     // 384 is width of sprites.png, so there's 12 32x32 sprites
     int srcx1 = (t1 % 12) * 32;
@@ -1860,9 +1863,9 @@ void Graphics::drawentity(const int i, const int yoff)
         return;
     }
 
-    SDL_Point tpoint;
+    VVV_Point tpoint;
 
-    SDL_Rect drawRect;
+    VVV_Rect drawRect;
 
     bool custom_gray;
 
@@ -1900,7 +1903,7 @@ void Graphics::drawentity(const int i, const int yoff)
         draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct); 
 
         // screenwrapping!
-        SDL_Point wrappedPoint;
+        VVV_Point wrappedPoint;
         bool wrapX = false;
         bool wrapY = false;
 
@@ -2162,7 +2165,7 @@ void Graphics::drawbackground( int t )
 
         for (int i = 0; i < numstars; i++)
         {
-            SDL_Rect star_rect = stars[i];
+            VVV_Rect star_rect = stars[i];
             star_rect.x = lerp(star_rect.x + starsspeed[i], star_rect.x);
 
             if (starsspeed[i] <= 6)
@@ -2313,7 +2316,7 @@ void Graphics::drawbackground( int t )
                 break;
             }
 
-            SDL_Rect backboxrect = backboxes[i];
+            VVV_Rect backboxrect = backboxes[i];
             backboxrect.x = lerp(backboxes[i].x - backboxvx[i], backboxes[i].x);
             backboxrect.y = lerp(backboxes[i].y - backboxvy[i], backboxes[i].y);
 
@@ -2405,7 +2408,7 @@ void Graphics::drawbackground( int t )
         for (int i = 10; i >= 0; i--)
         {
             const int temp = (i * 16) + backoffset;
-            const SDL_Rect warprect = {160 - temp, 120 - temp, temp * 2, temp * 2};
+            const VVV_Rect warprect = {160 - temp, 120 - temp, temp * 2, temp * 2};
             if (i % 2 == warpskip)
             {
                 fill_rect(&warprect, warpbcol);
@@ -2422,7 +2425,7 @@ void Graphics::drawbackground( int t )
         fill_rect(G2D_BLACK);
         for (int i = 0; i < numstars; i++)
         {
-            SDL_Rect star_rect = stars[i];
+            VVV_Rect star_rect = stars[i];
             star_rect.y = lerp(star_rect.y + starsspeed[i], star_rect.y);
             if (starsspeed[i] <= 8)
             {
@@ -3038,12 +3041,12 @@ void Graphics::textboxtranslate(const TextboxTranslate translate, const TextboxF
 
     if (translate == TEXTTRANSLATE_FUNCTION && function == NULL)
     {
-        SDL_assert(0 && "function is NULL!");
+        assert(0 && "function is NULL!");
         return;
     }
     if (translate != TEXTTRANSLATE_FUNCTION && function != NULL)
     {
-        SDL_assert(0 && "function provided when it won't be used!");
+        assert(0 && "function provided when it won't be used!");
         return;
     }
 
@@ -3127,7 +3130,7 @@ void Graphics::screenshake(void)
     //     g2dHelperClear(G2D_BLACK);
     // }
 
-    // SDL_Rect rect = {0, 0, 480, 272};
+    // VVV_Rect rect = {0, 0, 480, 272};
 
     // copy_texture(tempShakeTexture, NULL, &rect, 0, NULL, flipmode ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE);
 
@@ -3151,7 +3154,7 @@ void Graphics::render(void)
     //     ApplyFilter();
     // }
 
-    SDL_Rect stretch_info = {0, 0, 320, 240};
+    VVV_Rect stretch_info = {0, 0, 320, 240};
 
     ime_set_rect(&stretch_info);
 
@@ -3250,7 +3253,7 @@ void Graphics::draw_screenshot_border(void)
 
 void Graphics::drawtele(int x, int y, int t, const g2dColor color)
 {
-    SDL_Rect telerect;
+    VVV_Rect telerect;
     setRect(telerect, x, y, tele_rect.w, tele_rect.h);
 
     draw_grid_tile(grphx.im_teleporter, 0, x, y, tele_rect.w, tele_rect.h, G2D_RGB(16, 16, 16));

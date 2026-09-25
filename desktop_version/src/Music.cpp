@@ -1,6 +1,8 @@
 #define MUSIC_DEFINITION
 #include "Music.h"
 
+#include <cassert>
+
 #include "Alloc.h"
 #include "BinaryBlob.h"
 #include "FileSystemUtils.h"
@@ -561,7 +563,7 @@ void musicclass::changemusicarea(int x, int y)
 
     if (!INBOUNDS_ARR(room, areamap))
     {
-        SDL_assert(0 && "Music map index out-of-bounds!");
+        assert(0 && "Music map index out-of-bounds!");
         return;
     }
 

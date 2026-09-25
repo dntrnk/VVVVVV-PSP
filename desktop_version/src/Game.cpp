@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <tinyxml2.h>
+#include <cassert>
 
 #include "ButtonGlyphs.h"
 #include "Constants.h"
@@ -6568,7 +6569,7 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         if (ingame_titlemode)
         {
             /* We shouldn't be here! */
-            SDL_assert(0 && "Entering main menu from in-game options!");
+            assert(0 && "Entering main menu from in-game options!");
             break;
         }
 #if !defined(MAKEANDPLAY)
@@ -6646,7 +6647,7 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
                         break;
                     }
                     default:
-                        SDL_assert(0 && "Unhandled menu text prefix!");
+                        assert(0 && "Unhandled menu text prefix!");
                         prefix = "";
                         break;
                     }

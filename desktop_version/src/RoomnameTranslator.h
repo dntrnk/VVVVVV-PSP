@@ -3,13 +3,15 @@
 
 #include <SDL.h>
 
+#include "VVVCompat.h"
+
 namespace roomname_translator
 {
     extern bool enabled;
     extern bool edit_mode;
 
     extern SDL_Surface* dimbuffer;
-    extern SDL_Rect fullscreen_rect;
+    extern VVV_Rect fullscreen_rect;
 
     void set_enabled(bool value);
     bool is_pausing(void);

@@ -1,6 +1,7 @@
 #include "Textbox.h"
 
 #include <SDL.h>
+#include <cassert>
 
 #include "Font.h"
 #include "Localization.h"
@@ -346,7 +347,7 @@ void textboxclass::updatetext(void)
     case TEXTTRANSLATE_FUNCTION:
         if (function == NULL)
         {
-            SDL_assert(0 && "function is NULL!");
+            assert(0 && "function is NULL!");
             break;
         }
         function(this);

@@ -11,6 +11,7 @@
 #include "GraphicsResources.h"
 #include "Textbox.h"
 #include "TowerBG.h"
+#include "VVVCompat.h"
 
 enum FadeBars
 {
@@ -214,14 +215,14 @@ public:
     bool substitute(g2dImage** texture);
     void post_substitute(SDL_Texture* subst);
 
-    int copy_texture(SDL_Texture* texture, const SDL_Rect* src, const SDL_Rect* dest);
-    int copy_texture(SDL_Texture* texture, const SDL_Rect* src, const SDL_Rect* dest, double angle, const SDL_Point* center, SDL_RendererFlip flip);
+    int copy_texture(SDL_Texture* texture, const VVV_Rect* src, const VVV_Rect* dest);
+    int copy_texture(SDL_Texture* texture, const VVV_Rect* src, const VVV_Rect* dest, double angle, const VVV_Point* center, SDL_RendererFlip flip);
     
-    void fill_rect(const SDL_Rect* rect, g2dColor color);
+    void fill_rect(const VVV_Rect* rect, g2dColor color);
     void fill_rect(int x, int y, int w, int h, g2dColor color);
     void fill_rect(g2dColor color);
 
-    void draw_rect(const SDL_Rect* rect, g2dColor color);
+    void draw_rect(const VVV_Rect* rect, g2dColor color);
     void draw_rect(int x, int y, int w, int h, g2dColor color);
 
     void draw_line(int x, int y, int x2, int y2, g2dColor color);
@@ -247,7 +248,7 @@ public:
 
     void draw_screenshot_border(void);
 
-    bool Hitest(int t1, SDL_Point p1, int t2, SDL_Point p2);
+    bool Hitest(int t1, VVV_Point p1, int t2, VVV_Point p2);
 
     void drawentities(void);
 
@@ -323,11 +324,11 @@ public:
     TowerBG towerbg;
     TowerBG titlebg;
 
-    SDL_Rect tiles_rect;
-    SDL_Rect sprites_rect;
-    SDL_Rect tele_rect;
+    VVV_Rect tiles_rect;
+    VVV_Rect sprites_rect;
+    VVV_Rect tele_rect;
 
-    SDL_Rect footerrect;
+    VVV_Rect footerrect;
 
     int linestate, linedelay;
     int backoffset;
@@ -356,12 +357,12 @@ public:
     int oldcutscenebarspos;
 
     static const int numstars = 50;
-    SDL_Rect stars[numstars];
+    VVV_Rect stars[numstars];
     int starsspeed[numstars];
 
     static const int numbackboxes = 18;
     int spcol, spcoldel;
-    SDL_Rect backboxes[numbackboxes];
+    VVV_Rect backboxes[numbackboxes];
     int backboxvx[numbackboxes];
     int backboxvy[numbackboxes];
     float backboxmult;

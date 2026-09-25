@@ -3,6 +3,7 @@
 
 #include "Constants.h"
 #include "CustomLevels.h"
+#include "VVVCompat.h"
 
 #include <map>
 #include <SDL.h>
@@ -211,7 +212,7 @@ public:
     BoxTypes box_type;
     BoxCorner box_corner;
 
-    SDL_Point box_point;
+    VVV_Point box_point;
 
     int entcol;
     g2dColor entcolreal;
