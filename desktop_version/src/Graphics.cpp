@@ -157,9 +157,6 @@ void Graphics::destroy(void)
     } \
     name.clear();
 
-    CLEAR_ARRAY(sprites_surf)
-    CLEAR_ARRAY(flipsprites_surf)
-
 #undef CLEAR_ARRAY
 }
 
@@ -494,43 +491,6 @@ int Graphics::clear(void)
     return clear(0, 0, 0, 255);
 }
 
-bool Graphics::substitute(SDL_Texture** texture)
-{
-    /* Either keep the given texture the same and return false,
-     * or substitute it for a translation and return true. */
-
-    // if (loc::english_sprites)
-    // {
-    //     return false;
-    // }
-
-    // SDL_Texture* subst = NULL;
-
-    // if (*texture == grphx.im_sprites)
-    // {
-    //     subst = grphx.im_sprites_translated;
-    // }
-    // else if (*texture == grphx.im_flipsprites)
-    // {
-    //     subst = grphx.im_flipsprites_translated;
-    // }
-
-    // if (subst == NULL)
-    // {
-    //     return false;
-    // }
-
-    // // Apply the same colors as on the original
-    // Uint8 r, g, b, a;
-    // SDL_GetTextureColorMod(*texture, &r, &g, &b);
-    // SDL_GetTextureAlphaMod(*texture, &a);
-    // set_texture_color_mod(subst, r, g, b);
-    // set_texture_alpha_mod(subst, a);
-
-    // *texture = subst;
-    return true;
-}
-
 bool Graphics::substitute(g2dImage** texture)
 {
     /* Either keep the given texture the same and return false,
@@ -547,10 +507,6 @@ bool Graphics::substitute(g2dImage** texture)
     {
         subst = grphx.im_sprites_translated;
     }
-    else if (*texture == grphx.im_flipsprites)
-    {
-        subst = grphx.im_flipsprites_translated;
-    }
 
     if (subst == NULL)
     {
@@ -561,15 +517,9 @@ bool Graphics::substitute(g2dImage** texture)
     return true;
 }
 
-void Graphics::post_substitute(SDL_Texture* subst)
-{
-    set_texture_color_mod(subst, 255, 255, 255);
-    set_texture_alpha_mod(subst, 255);
-}
-
 int Graphics::copy_texture(SDL_Texture* texture, const VVV_Rect* src, const VVV_Rect* dest)
 {
-    bool is_substituted = substitute(&texture);
+    // bool is_substituted = substitute(&texture);
 
     // const int result = SDL_RenderCopy(gameScreen.m_renderer, texture, src, dest);
     const int result = 0;
@@ -578,28 +528,18 @@ int Graphics::copy_texture(SDL_Texture* texture, const VVV_Rect* src, const VVV_
         WHINE_ONCE_ARGS(("Could not copy texture: %s", SDL_GetError()));
     }
 
-    if (is_substituted)
-    {
-        post_substitute(texture);
-    }
-
     return result;
 }
 
 int Graphics::copy_texture(SDL_Texture* texture, const VVV_Rect* src, const VVV_Rect* dest, const double angle, const VVV_Point* center, const SDL_RendererFlip flip)
 {
-    bool is_substituted = substitute(&texture);
+    // bool is_substituted = substitute(&texture);
 
     // const int result = SDL_RenderCopyEx(gameScreen.m_renderer, texture, src, dest, angle, center, flip);
     const int result = 0;
     if (result != 0)
     {
         WHINE_ONCE_ARGS(("Could not copy texture: %s", SDL_GetError()));
-    }
-
-    if (is_substituted)
-    {
-        post_substitute(texture);
     }
 
     return result;
@@ -649,7 +589,7 @@ void Graphics::draw_sprite(const int x, const int y, const int t, const g2dColor
 
 void Graphics::draw_flipsprite(const int x, const int y, const int t, const g2dColor color)
 {
-    draw_grid_tile(grphx.im_flipsprites, t, x, y, sprites_rect.w, sprites_rect.h, color);
+    draw_grid_tile(grphx.im_sprites, t, x, y, sprites_rect.w, sprites_rect.h, color, 1, -1);
 }
 
 bool Graphics::shouldrecoloroneway(const int tilenum, const bool mounted)
@@ -1039,6 +979,8 @@ void Graphics::draw_texture_part(g2dImage* image, const int x, const int y, cons
     int draw_x = x + (scalex < 0 ? draw_w : 0);
     int draw_y = y + (scaley < 0 ? draw_h : 0);
     
+    substitute(&image);
+
     g2dHelperDrawImage(
         image,
         draw_x, draw_y,
@@ -1094,6 +1036,24 @@ void Graphics::draw_grid_tile(
     const g2dColor color
 ) {
     draw_grid_tile((g2dImage*) texture, t, x, y, width, height, color, 1, 1);
+}
+
+void Graphics::draw_grid_tile_flipaware(
+    g2dImage* texture, const int t,
+    const int x, const int y, const int width, const int height,
+    const g2dColor color
+) {
+    int scale_y = 1;
+
+    if (flipmode)
+    {
+        if ((t >= 28 && t <= 31) || (t >= 40 && t <= 43) || (t >= 50 && t <= 53)|| (t >= 56 && t <= 65) || (t == 75) || (t >= 82 && t <= 83)  || (t >= 100 && t <= 103) || (t >= 106 && t <= 107) || (t >= 112 && t <= 119) || (t >= 155 && t <= 166) || (t >= 175 && t <= 178))
+        {
+            scale_y = -1;
+        }
+    }
+
+    draw_grid_tile((g2dImage*) texture, t, x, y, width, height, color, 1, scale_y);
 }
 
 void Graphics::cutscenebars(void)
@@ -1880,7 +1840,6 @@ void Graphics::drawentity(const int i, const int yoff)
         custom_gray = false;
     }
 
-    g2dImage* sprites = flipmode ? grphx.im_flipsprites : grphx.im_sprites;
     g2dImage* tiles = (map.custommode && !map.finalmode) ? grphx.im_entcolours : grphx.im_tiles;
     g2dImage* tiles_tint = (map.custommode && !map.finalmode) ? grphx.im_entcolours_tint : grphx.im_tiles_tint;
 
@@ -1900,7 +1859,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct); 
+        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct); 
 
         // screenwrapping!
         VVV_Point wrappedPoint;
@@ -1937,21 +1896,21 @@ void Graphics::drawentity(const int i, const int yoff)
             drawRect = sprites_rect;
             drawRect.x += wrappedPoint.x;
             drawRect.y += tpoint.y;
-            draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+            draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
         }
         if (wrapY && map.warpy)
         {
             drawRect = sprites_rect;
             drawRect.x += tpoint.x;
             drawRect.y += wrappedPoint.y;
-            draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+            draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
         }
         if (wrapX && wrapY && map.warpx && map.warpy)
         {
             drawRect = sprites_rect;
             drawRect.x += wrappedPoint.x;
             drawRect.y += wrappedPoint.y;
-            draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+            draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
         }
         break;
     }
@@ -2034,7 +1993,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
 
         tpoint.x = xp + 32;
         tpoint.y = yp - yoff;
@@ -2043,7 +2002,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile(sprites, obj.entities[i].drawframe + 1, drawRect.x, drawRect.y, 32, 32, ct);
+        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe + 1, drawRect.x, drawRect.y, 32, 32, ct);
 
         tpoint.x = xp;
         tpoint.y = yp + 32 - yoff;
@@ -2052,7 +2011,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile(sprites, obj.entities[i].drawframe + 12, drawRect.x, drawRect.y, 32, 32, ct);
+        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe + 12, drawRect.x, drawRect.y, 32, 32, ct);
 
         tpoint.x = xp + 32;
         tpoint.y = yp + 32 - yoff;
@@ -2061,7 +2020,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile(sprites, obj.entities[i].drawframe + 13, drawRect.x, drawRect.y, 32, 32, ct);
+        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe + 13, drawRect.x, drawRect.y, 32, 32, ct);
         break;
     }
     case 10: // 2x1 Sprite
@@ -2075,7 +2034,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
 
         tpoint.x = xp + 32;
         tpoint.y = yp - yoff;
@@ -2084,7 +2043,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile(sprites, obj.entities[i].drawframe + 1, drawRect.x, drawRect.y, 32, 32, ct);
+        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe + 1, drawRect.x, drawRect.y, 32, 32, ct);
         break;
     }
     case 11: // The fucking elephant
@@ -2100,7 +2059,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
 
         // if we're outside the screen, we need to draw indicators
 
@@ -3360,13 +3319,9 @@ bool Graphics::reloadresources(void)
     MAYBE_FAIL(checktexturesize("tiles3.png", grphx.im_tiles3, 8, 8));
     MAYBE_FAIL(checktexturesize("entcolours.png", grphx.im_entcolours, 8, 8));
     MAYBE_FAIL(checktexturesize("sprites.png", grphx.im_sprites, 32, 32));
-    MAYBE_FAIL(checktexturesize("flipsprites.png", grphx.im_flipsprites, 32, 32));
     MAYBE_FAIL(checktexturesize("teleporter.png", grphx.im_teleporter, 96, 96));
 
     destroy();
-
-    // make_array(&grphx.im_sprites_surf, sprites_surf, 32);
-    // make_array(&grphx.im_flipsprites_surf, flipsprites_surf, 32);
 
     images[IMAGE_LEVELCOMPLETE] = grphx.im_image0;
     images[IMAGE_MINIMAP] = grphx.im_image1;

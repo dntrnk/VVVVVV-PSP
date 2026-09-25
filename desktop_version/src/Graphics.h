@@ -173,6 +173,7 @@ public:
     void draw_grid_tile(g2dImage* texture, int t, int x, int y, int width, int height, int r, int g, int b, int scalex, int scaley);
     void draw_grid_tile(g2dImage* texture, int t, int x, int y, int width, int height, g2dColor color, int scalex, int scaley);
     void draw_grid_tile(g2dImage* texture, int t, int x, int y, int width, int height, g2dColor color);
+    void draw_grid_tile_flipaware(g2dImage* texture, int t, int x, int y, int width, int height, g2dColor color);
 
     void updatetextboxes(void);
     const char* textbox_line(char* buffer, size_t buffer_len, size_t textbox_i, size_t line_i);
@@ -210,10 +211,8 @@ public:
 
     int clear(int r, int g, int b, int a);
     int clear(void);
-
-    bool substitute(SDL_Texture** texture);
+    
     bool substitute(g2dImage** texture);
-    void post_substitute(SDL_Texture* subst);
 
     int copy_texture(SDL_Texture* texture, const VVV_Rect* src, const VVV_Rect* dest);
     int copy_texture(SDL_Texture* texture, const VVV_Rect* src, const VVV_Rect* dest, double angle, const VVV_Point* center, SDL_RendererFlip flip);
@@ -306,9 +305,6 @@ public:
 
 
     int m;
-
-    std::vector <SDL_Surface*> sprites_surf;
-    std::vector <SDL_Surface*> flipsprites_surf;
 
     g2dImage* images[NUM_IMAGES];
 

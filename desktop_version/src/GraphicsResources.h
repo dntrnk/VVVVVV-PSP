@@ -20,9 +20,6 @@ public:
 
     void init_translations(void);
 
-    SDL_Surface* im_sprites_surf;
-    SDL_Surface* im_flipsprites_surf;
-
     g2dImage* im_tiles;
     g2dImage* im_tiles_white;
     g2dImage* im_tiles_tint;
@@ -49,7 +46,6 @@ public:
     g2dImage* im_image12;
 
     g2dImage* im_sprites_translated;
-    g2dImage* im_flipsprites_translated;
 };
 
 extern uint32_t sprites_collision_surface_normal[512][16];

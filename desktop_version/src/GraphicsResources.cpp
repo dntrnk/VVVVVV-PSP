@@ -885,39 +885,155 @@ static void LoadSprites(const char* filename, SDL_Texture** texture, SDL_Surface
 static void LoadSpritesTranslation(
     const char* filename,
     tinyxml2::XMLDocument* mask,
-    SDL_Surface* surface_english,
-    SDL_Texture** texture
+    const char* english_sprites_filename,
+    g2dImage** texture
 ) {
     /* Create a sprites texture for display in another language.
-     * surface_english is used as a base. Parts of the translation (filename)
+     * texture_english is used as a base. Parts of the translation (filename)
      * will replace parts of the base, as instructed in the mask XML. */
 
-    if (surface_english == NULL)
+    // Load original English sprites, for working with
+    g2dImage* original = NULL;
     {
-        vlog_error("LoadSpritesTranslation: English surface is NULL!");
-        return;
+        unsigned char* fileIn = NULL;
+        size_t length = 0;
+        FILESYSTEM_loadAssetToMemory(english_sprites_filename, &fileIn, &length);
+        if (fileIn == NULL)
+        {
+            assert(0 && "Image file missing!");
+            return;
+        }
+
+        unsigned int width = 0, height = 0;
+
+        {
+            png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, _png_error_dummy, _png_warn_dummy);
+            if (!png) { VVV_free(fileIn); return; }
+            png_infop info = png_create_info_struct(png);
+            if (!info) { png_destroy_read_struct(&png, NULL, NULL); VVV_free(fileIn); return; }
+            PNGMemReader r = { fileIn, length, 0 };
+            png_set_read_fn(png, &r, _png_mem_read);
+            png_read_info(png, info);
+            width = png_get_image_width(png, info);
+            height = png_get_image_height(png, info);
+            png_destroy_read_struct(&png, &info, NULL);
+        }
+
+        if (width == 0 || height == 0) {
+            VVV_free(fileIn);
+            return;
+        }
+
+        unsigned char* rgbaData = NULL;
+        unsigned int error = lodepng_decode32(&rgbaData, &width, &height, fileIn, length);
+        VVV_free(fileIn);
+
+        if (error != 0)
+        {
+            vlog_error("Could not load %s: %s", english_sprites_filename, lodepng_error_text(error));
+            return;
+        }
+
+        original = _g2dTexCreate(width, height, true);
+        if (original == NULL)
+        {
+            free(rgbaData);
+            return;
+        }
+
+        int bytesPerPixel = 4;
+        int srcRowSize = width * bytesPerPixel;
+        int dstRowSize = (original)->tw * bytesPerPixel;
+
+        for (unsigned int y = 0; y < height; y++)
+        {
+            memcpy((char*) original->data + y * dstRowSize, rgbaData + y * srcRowSize, srcRowSize);
+        }
+        free(rgbaData);
+
+        int curwidth = original->w;
+        int curheight = original->h;
+
+        for (int y = 0; y < curheight; y++)
+        {
+            for (int x = 0; x < curwidth; x++)
+            {
+                g2dColor color = get_pixel(original, x, y);
+                set_pixel(original, x, y, G2D_RGBA(255, 255, 255, G2D_GET_A(color)));
+            }
+        }
     }
 
-    // Make a copy of the English sprites, for working with
-    SDL_Surface* working = GetSubSurface(
-        surface_english,
-        0, 0, surface_english->w, surface_english->h
-    );
-    if (working == NULL)
+    g2dImage* translated = NULL;
     {
-        return;
-    }
+        unsigned char* fileIn = NULL;
+        size_t length = 0;
+        FILESYSTEM_loadAssetToMemory(filename, &fileIn, &length);
+        if (fileIn == NULL)
+        {
+            assert(0 && "Image file missing!");
+            return;
+        }
 
-    SDL_Surface* translated;
-    {
-        unsigned char* data;
-        SDL_Surface* loaded_image = LoadImageRaw(filename, &data);
-        translated = LoadSurfaceFromRaw(loaded_image);
+        unsigned int width = 0, height = 0;
 
-        VVV_freefunc(SDL_FreeSurface, loaded_image);
-        VVV_free(data);
+        {
+            png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, _png_error_dummy, _png_warn_dummy);
+            if (!png) { VVV_free(fileIn); return; }
+            png_infop info = png_create_info_struct(png);
+            if (!info) { png_destroy_read_struct(&png, NULL, NULL); VVV_free(fileIn); return; }
+            PNGMemReader r = { fileIn, length, 0 };
+            png_set_read_fn(png, &r, _png_mem_read);
+            png_read_info(png, info);
+            width = png_get_image_width(png, info);
+            height = png_get_image_height(png, info);
+            png_destroy_read_struct(&png, &info, NULL);
+        }
+
+        if (width == 0 || height == 0) {
+            VVV_free(fileIn);
+            return;
+        }
+
+        unsigned char* rgbaData = NULL;
+        unsigned int error = lodepng_decode32(&rgbaData, &width, &height, fileIn, length);
+        VVV_free(fileIn);
+
+        if (error != 0)
+        {
+            vlog_error("Could not load %s: %s", filename, lodepng_error_text(error));
+            return;
+        }
+
+        translated = _g2dTexCreate(width, height, true);
+        if (translated == NULL)
+        {
+            free(rgbaData);
+            return;
+        }
+
+        int bytesPerPixel = 4;
+        int srcRowSize = width * bytesPerPixel;
+        int dstRowSize = translated->tw * bytesPerPixel;
+
+        for (unsigned int y = 0; y < height; y++)
+        {
+            memcpy((char*) translated->data + y * dstRowSize, rgbaData + y * srcRowSize, srcRowSize);
+        }
+        free(rgbaData);
+
+        int curwidth = translated->w;
+        int curheight = translated->h;
+
+        for (int y = 0; y < curheight; y++)
+        {
+            for (int x = 0; x < curwidth; x++)
+            {
+                g2dColor color = get_pixel(translated, x, y);
+                set_pixel(translated, x, y, G2D_RGBA(255, 255, 255, G2D_GET_A(color)));
+            }
+        }
     }
-    SDL_SetSurfaceBlendMode(translated, SDL_BLENDMODE_NONE);
 
     tinyxml2::XMLHandle hMask(mask);
     tinyxml2::XMLElement* pElem;
@@ -945,69 +1061,91 @@ static void LoadSpritesTranslation(
         dst.x = pElem->IntAttribute("dx", x) * sprite_w;
         dst.y = pElem->IntAttribute("dy", y) * sprite_h;
 
-        // SDL_BlitSurface(translated, &src, working, &dst); Later
+        {
+            g2dColor* wdata = (g2dColor*)original->data;
+            g2dColor* tdata = (g2dColor*)translated->data;
+
+            for (int j = 0; j < src.h; j++) {
+                g2dColor* wrow = wdata + (dst.y + j) * original->tw + dst.x;
+                g2dColor* trow = tdata + (src.y + j) * translated->tw + src.x;
+
+                for (int i = 0; i < src.w; i++) {
+                    Uint8 a = G2D_GET_A(trow[i]);
+                    wrow[i] = G2D_RGBA(255, 255, 255, a);
+                }
+            }
+        }
     }
 
-    *texture = LoadTextureFromRaw(filename, working, TEX_WHITE);
+    *texture = (g2dImage*)calloc(1, sizeof(g2dImage));
+    if (*texture == NULL)
+    {
+        g2dTexFree(texture);
+        return;
+    }
 
-    VVV_freefunc(SDL_FreeSurface, translated);
-    VVV_freefunc(SDL_FreeSurface, working);
+    (*texture)->w = translated->w;
+    (*texture)->h = translated->h;
+    (*texture)->tw = translated->tw;
+    (*texture)->th = translated->th;
+    (*texture)->ratio = translated->ratio;
+    (*texture)->can_blend = translated->can_blend;
+    (*texture)->swizzled = false;
+
+    _g2dApplyFormat(*texture, (g2dColor*) original->data, GU_PSM_T4);
+
+    translated->data = NULL;
+    g2dTexFree(&translated);
+
+    _g2dSwizzle(*texture);
+
+    sceKernelDcacheWritebackAll();
 }
 
 void GraphicsResources::init_translations(void)
 {
-//     if (im_sprites_translated) g2dTexFree(&im_sprites_translated);
-//     if (im_flipsprites_translated) g2dTexFree(&im_flipsprites_translated);
+    if (im_sprites_translated) g2dTexFree(&im_sprites_translated);
 
-//     if (loc::english_sprites)
-//     {
-//         return;
-//     }
+    if (loc::english_sprites)
+    {
+        return;
+    }
 
-//     const char* langcode = loc::lang.c_str();
+    const char* langcode = loc::lang.c_str();
 
-//     const char* path_template = "lang/%s/graphics/%s";
-//     char path_xml[256];
-//     char path_sprites[256];
-//     char path_flipsprites[256];
-//     snprintf(path_xml, sizeof(path_xml), path_template, langcode, "spritesmask.xml");
-//     snprintf(path_sprites, sizeof(path_sprites), path_template, langcode, "sprites.png");
-//     snprintf(path_flipsprites, sizeof(path_flipsprites), path_template, langcode, "flipsprites.png");
+    const char* path_template = "lang/%s/graphics/%s";
+    char path_xml[256];
+    char path_sprites[256];
+    char path_flipsprites[256];
+    snprintf(path_xml, sizeof(path_xml), path_template, langcode, "spritesmask.xml");
+    snprintf(path_sprites, sizeof(path_sprites), path_template, langcode, "sprites.png");
+    snprintf(path_flipsprites, sizeof(path_flipsprites), path_template, langcode, "flipsprites.png");
 
-//     /* We don't want to apply main-game translations to level-specific (custom) sprites.
-//      * Either sprites and translations are BOTH main-game, or BOTH level-specific.
-//      * Our pivots are the XML (it _has_ to exist for translated sprites to work) and
-//      * graphics/sprites.png (what sense does it make to have only flipsprites). */
-//     if (FILESYSTEM_isAssetMounted(path_xml) != FILESYSTEM_isAssetMounted("graphics/sprites.png"))
-//     {
-//         return;
-//     }
+    /* We don't want to apply main-game translations to level-specific (custom) sprites.
+     * Either sprites and translations are BOTH main-game, or BOTH level-specific.
+     * Our pivots are the XML (it _has_ to exist for translated sprites to work) and
+     * graphics/sprites.png (what sense does it make to have only flipsprites). */
+    if (FILESYSTEM_isAssetMounted(path_xml) != FILESYSTEM_isAssetMounted("graphics/sprites.png"))
+    {
+        return;
+    }
 
-//     tinyxml2::XMLDocument doc_mask;
-//     if (!FILESYSTEM_loadAssetTiXml2Document(path_xml, doc_mask))
-//     {
-//         // Only try to load the images if the XML document exists
-//         return;
-//     }
+    tinyxml2::XMLDocument doc_mask;
+    if (!FILESYSTEM_loadAssetTiXml2Document(path_xml, doc_mask))
+    {
+        // Only try to load the images if the XML document exists
+        return;
+    }
 
-//     if (FILESYSTEM_areAssetsInSameRealDir(path_xml, path_sprites))
-//     {
-//         LoadSpritesTranslation(
-//             path_sprites,
-//             &doc_mask,
-//             im_sprites_surf,
-//             &im_sprites_translated
-//         );
-//     }
-//     if (FILESYSTEM_areAssetsInSameRealDir(path_xml, path_flipsprites))
-//     {
-//         LoadSpritesTranslation(
-//             path_flipsprites,
-//             &doc_mask,
-//             im_flipsprites_surf,
-//             &im_flipsprites_translated
-//         );
-//     }
+    if (FILESYSTEM_areAssetsInSameRealDir(path_xml, path_sprites))
+    {
+        LoadSpritesTranslation(
+            path_sprites,
+            &doc_mask,
+            "graphics/sprites.png",
+            &im_sprites_translated
+        );
+    }
 }
 
 void GraphicsResources::init(void)
@@ -1019,6 +1157,7 @@ void GraphicsResources::init(void)
 
     im_sprites = G2DLoadImage("graphics/sprites.png", TEX_WHITE, G2D_CLUT4, sprites_collision_surface_normal);
     im_flipsprites = G2DLoadImage("graphics/flipsprites.png", TEX_WHITE, G2D_CLUT4, sprites_collision_surface_flipped);
+    if (im_flipsprites) g2dTexFree(&im_flipsprites);
 
     im_tiles3 = G2DLoadImage("graphics/tiles3.png", G2D_CLUT8);
     im_teleporter = G2DLoadImage("graphics/teleporter.png", TEX_WHITE, G2D_CLUT4);
@@ -1037,9 +1176,8 @@ void GraphicsResources::init(void)
     im_image11 = G2DLoadImage("graphics/site4.png", TEX_WHITE, G2D_CLUT4);
 
     im_sprites_translated = NULL;
-    im_flipsprites_translated = NULL;
 
-    // init_translations();
+    init_translations();
 
     im_image12 = _g2dTexCreate(240, 180, false);
 }
@@ -1075,11 +1213,7 @@ void GraphicsResources::destroy(void)
     CLEAR(im_image12);
 
     CLEAR(im_sprites_translated);
-    CLEAR(im_flipsprites_translated);
 #undef CLEAR
-
-    VVV_freefunc(SDL_FreeSurface, im_sprites_surf);
-    VVV_freefunc(SDL_FreeSurface, im_flipsprites_surf);
 }
 
 bool SaveImage(const SDL_Surface* surface, const char* filename)
