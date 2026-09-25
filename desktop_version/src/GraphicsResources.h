@@ -52,12 +52,15 @@ public:
     g2dImage* im_flipsprites_translated;
 };
 
-bool sprites_collision_surface_get_bit(int x, int y);
-void sprites_collision_surface_set_bit(int x, int y);
-void sprites_collision_surface_clear_bit(int x, int y);
+extern uint32_t sprites_collision_surface_normal[512][16];
+extern uint32_t sprites_collision_surface_flipped[512][16];
+
+bool sprites_collision_surface_get_bit(uint32_t (*collision_surface)[16], int x, int y);
+void sprites_collision_surface_set_bit(uint32_t (*collision_surface)[16], int x, int y);
+void sprites_collision_surface_clear_bit(uint32_t (*collision_surface)[16], int x, int y);
 
 SDL_Surface* LoadImageSurface(const char* filename);
-g2dImage* G2DLoadImage(const char *filename, TextureLoadType loadtype, g2dTexFormat format, bool update_collision_surface = false);
+g2dImage* G2DLoadImage(const char *filename, TextureLoadType loadtype, g2dTexFormat format, uint32_t (*collision_surface)[16] = NULL);
 g2dImage* G2DLoadImage(const char *filename, g2dTexFormat format);
 
 bool SaveImage(const SDL_Surface* surface, const char* filename);

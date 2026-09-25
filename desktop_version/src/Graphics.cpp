@@ -1606,7 +1606,7 @@ void Graphics::drawcoloredtile(
 }
 
 
-bool Graphics::Hitest(int t1, VVV_Point p1, int t2, VVV_Point p2)
+bool Graphics::Hitest(uint32_t (*collision_surface)[16], int t1, VVV_Point p1, int t2, VVV_Point p2)
 {
     // 384 is width of sprites.png, so there's 12 32x32 sprites
     int srcx1 = (t1 % 12) * 32;
@@ -1644,7 +1644,7 @@ bool Graphics::Hitest(int t1, VVV_Point p1, int t2, VVV_Point p2)
         {
             for(int y = r3_bottom; y < r3_top; y++)
             {
-                if (sprites_collision_surface_get_bit(srcx1 + x - p1.x, srcy1 + y - p1.y) && sprites_collision_surface_get_bit(srcx2 + x - p2.x, srcy2 + y - p2.y))
+                if (sprites_collision_surface_get_bit(collision_surface, srcx1 + x - p1.x, srcy1 + y - p1.y) && sprites_collision_surface_get_bit(collision_surface, srcx2 + x - p2.x, srcy2 + y - p2.y))
                 {
                     return true;
                 }

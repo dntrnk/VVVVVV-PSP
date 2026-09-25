@@ -248,7 +248,7 @@ public:
 
     void draw_screenshot_border(void);
 
-    bool Hitest(int t1, VVV_Point p1, int t2, VVV_Point p2);
+    bool Hitest(uint32_t (*collision_surface)[16], int t1, VVV_Point p1, int t2, VVV_Point p2);
 
     void drawentities(void);
 
