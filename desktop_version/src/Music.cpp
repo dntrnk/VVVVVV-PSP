@@ -69,15 +69,19 @@ struct MusicChannel {
 
     static void Pause(void) {
         if (channel >= 0 && loaded) {
-            AalibPause(channel);
-            paused = true;
+            if (!paused) {
+                AalibPause(channel);
+                paused = true;
+            }
         }
     }
 
     static void Resume(void) {
         if (channel >= 0 && loaded) {
-            AalibPause(channel);
-            paused = false;
+            if (paused) {
+                AalibPause(channel);
+                paused = false;
+            }
         }
     }
 
