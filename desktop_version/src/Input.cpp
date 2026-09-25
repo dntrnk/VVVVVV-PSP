@@ -638,7 +638,7 @@ static void menuactionpress(void)
                 && FILESYSTEM_openDirectory(FILESYSTEM_getUserLevelDirectory()))
             {
                 music.playef(Sound_VIRIDIAN);
-                SDL_MinimizeWindow(gameScreen.m_window);
+                // minimize window func
             }
             else
             {
@@ -1125,7 +1125,7 @@ static void menuactionpress(void)
             && FILESYSTEM_openDirectory(FILESYSTEM_getUserMainLangDirectory()))
             {
                 music.playef(Sound_VIRIDIAN);
-                SDL_MinimizeWindow(gameScreen.m_window);
+                // minimize window func
             }
             else
             {

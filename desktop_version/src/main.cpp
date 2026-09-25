@@ -599,7 +599,7 @@ int main(int argc, char *argv[])
     if(!FILESYSTEM_init(argv[0], baseDir, assetsPath, langDir, fontsDir))
     {
         vlog_error("Unable to initialize filesystem!");
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "Unable to initialize filesystem!", NULL);
+        VVV_ShowSimpleMessageBox("Error", "Unable to initialize filesystem!");
         VVV_exit(1);
     }
 
@@ -609,6 +609,7 @@ int main(int argc, char *argv[])
         SDL_INIT_JOYSTICK |
         SDL_INIT_GAMECONTROLLER
     );
+    VVV_TicksInit();
     if (SDL_IsTextInputActive() == SDL_TRUE)
     {
         SDL_StopTextInput();
@@ -695,7 +696,7 @@ int main(int argc, char *argv[])
         {
             message = loc::gettext("Something went wrong, but we forgot the error message.");
         }
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", message, NULL);
+        VVV_ShowSimpleMessageBox("Error", message);
 
         VVV_exit(1);
     }
@@ -845,9 +846,6 @@ int main(int argc, char *argv[])
         graphics.fademode = FADE_NONE;
     }
 
-    /* Only create the window after we have loaded all the assets. */
-    SDL_ShowWindow(gameScreen.m_window);
-
     key.isActive = true;
 
     gamestate_funcs = get_gamestate_funcs(game.gamestate, &num_gamestate_funcs);
@@ -855,21 +853,21 @@ int main(int argc, char *argv[])
 
     while (true)
     {
-        f_time = SDL_GetTicks();
+        f_time = VVV_GetTicks();
 
         const Uint32 f_timetaken = f_time - f_timePrev;
         const int timestep = game.get_timestep();
         if (!game.over30mode && f_timetaken < (Uint32) timestep)
         {
             const volatile Uint32 f_delay = timestep - f_timetaken;
-            SDL_Delay((Uint32) f_delay);
-            f_time = SDL_GetTicks();
+            VVV_Delay((Uint32) f_delay);
+            f_time = VVV_GetTicks();
         }
 
         f_timePrev = f_time;
 
         timePrev = time_;
-        time_ = SDL_GetTicks();
+        time_ = VVV_GetTicks();
 
         deltaloop();
     }
@@ -1001,7 +999,7 @@ static void unfocused_run(void)
     }
     graphics.render();
     //We are minimised, so lets put a bit of a delay to save CPU
-    SDL_Delay(100);
+    VVV_Delay(100);
 }
 
 static void focused_begin(void)

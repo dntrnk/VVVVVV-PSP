@@ -30,7 +30,6 @@ public:
     int scalingMode;
     bool vsync;
 
-    SDL_Window *m_window;
     SDL_Renderer *m_renderer;
 };
 

@@ -3051,7 +3051,7 @@ void scriptclass::hardreset(void)
     if (game.seed_use_sdl_getticks)
     {
         /* The RNG is 32-bit. We don't _really_ need 64-bit... */
-        xoshiro_seed((Uint32) SDL_GetTicks());
+        xoshiro_seed((Uint32) VVV_GetTicks());
     }
     else
     {

@@ -18,6 +18,7 @@
 #include "UtilityClass.h"
 #include "VFormat.h"
 #include "Vlogging.h"
+#include "VVVCompat.h"
 
 #include <limits.h>
 #include <pspkernel.h>
@@ -261,7 +262,7 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
         sceIoMkdir(temp, 0777);
     }
 
-    basePath = SDL_GetBasePath();
+    basePath = VVV_GetBasePath();
 
     if (basePath == NULL)
     {
@@ -294,13 +295,9 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
         vlog_error("Grab it from your purchased copy of the game,");
         vlog_error("or get it from the free Make and Play Edition.");
 
-        SDL_ShowSimpleMessageBox(
-            SDL_MESSAGEBOX_ERROR,
-            "data.zip missing!",
-            "You do not have data.zip!"
-            "\n\nGrab it from your purchased copy of the game,"
-            "\nor get it from the free Make and Play Edition.",
-            NULL
+        VVV_ShowSimpleMessageBox(
+            "Error",
+            "data.zip missing!\nYou do not have data.zip!\n\nGrab it from your purchased copy of the game,\nor get it from the free Make and Play Edition."
         );
         VVV_exit(1);
         return 0;
