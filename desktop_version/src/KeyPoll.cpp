@@ -639,3 +639,23 @@ bool KeyPoll::controllerWantsDown(void)
 {
     return buttonmap[SDL_CONTROLLER_BUTTON_DPAD_DOWN] || yVel > 0;
 }
+
+bool KeyPoll::stickWantsLeft(void)
+{
+    return xVel < 0;
+}
+
+bool KeyPoll::stickWantsRight(void)
+{
+    return xVel > 0;
+}
+
+bool KeyPoll::stickWantsUp(void)
+{
+    return yVel < 0;
+}
+
+bool KeyPoll::stickWantsDown(void)
+{
+    return yVel > 0;
+}

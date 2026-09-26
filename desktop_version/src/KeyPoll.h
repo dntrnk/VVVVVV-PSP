@@ -59,6 +59,10 @@ public:
     bool controllerWantsRight(bool includeVert);
     bool controllerWantsUp(void);
     bool controllerWantsDown(void);
+    bool stickWantsLeft(void);
+    bool stickWantsRight(void);
+    bool stickWantsUp(void);
+    bool stickWantsDown(void);
 
     int leftbutton, rightbutton, middlebutton;
     int mousex;

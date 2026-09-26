@@ -63,9 +63,7 @@ namespace roomname_translator
             fullscreen_rect.y = 0;
             fullscreen_rect.w = 320;
             fullscreen_rect.h = 240;
-            graphics.set_blendmode(SDL_BLENDMODE_BLEND);
             graphics.fill_rect(G2D_RGBA(0, 0, 0, 96));
-            graphics.set_blendmode(SDL_BLENDMODE_NONE);
             if (help_screen)
             {
                 font::print(PR_BOR | PR_FONT_8X8, 0, 0, "=== Room name translation mode help ===", 255,255,255);

@@ -206,9 +206,6 @@ public:
 
     int query_texture(SDL_Texture* texture, Uint32* format, int* access, int* w, int* h);
 
-    int set_blendmode(SDL_BlendMode blendmode);
-    int set_blendmode(SDL_Texture* texture, SDL_BlendMode blendmode);
-
     int clear(int r, int g, int b, int a);
     int clear(void);
     

@@ -2,7 +2,6 @@
 #include "Script.h"
 
 #include <limits.h>
-#include <SDL_timer.h>
 
 #include "Alloc.h"
 #include "Constants.h"

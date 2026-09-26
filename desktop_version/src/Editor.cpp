@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "controls.h"
+
 #include "Constants.h"
 #include "CustomLevels.h"
 #include "DeferCallbacks.h"
@@ -1166,10 +1168,6 @@ static void draw_ghosts(void)
 
     //Draw ghosts (spooky!)
     if (game.ghostsenabled) {
-        graphics.set_render_target(graphics.ghostTexture);
-        graphics.set_blendmode(graphics.ghostTexture, SDL_BLENDMODE_BLEND);
-        graphics.clear(0, 0, 0, 0);
-
         for (int i = 0; i < (int) ed.ghosts.size(); i++) {
             if (i <= ed.current_ghosts) { // We don't want all of them to show up at once :)
                 if (ed.ghosts[i].rx != ed.levx || ed.ghosts[i].ry != ed.levy)
@@ -1180,10 +1178,6 @@ static void draw_ghosts(void)
                 graphics.draw_sprite(ed.ghosts[i].x, ed.ghosts[i].y, ed.ghosts[i].frame, ct);
             }
         }
-
-        graphics.set_render_target(graphics.gameTexture);
-        graphics.set_texture_alpha_mod(graphics.ghostTexture, 128);
-        graphics.copy_texture(graphics.ghostTexture, NULL, NULL);
     }
 }
 
@@ -1637,9 +1631,7 @@ static void draw_main_ui(void)
             }
             graphics.footerrect.y = 240 - graphics.footerrect.h + ed.roomnamehide;
 
-            graphics.set_blendmode(SDL_BLENDMODE_BLEND);
             graphics.fill_rect(&graphics.footerrect, G2D_RGBA(0, 0, 0, graphics.translucentroomname ? 127 : 255));
-            graphics.set_blendmode(SDL_BLENDMODE_NONE);
 
             font::print(PR_CEN | PR_BOR | PR_FONT_LEVEL | PR_CJK_LOW, -1, graphics.footerrect.y + 1 + ed.roomnamehide, room->roomname, 196, 196, 255 - help.glow);
             font::print(PR_BOR | PR_CJK_HIGH, 4, 232 - graphics.footerrect.h, loc::gettext("SPACE ^  SHIFT ^"), 196, 196, 255 - help.glow);
@@ -3095,7 +3087,7 @@ static void handle_draw_input()
         const int room = ed.levx + ed.levy * cl.maxwidth;
         const int plat_speed = cl.roomproperties[room].platv;
 
-        if (key.keymap[SDLK_COMMA])
+        if (key.keymap[SDLK_COMMA] || controls_held(PSP_CTRL_LTRIGGER))
         {
             if (key.keymap[SDLK_LCTRL] || key.keymap[SDLK_RCTRL])
             {
@@ -3107,7 +3099,7 @@ static void handle_draw_input()
             }
             ed.keydelay = 6;
         }
-        else if (key.keymap[SDLK_PERIOD])
+        else if (key.keymap[SDLK_PERIOD] || controls_held(PSP_CTRL_RTRIGGER))
         {
             if (key.keymap[SDLK_LCTRL] || key.keymap[SDLK_RCTRL])
             {
@@ -3132,7 +3124,7 @@ static void handle_draw_input()
             ed.show_note(buffer);
         }
 
-        if (key.keymap[SDLK_SPACE])
+        if (key.keymap[SDLK_SPACE] || controls_held(PSP_CTRL_SQUARE))
         {
             ed.toolbox_open = !ed.toolbox_open;
             ed.keydelay = 6;
@@ -3165,6 +3157,9 @@ void editorinput(void)
 {
     extern editorclass ed;
 
+    static int cursor_x = 0;
+    static int cursor_y = 0;
+
     if (graphics.fademode == FADE_FADING_OUT)
     {
         return;
@@ -3173,8 +3168,16 @@ void editorinput(void)
     ed.old_tilex = ed.tilex;
     ed.old_tiley = ed.tiley;
 
-    ed.tilex = std::clamp(key.mousex, 0, SCREEN_WIDTH_PIXELS - 1) / 8;
-    ed.tiley = std::clamp(key.mousey, 0, SCREEN_HEIGHT_PIXELS - 1) / 8;
+    if (key.stickWantsLeft()) cursor_x -= 4;
+    if (key.stickWantsRight()) cursor_x += 4;
+    if (key.stickWantsUp()) cursor_y -= 4;
+    if (key.stickWantsDown()) cursor_y += 4;
+
+    cursor_x = std::clamp(cursor_x, 0, SCREEN_WIDTH_PIXELS - 1);
+    cursor_y = std::clamp(cursor_y, 0, SCREEN_HEIGHT_PIXELS - 1);
+
+    ed.tilex = std::clamp(cursor_x, 0, SCREEN_WIDTH_PIXELS - 1) / 8;
+    ed.tiley = std::clamp(cursor_y, 0, SCREEN_HEIGHT_PIXELS - 1) / 8;
 
     bool up_pressed = key.isDown(SDLK_UP) || key.isDown(SDL_CONTROLLER_BUTTON_DPAD_UP);
     bool down_pressed = key.isDown(SDLK_DOWN) || key.isDown(SDL_CONTROLLER_BUTTON_DPAD_DOWN);
@@ -3208,24 +3211,24 @@ void editorinput(void)
 
     // Was escape just pressed?
     bool escape_pressed = false;
-    if (key.isDown(27) && !ed.settingskey)
+    if ((key.isDown(27) || controls_held(PSP_CTRL_START)) && !ed.settingskey)
     {
         ed.settingskey = true;
         escape_pressed = true;
     }
-    else if (!key.isDown(27))
+    else if (!key.isDown(27) && !controls_held(PSP_CTRL_START))
     {
         ed.settingskey = false;
     }
 
     // What about enter?
     bool enter_pressed = false;
-    if (key.isDown(KEYBOARD_ENTER) && !game.mapheld)
+    if ((key.isDown(KEYBOARD_ENTER) || controls_held(PSP_CTRL_TRIANGLE)) && !game.mapheld)
     {
         game.mapheld = true;
         enter_pressed = true;
     }
-    else if (!key.isDown(KEYBOARD_ENTER))
+    else if (!key.isDown(KEYBOARD_ENTER) && !controls_held(PSP_CTRL_TRIANGLE))
     {
         game.mapheld = false;
     }
@@ -3339,16 +3342,16 @@ void editorinput(void)
             }
 
             // Mouse input
-            if (key.leftbutton && ed.lclickdelay == 0)
+            if ((key.leftbutton || controls_held(PSP_CTRL_CROSS)) && ed.lclickdelay == 0)
             {
                 ed.tool_place();
             }
-            else if (!key.leftbutton)
+            else if (!key.leftbutton && !controls_held(PSP_CTRL_CROSS))
             {
                 ed.lclickdelay = 0;
             }
 
-            if (key.rightbutton)
+            if (key.rightbutton || controls_held(PSP_CTRL_CIRCLE))
             {
                 ed.tool_remove();
             }
@@ -3372,7 +3375,7 @@ void editorinput(void)
                 ed.substate = EditorSubState_MAIN;
             }
 
-            if (key.leftbutton && ed.lclickdelay == 0)
+            if ((key.leftbutton || controls_held(PSP_CTRL_CROSS)) && ed.lclickdelay == 0)
             {
                 if (ed.box_corner == BoxCorner_FIRST)
                 {
@@ -3420,12 +3423,12 @@ void editorinput(void)
                     }
                 }
             }
-            else if (!key.leftbutton)
+            else if (!key.leftbutton && !controls_held(PSP_CTRL_CROSS))
             {
                 ed.lclickdelay = 0;
             }
 
-            if (key.rightbutton)
+            if (key.rightbutton || controls_held(PSP_CTRL_CIRCLE))
             {
                 ed.substate = EditorSubState_MAIN;
             }
@@ -3433,7 +3436,7 @@ void editorinput(void)
             break;
 
         case EditorSubState_DRAW_WARPTOKEN:
-            if (escape_pressed || key.rightbutton)
+            if (escape_pressed || key.rightbutton || controls_held(PSP_CTRL_CIRCLE))
             {
                 // Cancel warp token placement
                 ed.substate = EditorSubState_MAIN;
@@ -3465,7 +3468,7 @@ void editorinput(void)
             }
 
             // Left click means place!
-            if (key.leftbutton)
+            if (key.leftbutton || controls_held(PSP_CTRL_CROSS))
             {
                 if (ed.lclickdelay == 0)
                 {

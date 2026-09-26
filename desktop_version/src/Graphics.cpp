@@ -450,26 +450,6 @@ int Graphics::query_texture(SDL_Texture* texture, Uint32* format, int* access, i
     return result;
 }
 
-int Graphics::set_blendmode(const SDL_BlendMode blendmode)
-{
-    const int result = SDL_SetRenderDrawBlendMode(gameScreen.m_renderer, blendmode);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not set draw mode: %s", SDL_GetError()));
-    }
-    return result;
-}
-
-int Graphics::set_blendmode(SDL_Texture* texture, const SDL_BlendMode blendmode)
-{
-    const int result = SDL_SetTextureBlendMode(texture, blendmode);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not set texture blend mode: %s", SDL_GetError()));
-    }
-    return result;
-}
-
 int Graphics::clear(const int r, const int g, const int b, const int a)
 {
     // const int result = SDL_RenderClear(gameScreen.m_renderer);
@@ -3196,17 +3176,13 @@ void Graphics::draw_screenshot_border(void)
 
     if (game.screenshot_saved_success)
     {
-        set_blendmode(SDL_BLENDMODE_BLEND);
         draw_rect(0, 0, 320, 240, G2D_RGBA(196, 196, 20, border_alpha));
         draw_rect(1, 1, width - 2, height - 2, G2D_RGBA(196, 196, 20, border_alpha));
-        set_blendmode(SDL_BLENDMODE_NONE);
     }
     else
     {
-        set_blendmode(SDL_BLENDMODE_BLEND);
         draw_rect(0, 0, 320, 240, G2D_RGBA(196, 20, 20, border_alpha));
         draw_rect(1, 1, width - 2, height - 2, G2D_RGBA(196, 20, 20, border_alpha));
-        set_blendmode(SDL_BLENDMODE_NONE);
     }
 }
 
@@ -3389,10 +3365,8 @@ void Graphics::render_roomname(uint32_t font_flag, const char* roomname, int r, 
     }
     footerrect.y = 240 - footerrect.h;
 
-    set_blendmode(SDL_BLENDMODE_BLEND);
     fill_rect(&footerrect, G2D_RGBA(0, 0, 0, translucentroomname ? 127 : 255));
     font::print(font_flag | PR_CEN | PR_BOR | PR_CJK_LOW, -1, footerrect.y+1, roomname, r, g, b);
-    set_blendmode(SDL_BLENDMODE_NONE);
 }
 
 void Graphics::print_roomtext(int x, const int y, const char* text, const bool rtl)

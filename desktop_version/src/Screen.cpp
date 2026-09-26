@@ -108,5 +108,5 @@ bool Screen::isForcedFullscreen(void)
      * If you're working on a tenfoot-only build, add a def that always
      * returns true!
      */
-    return SDL_GetHintBoolean("SteamTenfoot", SDL_FALSE);
+    return true;
 }

@@ -319,9 +319,7 @@ namespace level_debugger
             g2dColor on = G2D_RGB(220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
             g2dColor off = G2D_RGB(220 / 1.5 - (help.glow), 220 / 1.5 - (help.glow), 255 / 1.5 - (help.glow / 2));
 
-            graphics.set_blendmode(SDL_BLENDMODE_BLEND);
             graphics.fill_rect(NULL, G2D_RGBA(0, 0, 0, 127));
-            graphics.set_blendmode(SDL_BLENDMODE_NONE);
 
             int x = 0;
             int y = 0;
