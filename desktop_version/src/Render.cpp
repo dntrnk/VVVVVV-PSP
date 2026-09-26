@@ -3484,8 +3484,8 @@ void maprender(void)
 
         if (graphics.flipmode)
         {
-            graphics.draw_flipsprite(34, FLIP(126, 17) + offset, 50, graphics.col_clock);
-            graphics.draw_flipsprite(270, FLIP(126, 17) + offset, 22, graphics.col_trinket);
+            graphics.draw_grid_tile_flipaware(graphics.grphx.im_sprites, 50, 34, FLIP(126, 17) + offset, 32, 32, graphics.col_clock);
+            graphics.draw_grid_tile_flipaware(graphics.grphx.im_sprites, 22, 270, FLIP(126, 17) + offset, 32, 32, graphics.col_trinket);
         }
         else
         {
