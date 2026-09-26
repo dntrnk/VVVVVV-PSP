@@ -1311,14 +1311,7 @@ bool FILESYSTEM_openDirectoryEnabled(void)
 
 bool FILESYSTEM_openDirectory(const char *dname)
 {
-    char url[MAX_PATH];
-    snprintf(url, sizeof(url), "file://%s", dname);
-    if (SDL_OpenURL(url) == -1)
-    {
-        vlog_error("Error opening directory: %s", SDL_GetError());
-        return false;
-    }
-    return true;
+    return false;
 }
 
 bool FILESYSTEM_delete(const char *name)
