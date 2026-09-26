@@ -19,6 +19,7 @@
 #include "LocalizationStorage.h"
 #include "Map.h"
 #include "Music.h"
+#include "Render.h"
 #include "Unreachable.h"
 #include "UtilityClass.h"
 #include "VFormat.h"
@@ -1222,6 +1223,7 @@ void scriptclass::run(void)
                 {
                     game.gamestate = GAMEMODE; /* to set prevgamestate */
                     game.mapmenuchange(TELEPORTERMODE, false);
+                    render_pause_first_frame = true;
 
                     game.useteleporter = false; //good heavens don't actually use it
                 }

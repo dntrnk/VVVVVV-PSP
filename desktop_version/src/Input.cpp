@@ -22,6 +22,7 @@
 #include "MakeAndPlay.h"
 #include "Map.h"
 #include "Music.h"
+#include "Render.h"
 #include "RoomnameTranslator.h"
 #include "Screen.h"
 #include "Script.h"
@@ -2677,6 +2678,7 @@ void gameinput(void)
                             {
                                 //Alright, normal teleporting
                                 game.mapmenuchange(TELEPORTERMODE, true);
+                                render_pause_first_frame = true;
 
                                 game.useteleporter = true;
                                 game.initteleportermode();
@@ -2877,6 +2879,7 @@ void gameinput(void)
         game.mapheld = true;
         //Quit menu, same conditions as in game menu
         game.mapmenuchange(MAPMODE, true);
+        render_pause_first_frame = true;
         game.gamesaved = false;
         game.gamesavefailed = false;
         game.menupage = 20; // The Map Page
@@ -2901,6 +2904,7 @@ void gameinput(void)
     {
         //Normal map screen, do transition later
         game.mapmenuchange(MAPMODE, true);
+        render_pause_first_frame = true;
         map.cursordelay = 0;
         map.cursorstate = 0;
         game.gamesaved = false;
@@ -2922,6 +2926,7 @@ void gameinput(void)
         game.mapheld = true;
         //Quit menu, same conditions as in game menu
         game.mapmenuchange(MAPMODE, true);
+        render_pause_first_frame = true;
         game.gamesaved = false;
         game.gamesavefailed = false;
         game.menupage = 30; // Pause screen

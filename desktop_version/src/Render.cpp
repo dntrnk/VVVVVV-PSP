@@ -35,6 +35,8 @@ static int tr;
 static int tg;
 static int tb;
 
+bool render_pause_first_frame = false;
+
 typedef enum {
     AR,
     CA,
@@ -2768,6 +2770,29 @@ void gamerender(void)
 
 void gamepausedrender(void)
 {
+    if (render_pause_first_frame)
+    {
+        render_pause_first_frame = false;
+
+        if (!game.blackout && !game.completestop)
+        {
+            for (size_t i = 0; i < obj.entities.size(); i++)
+            {
+                if (obj.entitycollidefloor(i))
+                    obj.entities[i].visualonground = 2;
+                else
+                    --obj.entities[i].visualonground;
+
+                if (obj.entitycollideroof(i))
+                    obj.entities[i].visualonroof = 2;
+                else
+                    --obj.entities[i].visualonroof;
+
+                obj.animateentities(i);
+            }
+        }
+    }
+
     if(!game.blackout)
     {
         if (map.towermode)
@@ -3615,17 +3640,29 @@ void maprender(void)
 
 void teleporterrender(void)
 {
+    const int offset = (int) graphics.lerp(graphics.oldmenuoffset, graphics.menuoffset);
+
+    if (offset != 0)
+    {
+        float old_alpha = graphics.alpha;
+        graphics.alpha = graphics.frozen_alpha;
+        gamepausedrender();
+        graphics.alpha = old_alpha;
+    }
+
+    g2dHelperFillRect(0, offset, 320, 240, G2D_BLACK);
+
     const int telex = map.teleporters[game.teleport_to_teleporter].x;
     const int teley = map.teleporters[game.teleport_to_teleporter].y;
 
-    draw_roomname_menu(0);
+    draw_roomname_menu(offset);
 
     //Background color
-    graphics.fill_rect(0, 12, 320, 240, G2D_RGB(10, 24, 26));
+    graphics.fill_rect(0, 12 + offset, 320, 240, G2D_RGB(10, 24, 26));
 
-    rendermap(0);
-    rendermapfog(0);
-    rendermapcursor(0, false);
+    rendermap(offset);
+    rendermapfog(offset);
+    rendermapcursor(offset, false);
 
     // Draw a box around the currently selected teleporter
 
@@ -3636,19 +3673,19 @@ void teleporterrender(void)
         //Draw the chosen destination coordinate!
         //TODO
         //draw the coordinates //destination
-        graphics.draw_rect(40 + data.xoff + (telex * 12 * data.zoom) + 1, 21 + data.yoff + (teley * 9 * data.zoom) + 1, 12 * data.zoom - 2, 9 * data.zoom - 2, G2D_RGB(245 - (help.glow * 2), 16, 16));
-        graphics.draw_rect(40 + data.xoff + (telex * 12 * data.zoom) + 3, 21 + data.yoff + (teley * 9 * data.zoom) + 3, 12 * data.zoom - 6, 9 * data.zoom - 6, G2D_RGB(245 - (help.glow * 2), 16, 16));
+        graphics.draw_rect(40 + data.xoff + (telex * 12 * data.zoom) + 1, 21 + data.yoff + (teley * 9 * data.zoom) + 1 + offset, 12 * data.zoom - 2, 9 * data.zoom - 2, G2D_RGB(245 - (help.glow * 2), 16, 16));
+        graphics.draw_rect(40 + data.xoff + (telex * 12 * data.zoom) + 3, 21 + data.yoff + (teley * 9 * data.zoom) + 3 + offset, 12 * data.zoom - 6, 9 * data.zoom - 6, G2D_RGB(245 - (help.glow * 2), 16, 16));
     }
 
     // Draw the legend itself
 
-    rendermaplegend(0);
+    rendermaplegend(offset);
 
     // Highlight the currently selected teleporter
 
     if (game.useteleporter && (help.slowsine % 16 > 8 || game.noflashingmode))
     {
-        font::print(PR_FONT_8X8 | PR_FULLBOR, data.legendxoff + data.xoff + (telex * 12 * data.zoom), data.legendyoff + data.yoff + (teley * 9 * data.zoom), "💿", 255, 0, 0);
+        font::print(PR_FONT_8X8 | PR_FULLBOR, data.legendxoff + data.xoff + (telex * 12 * data.zoom), data.legendyoff + data.yoff + (teley * 9 * data.zoom) + offset, "💿", 255, 0, 0);
     }
 
     graphics.cutscenebars();
@@ -3664,8 +3701,8 @@ void teleporterrender(void)
         );
 
         //Instructions!
-        font::print(PR_CEN, -1, 210, loc::gettext("Press Left/Right to choose a Teleporter"), 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
-        font::print(PR_CEN, -1, 225, final_string, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
+        font::print(PR_CEN, -1, 210 + offset, loc::gettext("Press Left/Right to choose a Teleporter"), 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
+        font::print(PR_CEN, -1, 225 + offset, final_string, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
     }
 
     graphics.drawgui();
@@ -3680,7 +3717,7 @@ void teleporterrender(void)
             vformat_button(ActionSet_InGame, Action_InGame_ACTION)
         );
 
-        font::print(PR_CEN | PR_BOR, -1, graphics.flipmode ? 228 : 5, buffer_adv, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
+        font::print(PR_CEN | PR_BOR, -1, (graphics.flipmode ? 228 : 5) + offset, buffer_adv, 220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
     }
 
     graphics.render();
