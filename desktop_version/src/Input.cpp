@@ -484,7 +484,7 @@ static void menuactionpress(void)
         case 1:
             //Bring you to the normal playmenu
             music.playef(Sound_VIRIDIAN);
-            game.editor_disabled = !BUTTONGLYPHS_keyboard_is_available();
+            game.editor_disabled = false; // There's level editor support on PSP
             game.createmenu(Menu::playerworlds);
             map.nexttowercolour();
             break;
@@ -659,7 +659,7 @@ static void menuactionpress(void)
     }
     case Menu::showlevelspath:
         music.playef(Sound_VIRIDIAN);
-        game.editor_disabled = !BUTTONGLYPHS_keyboard_is_available();
+        game.editor_disabled = false; // There's level editor support on PSP
         game.returntomenu(Menu::playerworlds);
         map.nexttowercolour();
         break;

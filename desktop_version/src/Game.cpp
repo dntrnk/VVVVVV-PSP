@@ -7600,7 +7600,7 @@ void Game::quittomenu(void)
         else
         {
             //Returning from editor
-            editor_disabled = !BUTTONGLYPHS_keyboard_is_available();
+            editor_disabled = false; // There's level editor support on PSP
             returntomenu(Menu::playerworlds);
         }
     }
