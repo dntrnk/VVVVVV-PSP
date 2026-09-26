@@ -610,10 +610,6 @@ int main(int argc, char *argv[])
         SDL_INIT_GAMECONTROLLER
     );
     VVV_TicksInit();
-    if (SDL_IsTextInputActive() == SDL_TRUE)
-    {
-        SDL_StopTextInput();
-    }
 
     controls_init();
 

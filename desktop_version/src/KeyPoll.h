@@ -75,6 +75,14 @@ public:
     int imebuffer_start;
     int imebuffer_length;
 
+    bool osk_active;
+    bool osk_done;
+    bool osk_just_closed;
+    std::string osk_result;
+    uint16_t osk_intext[256];
+    uint16_t osk_outtext[256];
+    int osk_status = 0;
+
     bool linealreadyemptykludge;
 
 private:

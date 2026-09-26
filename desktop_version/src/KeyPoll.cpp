@@ -1,6 +1,9 @@
 #define KEY_DEFINITION
 #include "KeyPoll.h"
 
+#include <pspgu.h>
+#include <psputility.h>
+
 #include <string.h>
 
 #include "Alloc.h"
@@ -61,28 +64,118 @@ KeyPoll::KeyPoll(void)
     linealreadyemptykludge = false;
 
     isActive = true;
+
+    osk_active = false;
+    osk_done = false;
+    osk_just_closed = false;
+    osk_result = "";
+    memset(osk_intext, 0, sizeof(osk_intext));
+    memset(osk_outtext, 0, sizeof(osk_outtext));
+
+    osk_status = sceUtilityOskGetStatus();
 }
 
 void KeyPoll::enabletextentry(void)
 {
-    keybuffer = "";
+    if (osk_active) return;
+    osk_active = true;
+
     imebuffer = "";
     imebuffer_start = 0;
     imebuffer_length = 0;
-    SDL_StartTextInput();
+
+    memset(osk_intext, 0, sizeof(osk_intext));
+    memset(osk_outtext, 0, sizeof(osk_outtext));
+
+    for (size_t i = 0; i < keybuffer.size() && i < 255; i++)
+    {
+        osk_intext[i] = (uint16_t)(unsigned char)keybuffer[i];
+    }
+
+    SceUtilityOskData oskData;
+    memset(&oskData, 0, sizeof(oskData));
+    oskData.language = PSP_UTILITY_OSK_LANGUAGE_ENGLISH;
+    oskData.lines = 1;
+    oskData.unk_24 = 0;
+    oskData.inputtype = PSP_UTILITY_OSK_INPUTTYPE_ALL;
+    oskData.desc = NULL;
+    oskData.intext = osk_intext;
+    oskData.outtext = osk_outtext;
+    oskData.outtextlength = sizeof(osk_outtext) / sizeof(osk_outtext[0]);
+    oskData.outtextlimit = 255;
+
+    SceUtilityOskParams oskParams;
+    memset(&oskParams, 0, sizeof(oskParams));
+    oskParams.base.size = sizeof(oskParams);
+    oskParams.base.language = PSP_UTILITY_OSK_LANGUAGE_ENGLISH;
+    oskParams.base.buttonSwap = PSP_UTILITY_ACCEPT_CROSS;
+    oskParams.base.graphicsThread = 0x11;
+    oskParams.base.accessThread = 0x13;
+    oskParams.base.fontThread = 0x12;
+    oskParams.base.soundThread = 0x10;
+    oskParams.datacount = 1;
+    oskParams.data = &oskData;
+
+    sceUtilityOskInitStart(&oskParams);
+
+    int done = 0;
+    while (!done)
+    {
+        // Тут надо бы нарисовать фон, но можно и просто clear
+        g2dClear(G2D_BLACK);
+
+        sceGuFinish();
+        sceGuSync(0, 0);
+
+        switch (sceUtilityOskGetStatus())
+        {
+        case PSP_UTILITY_DIALOG_INIT:
+            break;
+        case PSP_UTILITY_DIALOG_VISIBLE:
+            sceUtilityOskUpdate(1);
+            break;
+        case PSP_UTILITY_DIALOG_QUIT:
+            sceUtilityOskShutdownStart();
+            break;
+        case PSP_UTILITY_DIALOG_FINISHED:
+            break;
+        case PSP_UTILITY_DIALOG_NONE:
+            done = 1;
+            break;
+        default:
+            break;
+        }
+
+        g2dFlip(G2D_VSYNC);
+    }
+
+    keybuffer.clear();
+    for (int i = 0; osk_outtext[i] != 0 && i < 256; i++)
+    {
+        keybuffer += (char)(osk_outtext[i] & 0xFF);
+    }
+
+    osk_active = false;
+    osk_done = true;
+    osk_just_closed = true;
 }
 
 void KeyPoll::disabletextentry(void)
 {
-    SDL_StopTextInput();
     imebuffer = "";
     imebuffer_start = 0;
     imebuffer_length = 0;
+
+    if (osk_active)
+    {
+        sceUtilityOskShutdownStart();
+        osk_active = false;
+    }
 }
 
 bool KeyPoll::textentry(void)
 {
-    return SDL_IsTextInputActive() == SDL_TRUE;
+    return osk_active;
 }
 
 static int changemousestate(
@@ -262,36 +355,6 @@ void KeyPoll::Poll(void)
             
             BUTTONGLYPHS_keyboard_set_active(true);
 
-            if (textentry())
-            {
-                if (evt.key.keysym.sym == SDLK_BACKSPACE && !keybuffer.empty())
-                {
-                    keybuffer.erase(UTF8_backspace(keybuffer.c_str(), keybuffer.length()));
-                    if (keybuffer.empty())
-                    {
-                        linealreadyemptykludge = true;
-                    }
-                }
-                else if (    evt.key.keysym.sym == SDLK_v &&
-                        keymap[SDLK_LCTRL]    )
-                {
-                    char* text = SDL_GetClipboardText();
-                    if (text != NULL)
-                    {
-                        keybuffer += text;
-                        VVV_free(text);
-                    }
-                }
-                else if (    evt.key.keysym.sym == SDLK_x &&
-                        keymap[SDLK_LCTRL]    )
-                {
-                    if (SDL_SetClipboardText(keybuffer.c_str()) == 0)
-                    {
-                        keybuffer = "";
-                    }
-                }
-            }
-            break;
         }
         case SDL_KEYUP:
             keymap[evt.key.keysym.sym] = false;
@@ -299,23 +362,6 @@ void KeyPoll::Poll(void)
             {
                 pressedbackspace = false;
             }
-            break;
-        case SDL_TEXTINPUT:
-            if (!altpressed)
-            {
-                keybuffer += evt.text.text;
-            }
-            break;
-        case SDL_TEXTEDITING:
-            imebuffer = evt.edit.text;
-            imebuffer_start = evt.edit.start;
-            imebuffer_length = evt.edit.length;
-            break;
-        case SDL_TEXTEDITING_EXT:
-            imebuffer = evt.editExt.text;
-            imebuffer_start = evt.editExt.start;
-            imebuffer_length = evt.editExt.length;
-            free(evt.editExt.text);
             break;
 
         /* Mouse Input */
@@ -453,7 +499,6 @@ void KeyPoll::Poll(void)
                 hidemouse = true;
             }
             break;
-        case SDL_TEXTINPUT:
         case SDL_CONTROLLERBUTTONDOWN:
         case SDL_CONTROLLERAXISMOTION:
             hidemouse = true;

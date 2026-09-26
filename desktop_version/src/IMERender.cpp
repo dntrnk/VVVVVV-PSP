@@ -13,7 +13,7 @@ void ime_render(void)
 {
     render_done = false;
 
-    if (!SDL_IsTextInputActive() || key.imebuffer == "")
+    if (!osk_active || key.imebuffer == "")
     {
         return;
     }

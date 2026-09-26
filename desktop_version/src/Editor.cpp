@@ -2169,9 +2169,9 @@ static void input_submitted(void)
         ed.current_text_mode = TEXT_DESC2;
         ed.substate = EditorSubState_MENU_INPUT;
         reset_text_mode = false;
+        key.keybuffer = cl.Desc2;
         key.enabletextentry();
         ed.current_text_ptr = &(key.keybuffer);
-        key.keybuffer = cl.Desc2;
         break;
     case TEXT_DESC2:
         cl.Desc2 = key.keybuffer;
@@ -2179,11 +2179,11 @@ static void input_submitted(void)
         if (font::height(PR_FONT_LEVEL) <= 10)
         {
             ed.current_text_mode = TEXT_DESC3;
-            key.enabletextentry();
             ed.substate = EditorSubState_MENU_INPUT;
             reset_text_mode = false;
-            ed.current_text_ptr = &(key.keybuffer);
             key.keybuffer = cl.Desc3;
+            key.enabletextentry();
+            ed.current_text_ptr = &(key.keybuffer);
         }
         else
         {
@@ -2666,17 +2666,10 @@ static void editormenuactionpress(void)
 
             ed.current_text_mode = TEXT_TITLE;
             ed.substate = EditorSubState_MENU_INPUT;
+            key.keybuffer = cl.title;
+            music.playef(Sound_VIRIDIAN);
             key.enabletextentry();
             ed.current_text_ptr = &(key.keybuffer);
-
-            if (title_is_gettext)
-            {
-                key.keybuffer = "";
-            }
-            else
-            {
-                key.keybuffer = cl.title;
-            }
             break;
         }
         case 1:
@@ -2685,42 +2678,39 @@ static void editormenuactionpress(void)
 
             ed.current_text_mode = TEXT_CREATOR;
             ed.substate = EditorSubState_MENU_INPUT;
+            key.keybuffer = cl.creator;
+            music.playef(Sound_VIRIDIAN);
             key.enabletextentry();
             ed.current_text_ptr = &(key.keybuffer);
-            if (creator_is_gettext)
-            {
-                key.keybuffer = "";
-            }
-            else
-            {
-                key.keybuffer = cl.creator;
-            }
             break;
         }
         case 2:
             ed.current_text_mode = TEXT_DESC1;
             ed.substate = EditorSubState_MENU_INPUT;
+            key.keybuffer = cl.Desc1;
+            music.playef(Sound_VIRIDIAN);
             key.enabletextentry();
             ed.current_text_ptr = &(key.keybuffer);
-            key.keybuffer = cl.Desc1;
             break;
         case 3:
             ed.current_text_mode = TEXT_WEBSITE;
             ed.substate = EditorSubState_MENU_INPUT;
+            key.keybuffer=cl.website;
+            music.playef(Sound_VIRIDIAN);
             key.enabletextentry();
             ed.current_text_ptr = &(key.keybuffer);
-            key.keybuffer=cl.website;
             break;
         case 4:
+            music.playef(Sound_VIRIDIAN);
             game.createmenu(Menu::ed_font);
             map.nexttowercolour();
             break;
         case 5:
+            music.playef(Sound_VIRIDIAN);
             game.returnmenu();
             map.nexttowercolour();
             break;
         }
-        music.playef(Sound_VIRIDIAN);
         break;
     case Menu::ed_settings:
         switch (game.currentmenuoption)
@@ -3139,7 +3129,7 @@ void editorclass::get_input_line(const enum TextMode mode, const std::string& pr
     current_text_mode = mode;
     current_text_ptr = ptr;
     current_text_desc = prompt;
-    key.enabletextentry();
+
     if (ptr)
     {
         key.keybuffer = *ptr;
@@ -3151,6 +3141,8 @@ void editorclass::get_input_line(const enum TextMode mode, const std::string& pr
     }
 
     old_entity_text = key.keybuffer;
+
+    key.enabletextentry();
 }
 
 void editorinput(void)
@@ -3524,8 +3516,9 @@ void editorinput(void)
                 ed.substate = EditorSubState_MAIN;
             }
 
-            if (enter_pressed)
+            if (key.osk_just_closed)
             {
+                key.osk_just_closed = false;
                 input_submitted();
             }
             break;
@@ -3643,8 +3636,9 @@ void editorinput(void)
                 music.playef(Sound_VIRIDIAN);
             }
 
-            if (enter_pressed)
+            if (key.osk_just_closed)
             {
+                key.osk_just_closed = false;
                 input_submitted();
             }
             break;
@@ -3723,8 +3717,9 @@ void editorinput(void)
                 {
                     game.mapheld = true;
                     ed.substate = EditorSubState_SCRIPTS_EDIT;
-                    key.enabletextentry();
                     key.keybuffer = "";
+                    music.playef(Sound_VIRIDIAN);
+                    key.enabletextentry();
                     ed.current_text_ptr = &(key.keybuffer);
                     ed.current_script = script.customscripts[(script.customscripts.size() - 1) - ed.selected_script].name;
                     ed.load_script_in_editor(ed.current_script);
@@ -3734,8 +3729,6 @@ void editorinput(void)
 
                     key.keybuffer = ed.script_buffer[ed.script_cursor_y];
                     ed.script_cursor_x = UTF8_total_codepoints(ed.script_buffer[ed.script_cursor_y].c_str());
-
-                    music.playef(Sound_VIRIDIAN);
                 }
             }
             break;
