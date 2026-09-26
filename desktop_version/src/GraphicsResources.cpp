@@ -43,10 +43,6 @@ static int _get_or_add_palette_color(g2dColor color, g2dColor *palette, int *pal
 static void _g2dApplyFormat(g2dImage *tex, g2dColor *rgba_buffer, int target_hw_format);
 static void _g2dSwizzle(g2dImage *tex);
 static int _g2dPaletteLookup(g2dColor c, g2dColor *palette, int count, int max_colors);
-static g2dImage *_g2dCreateTileFromRGBA(const g2dColor *src, int src_w,
-                                        int src_x, int src_y,
-                                        int tile_w, int tile_h,
-                                        int hw_format, bool use_swizzle);
 
 // Used to load PNG data
 extern "C"
@@ -92,143 +88,6 @@ static void _png_mem_read(png_structp png, png_bytep out, png_size_t len)
 
 static void _png_error_dummy(png_structp, png_const_charp) {}
 static void _png_warn_dummy(png_structp, png_const_charp) {}
-
-static SDL_Surface* LoadImageRaw(const char* filename, unsigned char** data)
-{
-    *data = NULL;
-
-    SDL_Surface* loadedImage = NULL;
-
-    unsigned int width, height;
-    unsigned int error;
-
-    unsigned char* fileIn;
-    size_t length;
-    FILESYSTEM_loadAssetToMemory(filename, &fileIn, &length);
-    if (fileIn == NULL)
-    {
-        assert(0 && "Image file missing!");
-        return NULL;
-    }
-    error = lodepng_decode32(data, &width, &height, fileIn, length);
-    VVV_free(fileIn);
-
-    if (error != 0)
-    {
-        vlog_error("Could not load %s: %s", filename, lodepng_error_text(error));
-        return NULL;
-    }
-
-    loadedImage = SDL_CreateRGBSurfaceWithFormatFrom(
-        *data,
-        width,
-        height,
-        32,
-        width * 4,
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-        SDL_PIXELFORMAT_RGBA8888
-#else
-        SDL_PIXELFORMAT_ABGR8888
-#endif
-    );
-
-    return loadedImage;
-}
-
-static SDL_Surface* LoadSurfaceFromRaw(SDL_Surface* loadedImage)
-{
-    SDL_Surface* optimizedImage = SDL_ConvertSurfaceFormat(
-        loadedImage,
-        SDL_PIXELFORMAT_ARGB8888,
-        0
-    );
-    SDL_SetSurfaceBlendMode(optimizedImage, SDL_BLENDMODE_BLEND);
-    return optimizedImage;
-}
-
-SDL_Surface* LoadImageSurface(const char* filename)
-{
-    unsigned char* data;
-
-    SDL_Surface* loadedImage = LoadImageRaw(filename, &data);
-
-    SDL_Surface* optimizedImage = LoadSurfaceFromRaw(loadedImage);
-    if (loadedImage != NULL)
-    {
-        VVV_freefunc(SDL_FreeSurface, loadedImage);
-    }
-
-    VVV_free(data);
-
-    if (optimizedImage == NULL)
-    {
-        vlog_error("Image not found: %s", filename);
-        assert(0 && "Image not found! See stderr.");
-    }
-
-    return optimizedImage;
-}
-
-static SDL_Texture* LoadTextureFromRaw(const char* filename, SDL_Surface* loadedImage, const TextureLoadType loadtype)
-{
-    if (loadedImage == NULL)
-    {
-        return NULL;
-    }
-
-    // Modify the surface with the load type.
-    // This could be done in LoadImageRaw, however currently, surfaces are only used for
-    // pixel perfect collision (which will be changed later) and the window icon.
-
-    switch (loadtype)
-    {
-    case TEX_WHITE:
-        SDL_LockSurface(loadedImage);
-        for (int y = 0; y < loadedImage->h; y++)
-        {
-            for (int x = 0; x < loadedImage->w; x++)
-            {
-                g2dColor color = ReadPixel(loadedImage, x, y);
-                color = G2D_WHITE;
-                DrawPixel(loadedImage, x, y, color);
-            }
-        }
-        SDL_UnlockSurface(loadedImage);
-        break;
-    case TEX_GRAYSCALE:
-        SDL_LockSurface(loadedImage);
-        for (int y = 0; y < loadedImage->h; y++)
-        {
-            for (int x = 0; x < loadedImage->w; x++)
-            {
-                g2dColor color = ReadPixel(loadedImage, x, y);
-
-                // Magic numbers used for grayscaling (eyes perceive certain colors brighter than others)
-                Uint8 r = G2D_GET_R(color) * 0.299;
-                Uint8 g = G2D_GET_G(color) * 0.587;
-                Uint8 b = G2D_GET_B(color) * 0.114;
-
-                const double gray = floor(r + g + b + 0.5);
-
-                color = G2D_RGB(gray, gray, gray);
-                DrawPixel(loadedImage, x, y, color);
-            }
-        }
-        SDL_UnlockSurface(loadedImage);
-        break;
-    default:
-        break;
-    }
-
-    //Create texture from surface pixels
-    SDL_Texture* texture = SDL_CreateTextureFromSurface(gameScreen.m_renderer, loadedImage);
-    if (texture == NULL)
-    {
-        vlog_error("Failed creating texture: %s. SDL error: %s\n", filename, SDL_GetError());
-    }
-
-    return texture;
-}
 
 #define GR_MAX_TEX_SIZE 512
 
@@ -663,7 +522,7 @@ pass1_done:
     return tiled;
 }
 
-g2dImage* G2DLoadImage(const char* filename, const TextureLoadType loadtype, g2dTexFormat format, uint32_t (*collision_surface)[16] /*= NULL*/)
+g2dImage* LoadImage(const char* filename, const TextureLoadType loadtype, g2dTexFormat format, uint32_t (*collision_surface)[16] /*= NULL*/)
 {
     unsigned char* fileIn = NULL;
     size_t length = 0;
@@ -841,45 +700,17 @@ g2dImage* G2DLoadImage(const char* filename, const TextureLoadType loadtype, g2d
     return resultTex;
 }
 
-g2dImage* G2DLoadImage(const char* filename, g2dTexFormat format)
+g2dImage* LoadImage(const char* filename, g2dTexFormat format)
 {
-    return G2DLoadImage(filename, TEX_COLOR, format);
+    return LoadImage(filename, TEX_COLOR, format);
 }
 
 /* Any unneeded variants can be NULL */
-static void G2DLoadVariants(const char* filename, g2dTexFormat format, g2dImage** colored, g2dImage** white, g2dImage** grayscale)
+static void LoadVariants(const char* filename, g2dTexFormat format, g2dImage** colored, g2dImage** white, g2dImage** grayscale)
 {
-    if (colored != NULL) *colored = G2DLoadImage(filename, TEX_COLOR, format);
-    if (white != NULL) *white = G2DLoadImage(filename, TEX_WHITE, G2D_CLUT4);
-    if (grayscale != NULL) *grayscale = G2DLoadImage(filename, TEX_GRAYSCALE, format);
-}
-
-/* The pointers `texture` and `surface` cannot be NULL */
-static void LoadSprites(const char* filename, SDL_Texture** texture, SDL_Surface** surface)
-{
-    unsigned char* data;
-    SDL_Surface* loadedImage = LoadImageRaw(filename, &data);
-
-    *surface = LoadSurfaceFromRaw(loadedImage);
-    if (*surface == NULL)
-    {
-        vlog_error("Image not found: %s", filename);
-        assert(0 && "Image not found! See stderr.");
-    }
-
-    *texture = LoadTextureFromRaw(filename, loadedImage, TEX_WHITE);
-    if (*texture == NULL)
-    {
-        vlog_error("Image not found: %s", filename);
-        assert(0 && "Image not found! See stderr.");
-    }
-
-    if (loadedImage != NULL)
-    {
-        VVV_freefunc(SDL_FreeSurface, loadedImage);
-    }
-
-    VVV_free(data);
+    if (colored != NULL) *colored = LoadImage(filename, TEX_COLOR, format);
+    if (white != NULL) *white = LoadImage(filename, TEX_WHITE, G2D_CLUT4);
+    if (grayscale != NULL) *grayscale = LoadImage(filename, TEX_GRAYSCALE, format);
 }
 
 static void LoadSpritesTranslation(
@@ -1151,29 +982,29 @@ void GraphicsResources::init_translations(void)
 void GraphicsResources::init(void)
 {
 
-    G2DLoadVariants("graphics/tiles.png", G2D_CLUT8, &im_tiles, &im_tiles_white, &im_tiles_tint);
-    G2DLoadVariants("graphics/tiles2.png", G2D_CLUT8, &im_tiles2, NULL, &im_tiles2_tint);
-    G2DLoadVariants("graphics/entcolours.png", G2D_CLUT8, &im_entcolours, NULL, &im_entcolours_tint);
+    LoadVariants("graphics/tiles.png", G2D_CLUT8, &im_tiles, &im_tiles_white, &im_tiles_tint);
+    LoadVariants("graphics/tiles2.png", G2D_CLUT8, &im_tiles2, NULL, &im_tiles2_tint);
+    LoadVariants("graphics/entcolours.png", G2D_CLUT8, &im_entcolours, NULL, &im_entcolours_tint);
 
-    im_sprites = G2DLoadImage("graphics/sprites.png", TEX_WHITE, G2D_CLUT4, sprites_collision_surface_normal);
-    im_flipsprites = G2DLoadImage("graphics/flipsprites.png", TEX_WHITE, G2D_CLUT4, sprites_collision_surface_flipped);
+    im_sprites = LoadImage("graphics/sprites.png", TEX_WHITE, G2D_CLUT4, sprites_collision_surface_normal);
+    im_flipsprites = LoadImage("graphics/flipsprites.png", TEX_WHITE, G2D_CLUT4, sprites_collision_surface_flipped);
     if (im_flipsprites) g2dTexFree(&im_flipsprites);
 
-    im_tiles3 = G2DLoadImage("graphics/tiles3.png", G2D_CLUT8);
-    im_teleporter = G2DLoadImage("graphics/teleporter.png", TEX_WHITE, G2D_CLUT4);
+    im_tiles3 = LoadImage("graphics/tiles3.png", G2D_CLUT8);
+    im_teleporter = LoadImage("graphics/teleporter.png", TEX_WHITE, G2D_CLUT4);
 
-    im_image0 = G2DLoadImage("graphics/levelcomplete.png", G2D_CLUT4);
-    im_image1 = G2DLoadImage("graphics/minimap.png", G2D_CLUT8);
-    im_image2 = G2DLoadImage("graphics/covered.png", G2D_CLUT8);
-    im_image3 = G2DLoadImage("graphics/elephant.png", TEX_WHITE, G2D_CLUT4);
-    im_image4 = G2DLoadImage("graphics/gamecomplete.png", G2D_CLUT4);
-    im_image5 = G2DLoadImage("graphics/fliplevelcomplete.png", G2D_CLUT4);
-    im_image6 = G2DLoadImage("graphics/flipgamecomplete.png", G2D_CLUT4);
-    im_image7 = G2DLoadImage("graphics/site.png", TEX_WHITE, G2D_CLUT4);
-    im_image8 = G2DLoadImage("graphics/site2.png", TEX_WHITE, G2D_CLUT4);
-    im_image9 = G2DLoadImage("graphics/site3.png", TEX_WHITE, G2D_CLUT4);
-    im_image10 = G2DLoadImage("graphics/ending.png", G2D_CLUT4);
-    im_image11 = G2DLoadImage("graphics/site4.png", TEX_WHITE, G2D_CLUT4);
+    im_image0 = LoadImage("graphics/levelcomplete.png", G2D_CLUT4);
+    im_image1 = LoadImage("graphics/minimap.png", G2D_CLUT8);
+    im_image2 = LoadImage("graphics/covered.png", G2D_CLUT8);
+    im_image3 = LoadImage("graphics/elephant.png", TEX_WHITE, G2D_CLUT4);
+    im_image4 = LoadImage("graphics/gamecomplete.png", G2D_CLUT4);
+    im_image5 = LoadImage("graphics/fliplevelcomplete.png", G2D_CLUT4);
+    im_image6 = LoadImage("graphics/flipgamecomplete.png", G2D_CLUT4);
+    im_image7 = LoadImage("graphics/site.png", TEX_WHITE, G2D_CLUT4);
+    im_image8 = LoadImage("graphics/site2.png", TEX_WHITE, G2D_CLUT4);
+    im_image9 = LoadImage("graphics/site3.png", TEX_WHITE, G2D_CLUT4);
+    im_image10 = LoadImage("graphics/ending.png", G2D_CLUT4);
+    im_image11 = LoadImage("graphics/site4.png", TEX_WHITE, G2D_CLUT4);
 
     im_sprites_translated = NULL;
 
@@ -1214,99 +1045,6 @@ void GraphicsResources::destroy(void)
 
     CLEAR(im_sprites_translated);
 #undef CLEAR
-}
-
-bool SaveImage(const SDL_Surface* surface, const char* filename)
-{
-    unsigned char* out;
-    size_t outsize;
-    unsigned int error;
-    bool success;
-
-    error = lodepng_encode24(
-        &out, &outsize,
-        (const unsigned char*) surface->pixels,
-        surface->w, surface->h
-    );
-
-    if (error != 0)
-    {
-        vlog_error("Could not save image: %s", lodepng_error_text(error));
-        return false;
-    }
-
-    success = FILESYSTEM_saveFile(filename, out, outsize);
-    free(out);
-
-    if (!success)
-    {
-        vlog_error("Could not save image");
-    }
-
-    return success;
-}
-
-bool SaveScreenshot(void)
-{
-    static time_t last_time = 0;
-    static int subsecond_counter = 0;
-
-    bool success = TakeScreenshot(&graphics.tempScreenshot);
-    if (!success)
-    {
-        vlog_error("Could not take screenshot");
-        return false;
-    }
-
-    const time_t now = time(NULL);
-    const tm* date = localtime(&now);
-
-    if (now != last_time)
-    {
-        last_time = now;
-        subsecond_counter = 0;
-    }
-    subsecond_counter++;
-
-    char timestamp[32];
-    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d_%H-%M-%S", date);
-
-    char name[32];
-    if (subsecond_counter > 1)
-    {
-        snprintf(name, sizeof(name), "%s_%i", timestamp, subsecond_counter);
-    }
-    else
-    {
-        strlcpy(name, timestamp, sizeof(name));
-    }
-
-    char filename[64];
-    snprintf(filename, sizeof(filename), "screenshots/1x/%s_1x.png", name);
-
-    success = SaveImage(graphics.tempScreenshot, filename);
-    if (!success)
-    {
-        return false;
-    }
-
-    success = UpscaleScreenshot2x(graphics.tempScreenshot, &graphics.tempScreenshot2x);
-    if (!success)
-    {
-        vlog_error("Could not upscale screenshot to 2x");
-        return false;
-    }
-
-    snprintf(filename, sizeof(filename), "screenshots/2x/%s_2x.png", name);
-
-    success = SaveImage(graphics.tempScreenshot2x, filename);
-    if (!success)
-    {
-        return false;
-    }
-
-    vlog_info("Saved screenshot %s", name);
-    return true;
 }
 
 static int _get_or_add_palette_color(g2dColor color, g2dColor *palette, int *pal_count, int max_colors) {
@@ -1436,43 +1174,4 @@ static int _g2dPaletteLookup(g2dColor c, g2dColor *palette, int count,
         }
     }
     return 0;
-}
-
-static g2dImage *_g2dCreateTileFromRGBA(const g2dColor *src, int src_w,
-                                        int src_x, int src_y,
-                                        int tile_w, int tile_h,
-                                        int hw_format, bool use_swizzle) {
-    g2dImage *tile = (g2dImage *)calloc(1, sizeof(g2dImage));
-    if (!tile) return NULL;
-
-    tile->w = tile_w;
-    tile->h = tile_h;
-    tile->tw = 1; while (tile->tw < tile_w) tile->tw <<= 1;
-    tile->th = 1; while (tile->th < tile_h) tile->th <<= 1;
-    tile->ratio = (float)tile_w / (float)tile_h;
-    tile->can_blend = true;
-    tile->tiled = false;
-    tile->cols = tile->rows = 1;
-    tile->format = hw_format;
-    tile->palette = NULL;
-    tile->data = NULL;
-
-    int total_pixels = tile->tw * tile->th;
-    g2dColor *rgba = (g2dColor *)malloc(total_pixels * sizeof(g2dColor));
-    if (!rgba) { free(tile); return NULL; }
-    memset(rgba, 0, total_pixels * sizeof(g2dColor));
-
-    for (int y = 0; y < tile_h; y++) {
-        const g2dColor *srow = src + (src_y + y) * src_w + src_x;
-        g2dColor *drow = rgba + y * tile->tw;
-        memcpy(drow, srow, tile_w * sizeof(g2dColor));
-    }
-
-    _g2dApplyFormat(tile, rgba, hw_format);
-    if (!tile->data) { g2dTexFree(&tile); return NULL; }
-
-    if (use_swizzle && tile->tw >= 16) {
-        _g2dSwizzle(tile);
-    }
-    return tile;
 }

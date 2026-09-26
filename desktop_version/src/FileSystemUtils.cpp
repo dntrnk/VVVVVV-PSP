@@ -34,7 +34,6 @@ static char* basePath = NULL;
 static char writeDir[MAX_PATH] = {'\0'};
 static char saveDir[MAX_PATH] = {'\0'};
 static char levelDir[MAX_PATH] = {'\0'};
-static char screenshotDir[MAX_PATH] = {'\0'};
 static char mainLangDir[MAX_PATH] = {'\0'};
 static bool isMainLangDirFromRepo = false;
 static bool doesLangDirExist = false;
@@ -238,29 +237,6 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
     sceIoMkdir(levelDir, 0777);
     strlcat(levelDir, pathSep, sizeof(levelDir));
     vlog_info("Level directory: %s", levelDir);
-
-    /* Store full screenshot directory */
-    snprintf(screenshotDir, sizeof(screenshotDir), "%s%s",
-        writeDir,
-        "screenshots"
-    );
-    sceIoMkdir(screenshotDir, 0777);
-    strlcat(screenshotDir, pathSep, sizeof(screenshotDir));
-    vlog_info("Screenshot directory: %s", screenshotDir);
-
-    /* We also need to make the subdirectories */
-    {
-        char temp[MAX_PATH];
-        snprintf(temp, sizeof(temp), "%s%s",
-            screenshotDir, "1x"
-        );
-        sceIoMkdir(temp, 0777);
-
-        snprintf(temp, sizeof(temp), "%s%s",
-            screenshotDir, "2x"
-        );
-        sceIoMkdir(temp, 0777);
-    }
 
     basePath = VVV_GetBasePath();
 

@@ -378,7 +378,7 @@ int main(int argc, char *argv[])
     char* assetsPath = NULL;
     char* langDir = NULL;
     char* fontsDir = NULL;
-    bool seed_use_sdl_getticks = false;
+    bool seed_use_vvv_getticks = false;
     bool open_console = false;
     bool print_version = false;
     bool print_addresses = false;
@@ -521,7 +521,7 @@ int main(int argc, char *argv[])
 #endif
         else if (ARG("-seed-use-sdl-getticks"))
         {
-            seed_use_sdl_getticks = true;
+            seed_use_vvv_getticks = true;
         }
 #undef ARG_INNER
 #undef ARG
@@ -652,7 +652,7 @@ int main(int argc, char *argv[])
     graphics.init();
 
     game.init();
-    game.seed_use_sdl_getticks = seed_use_sdl_getticks;
+    game.seed_use_vvv_getticks = seed_use_vvv_getticks;
 
     game.gamestate = PRELOADER;
 
@@ -704,8 +704,6 @@ int main(int argc, char *argv[])
     loc::loadtext(false);
     loc::loadlanguagelist();
     game.createmenu(Menu::mainmenu);
-
-    graphics.create_buffers();
 
     if (game.skipfakeload)
         game.gamestate = TITLEMODE;
@@ -886,8 +884,6 @@ static void cleanup(void)
     }
 
     graphics.grphx.destroy();
-    graphics.destroy_buffers();
-    graphics.destroy();
     font::bidi_destroy();
     font::destroy();
     gameScreen.destroy();

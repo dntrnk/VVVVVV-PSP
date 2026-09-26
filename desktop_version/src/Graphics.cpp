@@ -106,10 +106,6 @@ void Graphics::init(void)
     // initialize everything else to zero
     m = 0;
     linedelay = 0;
-    gameTexture = NULL;
-    ghostTexture = NULL;
-    tempScreenshot = NULL;
-    tempScreenshot2x = NULL;
     towerbg = TowerBG();
     titlebg = TowerBG();
     trinketr = 0;
@@ -146,52 +142,6 @@ void Graphics::init(void)
     levelcomplete_mounted = false;
     flipgamecomplete_mounted = false;
     fliplevelcomplete_mounted = false;
-}
-
-void Graphics::destroy(void)
-{
-#define CLEAR_ARRAY(name) \
-    for (size_t i = 0; i < name.size(); i += 1) \
-    { \
-        VVV_freefunc(SDL_FreeSurface, name[i]); \
-    } \
-    name.clear();
-
-#undef CLEAR_ARRAY
-}
-
-void Graphics::create_buffers(void)
-{
-#define CREATE_TEXTURE_WITH_DIMENSIONS(w, h) \
-    SDL_CreateTexture( \
-        gameScreen.m_renderer, \
-        SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, \
-        (w), (h) \
-    )
-#define CREATE_TEXTURE \
-    CREATE_TEXTURE_WITH_DIMENSIONS(SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS)
-#define CREATE_SCROLL_TEXTURE \
-    CREATE_TEXTURE_WITH_DIMENSIONS(SCREEN_WIDTH_PIXELS + 16, SCREEN_WIDTH_PIXELS + 16)
-
-    gameTexture = CREATE_TEXTURE;
-    ghostTexture = CREATE_TEXTURE;
-
-#undef CREATE_SCROLL_TEXTURE
-#undef CREATE_TEXTURE
-#undef CREATE_TEXTURE_WITH_DIMENSIONS
-
-    SDL_SetTextureScaleMode(
-        gameTexture,
-        gameScreen.isFiltered ? SDL_ScaleModeLinear : SDL_ScaleModeNearest
-    );
-}
-
-void Graphics::destroy_buffers(void)
-{
-    VVV_freefunc(SDL_DestroyTexture, gameTexture);
-    VVV_freefunc(SDL_DestroyTexture, ghostTexture);
-    VVV_freefunc(SDL_FreeSurface, tempScreenshot);
-    VVV_freefunc(SDL_FreeSurface, tempScreenshot2x);
 }
 
 void Graphics::drawspritesetcol(int x, int y, int t, int c)
@@ -410,46 +360,6 @@ void Graphics::print_level_creator(
     font::print(print_flags, text_x, y, creator, r, g, b);
 }
 
-int Graphics::set_render_target(SDL_Texture* texture)
-{
-    const int result = SDL_SetRenderTarget(gameScreen.m_renderer, texture);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not set render target: %s", SDL_GetError()));
-    }
-    return result;
-}
-
-int Graphics::set_texture_color_mod(SDL_Texture* texture, const Uint8 r, const Uint8 g, const Uint8 b)
-{
-    const int result = SDL_SetTextureColorMod(texture, r, g, b);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not set texture color mod: %s", SDL_GetError()));
-    }
-    return result;
-}
-
-int Graphics::set_texture_alpha_mod(SDL_Texture* texture, const Uint8 alpha)
-{
-    const int result = SDL_SetTextureAlphaMod(texture, alpha);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not set texture alpha mod: %s", SDL_GetError()));
-    }
-    return result;
-}
-
-int Graphics::query_texture(SDL_Texture* texture, Uint32* format, int* access, int* w, int* h)
-{
-    const int result = SDL_QueryTexture(texture, format, access, w, h);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not query texture: %s", SDL_GetError()));
-    }
-    return result;
-}
-
 int Graphics::clear(const int r, const int g, const int b, const int a)
 {
     // const int result = SDL_RenderClear(gameScreen.m_renderer);
@@ -495,34 +405,6 @@ bool Graphics::substitute(g2dImage** texture)
 
     *texture = subst;
     return true;
-}
-
-int Graphics::copy_texture(SDL_Texture* texture, const VVV_Rect* src, const VVV_Rect* dest)
-{
-    // bool is_substituted = substitute(&texture);
-
-    // const int result = SDL_RenderCopy(gameScreen.m_renderer, texture, src, dest);
-    const int result = 0;
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not copy texture: %s", SDL_GetError()));
-    }
-
-    return result;
-}
-
-int Graphics::copy_texture(SDL_Texture* texture, const VVV_Rect* src, const VVV_Rect* dest, const double angle, const VVV_Point* center, const SDL_RendererFlip flip)
-{
-    // bool is_substituted = substitute(&texture);
-
-    // const int result = SDL_RenderCopyEx(gameScreen.m_renderer, texture, src, dest, angle, center, flip);
-    const int result = 0;
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not copy texture: %s", SDL_GetError()));
-    }
-
-    return result;
 }
 
 void Graphics::fill_rect(const VVV_Rect* rect, const g2dColor color)
@@ -3061,17 +2943,11 @@ void Graphics::screenshake(void)
     //     ApplyFilter();
     // }
 
-    // draw_screenshot_border();
-
     // Clear the gameplay texture so blackout() is actually black after a screenshake
     // if (game.screenshake > 0 && !game.noflashingmode)
     // {
     //     g2dHelperClear(G2D_BLACK);
     // }
-
-    // VVV_Rect rect = {0, 0, 480, 272};
-
-    // copy_texture(tempShakeTexture, NULL, &rect, 0, NULL, flipmode ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE);
 
     g2dScreenOffsetX = screenshake_x;
     g2dScreenOffsetY = screenshake_y;
@@ -3086,7 +2962,6 @@ void Graphics::updatescreenshake(void)
 void Graphics::render(void)
 {
     ime_render();
-    draw_screenshot_border();
 
     // if (gameScreen.badSignalEffect)
     // {
@@ -3096,8 +2971,6 @@ void Graphics::render(void)
     VVV_Rect stretch_info = {0, 0, 320, 240};
 
     ime_set_rect(&stretch_info);
-
-    // copy_texture(gameTexture, NULL, &stretch_info, 0, NULL, flipmode ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE);
 }
 
 void Graphics::renderwithscreeneffects(void)
@@ -3134,7 +3007,7 @@ void Graphics::renderfixedpre(void)
 
     if (gameScreen.badSignalEffect)
     {
-        UpdateFilter();
+        // UpdateFilter();
     }
 }
 
@@ -3148,41 +3021,6 @@ void Graphics::renderfixedpost(void)
     if (game.screenshake > 0)
     {
         --game.screenshake;
-    }
-
-    game.old_screenshot_border_timer = game.screenshot_border_timer;
-    if (game.screenshot_border_timer > 0)
-    {
-        game.screenshot_border_timer -= 15;
-    }
-}
-
-void Graphics::draw_screenshot_border(void)
-{
-    const int border_alpha = lerp(game.old_screenshot_border_timer, game.screenshot_border_timer);
-
-    if (border_alpha <= 100)
-    {
-        return;
-    }
-
-    int width = 0;
-    int height = 0;
-    int result = query_texture(gameTexture, NULL, NULL, &width, &height);
-    if (result != 0)
-    {
-        return;
-    }
-
-    if (game.screenshot_saved_success)
-    {
-        draw_rect(0, 0, 320, 240, G2D_RGBA(196, 196, 20, border_alpha));
-        draw_rect(1, 1, width - 2, height - 2, G2D_RGBA(196, 196, 20, border_alpha));
-    }
-    else
-    {
-        draw_rect(0, 0, 320, 240, G2D_RGBA(196, 20, 20, border_alpha));
-        draw_rect(1, 1, width - 2, height - 2, G2D_RGBA(196, 20, 20, border_alpha));
     }
 }
 
@@ -3214,36 +3052,6 @@ bool Graphics::onscreen(int t)
 }
 
 bool Graphics::checktexturesize(
-    const char* filename, SDL_Texture* texture,
-    const int tilewidth, const int tileheight
-) {
-    int texturewidth;
-    int textureheight;
-    if (query_texture(texture, NULL, NULL, &texturewidth, &textureheight) != 0)
-    {
-        /* Just give it the benefit of the doubt. */
-        vlog_warn(
-            "Assuming the dimensions of %s are exact multiples of %i by %i!",
-            filename, tilewidth, tileheight
-        );
-        return true;
-    }
-
-    const bool valid = texturewidth % tilewidth == 0 && textureheight % tileheight == 0;
-    if (!valid)
-    {
-        FILESYSTEM_setLevelDirError(
-            loc::gettext("{filename} dimensions not exact multiples of {width} by {height}!"),
-            "filename:str, width:int, height:int",
-            filename, tilewidth, tileheight
-        );
-        return false;
-    }
-
-    return true;
-}
-
-bool Graphics::checktexturesize(
     const char* filename, g2dImage* texture,
     const int tilewidth, const int tileheight
 ) {
@@ -3264,27 +3072,6 @@ bool Graphics::checktexturesize(
     return true;
 }
 
-static void make_array(
-    SDL_Surface** tilesheet,
-    std::vector<SDL_Surface*>& vector,
-    const int tile_square
-) {
-    int j;
-    for (j = 0; j < (*tilesheet)->h / tile_square; j++)
-    {
-        int i;
-        for (i = 0; i < (*tilesheet)->w / tile_square; i++)
-        {
-            SDL_Surface* temp = GetSubSurface(
-                *tilesheet,
-                i * tile_square, j * tile_square,
-                tile_square, tile_square
-            );
-            vector.push_back(temp);
-        }
-    }
-}
-
 bool Graphics::reloadresources(void)
 {
     grphx.destroy();
@@ -3296,8 +3083,6 @@ bool Graphics::reloadresources(void)
     MAYBE_FAIL(checktexturesize("entcolours.png", grphx.im_entcolours, 8, 8));
     MAYBE_FAIL(checktexturesize("sprites.png", grphx.im_sprites, 32, 32));
     MAYBE_FAIL(checktexturesize("teleporter.png", grphx.im_teleporter, 96, 96));
-
-    destroy();
 
     images[IMAGE_LEVELCOMPLETE] = grphx.im_image0;
     images[IMAGE_MINIMAP] = grphx.im_image1;

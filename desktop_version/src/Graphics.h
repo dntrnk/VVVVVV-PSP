@@ -47,10 +47,6 @@ class Graphics
 {
 public:
     void init(void);
-    void destroy(void);
-
-    void create_buffers(void);
-    void destroy_buffers(void);
 
     GraphicsResources grphx;
 
@@ -198,22 +194,11 @@ public:
         uint8_t b
     );
 
-    int set_render_target(SDL_Texture* texture);
-
-    int set_texture_color_mod(SDL_Texture* texture, Uint8 r, Uint8 g, Uint8 b);
-
-    int set_texture_alpha_mod(SDL_Texture* texture, Uint8 alpha);
-
-    int query_texture(SDL_Texture* texture, Uint32* format, int* access, int* w, int* h);
-
     int clear(int r, int g, int b, int a);
     int clear(void);
     
     bool substitute(g2dImage** texture);
 
-    int copy_texture(SDL_Texture* texture, const VVV_Rect* src, const VVV_Rect* dest);
-    int copy_texture(SDL_Texture* texture, const VVV_Rect* src, const VVV_Rect* dest, double angle, const VVV_Point* center, SDL_RendererFlip flip);
-    
     void fill_rect(const VVV_Rect* rect, g2dColor color);
     void fill_rect(int x, int y, int w, int h, g2dColor color);
     void fill_rect(g2dColor color);
@@ -241,8 +226,6 @@ public:
     void renderwithscreeneffects(void);
     void renderfixedpre(void);
     void renderfixedpost(void);
-
-    void draw_screenshot_border(void);
 
     bool Hitest(uint32_t (*collision_surface)[16], int t1, VVV_Point p1, int t2, VVV_Point p2);
 
@@ -275,10 +258,6 @@ public:
 
     bool reloadresources(void);
     bool checktexturesize(
-        const char* filename, SDL_Texture* texture,
-        int tilewidth, int tileheight
-    );
-    bool checktexturesize(
         const char* filename, g2dImage* texture,
         int tilewidth, int tileheight
     );
@@ -308,11 +287,6 @@ public:
     bool flipmode;
     bool setflipmode;
     bool notextoutline;
-
-    SDL_Texture* gameTexture;
-    SDL_Texture* ghostTexture;
-    SDL_Surface* tempScreenshot;
-    SDL_Surface* tempScreenshot2x;
 
     TowerBG towerbg;
     TowerBG titlebg;

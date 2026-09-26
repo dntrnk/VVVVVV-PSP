@@ -263,7 +263,7 @@ void Game::init(void)
     deathcounts = 0;
     gameoverdelay = 0;
     framecounter = 0;
-    seed_use_sdl_getticks = false;
+    seed_use_vvv_getticks = false;
     editor_disabled = false;
     resetgameclock();
     gamesaved = false;
@@ -376,10 +376,6 @@ void Game::init(void)
 
     old_mode_indicator_timer = 0;
     mode_indicator_timer = 0;
-
-    old_screenshot_border_timer = 0;
-    screenshot_border_timer = 0;
-    screenshot_saved_success = false;
 
     setdefaultcontrollerbuttons();
 }

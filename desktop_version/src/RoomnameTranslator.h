@@ -10,7 +10,6 @@ namespace roomname_translator
     extern bool enabled;
     extern bool edit_mode;
 
-    extern SDL_Surface* dimbuffer;
     extern VVV_Rect fullscreen_rect;
 
     void set_enabled(bool value);

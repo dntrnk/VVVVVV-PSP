@@ -1816,14 +1816,7 @@ static void menurender(void)
         {
             if (game.currentmenuoption == 1)
             {
-                if (SDL_GetHintBoolean("SteamDeck", SDL_FALSE))
-                {
-                    font::print_wrap(PR_CEN, -1, 180, loc::gettext("The level editor is not currently supported on Steam Deck, as it requires a keyboard and mouse to use."), tr, tg, tb);
-                }
-                else
-                {
-                    font::print_wrap(PR_CEN, -1, 180, loc::gettext("The level editor is not currently supported on this device, as it requires a keyboard and mouse to use."), tr, tg, tb);
-                }
+                font::print_wrap(PR_CEN, -1, 180, loc::gettext("The level editor is not currently supported on this device, as it requires a keyboard and mouse to use."), tr, tg, tb);
             }
         }
         else
@@ -2462,8 +2455,6 @@ void gamerender(void)
     {
         mode_indicator_text(mode_indicator_alpha);
     }
-
-    graphics.set_render_target(graphics.gameTexture);
 
     if (game.advancetext)
     {

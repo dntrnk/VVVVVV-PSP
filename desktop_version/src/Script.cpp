@@ -3047,7 +3047,7 @@ void scriptclass::hardreset(void)
 {
     const bool version2_2 = GlitchrunnerMode_less_than_or_equal(Glitchrunner2_2);
 
-    if (game.seed_use_sdl_getticks)
+    if (game.seed_use_vvv_getticks)
     {
         /* The RNG is 32-bit. We don't _really_ need 64-bit... */
         xoshiro_seed((Uint32) VVV_GetTicks());

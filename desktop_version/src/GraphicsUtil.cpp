@@ -11,9 +11,6 @@
 #include "UtilityClass.h"
 #include "Vlogging.h"
 
-
-
-
 void setRect( VVV_Rect& _r, int x, int y, int w, int h )
 {
     _r.x = x;
@@ -22,365 +19,112 @@ void setRect( VVV_Rect& _r, int x, int y, int w, int h )
     _r.h = h;
 }
 
-static SDL_Surface* RecreateSurfaceWithDimensions(
-    SDL_Surface* surface,
-    const int width,
-    const int height
-) {
-    SDL_Surface* retval;
-    SDL_BlendMode blend_mode;
+// static int oldscrollamount = 0;
+// static int scrollamount = 0;
+// static bool isscrolling = 0;
 
-    if (surface == NULL)
-    {
-        return NULL;
-    }
+// void UpdateFilter(void)
+// {
+//     if (rand() % 4000 < 8)
+//     {
+//         isscrolling = true;
+//     }
 
-    retval = SDL_CreateRGBSurface(
-        surface->flags,
-        width,
-        height,
-        surface->format->BitsPerPixel,
-        surface->format->Rmask,
-        surface->format->Gmask,
-        surface->format->Bmask,
-        surface->format->Amask
-    );
+//     oldscrollamount = scrollamount;
+//     if(isscrolling == true)
+//     {
+//         scrollamount += 20;
+//         if(scrollamount > 240)
+//         {
+//             scrollamount = 0;
+//             oldscrollamount = 0;
+//             isscrolling = false;
+//         }
+//     }
+// }
 
-    if (retval == NULL)
-    {
-        return NULL;
-    }
+// void ApplyFilter(SDL_Surface** src, SDL_Surface** dest)
+// {
+//     // if (src == NULL || dest == NULL)
+//     // {
+//     //     assert(0 && "NULL src or dest!");
+//     //     return;
+//     // }
 
-    SDL_GetSurfaceBlendMode(surface, &blend_mode);
-    SDL_SetSurfaceBlendMode(retval, blend_mode);
+//     // if (*src == NULL)
+//     // {
+//     //     *src = SDL_CreateRGBSurface(0, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS, 32, 0, 0, 0, 0);
+//     // }
+//     // if (*dest == NULL)
+//     // {
+//     //     *dest = SDL_CreateRGBSurface(0, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS, 32, 0, 0, 0, 0);
+//     // }
+//     // if (*src == NULL || *dest == NULL)
+//     // {
+//     //     WHINE_ONCE_ARGS(("Could not create temporary surfaces: %s", SDL_GetError()));
+//     //     return;
+//     // }
 
-    return retval;
-}
+//     // const int result = SDL_RenderReadPixels(gameScreen.m_renderer, NULL, 0, (*src)->pixels, (*src)->pitch);
+//     // if (result != 0)
+//     // {
+//     //     SDL_FreeSurface(*src);
+//     //     WHINE_ONCE_ARGS(("Could not read pixels from renderer: %s", SDL_GetError()));
+//     //     return;
+//     // }
 
-SDL_Surface* GetSubSurface( SDL_Surface* metaSurface, int x, int y, int width, int height )
-{
-    // Create an VVV_Rect with the area of the _surface
-    VVV_Rect area;
-    area.x = x;
-    area.y = y;
-    area.w = width;
-    area.h = height;
+//     // const int red_offset = rand() % 4;
 
-    //Convert to the correct display format after nabbing the new _surface or we will slow things down.
-    SDL_Surface* preSurface = RecreateSurfaceWithDimensions(
-        metaSurface,
-        width,
-        height
-    );
+//     // for (int x = 0; x < (*src)->w; x++)
+//     // {
+//     //     for (int y = 0; y < (*src)->h; y++)
+//     //     {
+//     //         const int sampley = (y + (int) graphics.lerp(oldscrollamount, scrollamount)) % 240;
 
-    // Lastly, apply the area from the meta _surface onto the whole of the sub _surface.
-    // SDL_BlitSurface(metaSurface, &area, preSurface, 0); // Later
+//     //         const g2dColor pixel = ReadPixel(*src, x, sampley);
 
-    // Return the new Bitmap _surface
-    return preSurface;
-}
+//     //         Uint8 green = G2D_GET_G(pixel);
+//     //         Uint8 blue = G2D_GET_B(pixel);
 
-void DrawPixel(SDL_Surface* surface, const int x, const int y, const g2dColor color)
-{
-    const VVV_Point point = {x, y};
-    const VVV_Rect rect = {0, 0, surface->w, surface->h};
-    const bool inbounds = VVV_PointInRect(&point, &rect);
-    if (!inbounds)
-    {
-        WHINE_ONCE_ARGS((
-            "Pixel draw is not inbounds: "
-            "Attempted to draw to %i,%i in %ix%i surface",
-            x, y, surface->w, surface->h
-        ));
-        assert(0 && "Pixel draw is not inbounds!");
-        return;
-    }
+//     //         const g2dColor pixel_offset = ReadPixel(*src, std::min(x + red_offset, 319), sampley);
+//     //         Uint8 red = G2D_GET_R(pixel_offset);
 
-    const SDL_PixelFormat* fmt = surface->format;
-    const int bpp = fmt->BytesPerPixel;
-    Uint8* pixel = (Uint8*) surface->pixels + y * surface->pitch + x * bpp;
-    Uint32* pixel32 = (Uint32*) pixel;
+//     //         double mult;
+//     //         int tmp; /* needed to avoid char overflow */
+//     //         if (isscrolling && sampley > 220 && ((rand() % 10) < 4))
+//     //         {
+//     //             mult = 0.6;
+//     //         }
+//     //         else
+//     //         {
+//     //             mult = 0.2;
+//     //         }
 
-    switch (bpp)
-    {
-    case 1:
-    case 2:
-        assert(0 && "Colors other than 24- or 32- bit unsupported!");
-        break;
+//     //         tmp = red + fRandom() * mult * 254;
+//     //         red = std::min(tmp, 255);
+//     //         tmp = green + fRandom() * mult * 254;
+//     //         green = std::min(tmp, 255);
+//     //         tmp = blue + fRandom() * mult * 254;
+//     //         blue = std::min(tmp, 255);
 
-    case 3:
-    {
-        const Uint32 single = SDL_MapRGB(fmt, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color));
-        pixel[0] = (single & 0xFF0000) >> 16;
-        pixel[1] = (single & 0x00FF00) >> 8;
-        pixel[2] = (single & 0x0000FF) >> 0;
-        break;
-    }
+//     //         if (y % 2 == 0)
+//     //         {
+//     //             red = (Uint8) (red / 1.2f);
+//     //             green = (Uint8) (green / 1.2f);
+//     //             blue = (Uint8) (blue / 1.2f);
+//     //         }
 
-    case 4:
-        *pixel32 = SDL_MapRGBA(fmt, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color), G2D_GET_A(color));
-    }
-}
+//     //         int distX = (int) ((std::abs(160.0f - x) / 160.0f) * 16);
+//     //         int distY = (int) ((std::abs(120.0f - y) / 120.0f) * 32);
 
-g2dColor ReadPixel(const SDL_Surface* surface, const int x, const int y)
-{
-    Uint8 color[4] = {0, 0, 0, 0};
-    const VVV_Point point = {x, y};
-    const VVV_Rect rect = {0, 0, surface->w, surface->h};
-    const bool inbounds = VVV_PointInRect(&point, &rect);
-    if (!inbounds)
-    {
-        WHINE_ONCE_ARGS((
-            "Pixel read is not inbounds: "
-            "Attempted to read %i,%i in %ix%i surface",
-            x, y, surface->w, surface->h
-        ));
-        assert(0 && "Pixel read is not inbounds!");
-        return G2D_RGBA(color[0], color[1], color[2], color[3]);
-    }
+//     //         red = std::max(red - (distX + distY), 0);
+//     //         green = std::max(green - (distX + distY), 0);
+//     //         blue = std::max(blue - (distX + distY), 0);
 
-    const SDL_PixelFormat* fmt = surface->format;
-    const int bpp = surface->format->BytesPerPixel;
-    const Uint8* pixel = (Uint8*) surface->pixels + y * surface->pitch + x * bpp;
-    const Uint32* pixel32 = (Uint32*) pixel;
+//     //         const g2dColor color = G2D_RGBA(red, green, blue, G2D_GET_A(pixel));
+//     //         DrawPixel(*dest, x, y, color);
+//     //     }
+//     // }
 
-    switch (bpp)
-    {
-    case 1:
-    case 2:
-        assert(0 && "Colors other than 24- or 32- bit unsupported!");
-        break;
-
-    case 3:
-    {
-        const Uint32 single = (pixel[0] << 16) | (pixel[1] << 8) | (pixel[2] << 0);
-        SDL_GetRGB(single, fmt, &color[0], &color[1], &color[2]);
-        color[3] = 255;
-        break;
-    }
-
-    case 4:
-        SDL_GetRGBA(*pixel32, fmt, &color[0], &color[1], &color[2], &color[3]);
-    }
-
-    return G2D_RGBA(color[0], color[1], color[2], color[3]);
-}
-
-static int oldscrollamount = 0;
-static int scrollamount = 0;
-static bool isscrolling = 0;
-
-void UpdateFilter(void)
-{
-    if (rand() % 4000 < 8)
-    {
-        isscrolling = true;
-    }
-
-    oldscrollamount = scrollamount;
-    if(isscrolling == true)
-    {
-        scrollamount += 20;
-        if(scrollamount > 240)
-        {
-            scrollamount = 0;
-            oldscrollamount = 0;
-            isscrolling = false;
-        }
-    }
-}
-
-void ApplyFilter(SDL_Surface** src, SDL_Surface** dest)
-{
-    if (src == NULL || dest == NULL)
-    {
-        assert(0 && "NULL src or dest!");
-        return;
-    }
-
-    if (*src == NULL)
-    {
-        *src = SDL_CreateRGBSurface(0, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS, 32, 0, 0, 0, 0);
-    }
-    if (*dest == NULL)
-    {
-        *dest = SDL_CreateRGBSurface(0, SCREEN_WIDTH_PIXELS, SCREEN_HEIGHT_PIXELS, 32, 0, 0, 0, 0);
-    }
-    if (*src == NULL || *dest == NULL)
-    {
-        WHINE_ONCE_ARGS(("Could not create temporary surfaces: %s", SDL_GetError()));
-        return;
-    }
-
-    const int result = SDL_RenderReadPixels(gameScreen.m_renderer, NULL, 0, (*src)->pixels, (*src)->pitch);
-    if (result != 0)
-    {
-        SDL_FreeSurface(*src);
-        WHINE_ONCE_ARGS(("Could not read pixels from renderer: %s", SDL_GetError()));
-        return;
-    }
-
-    const int red_offset = rand() % 4;
-
-    for (int x = 0; x < (*src)->w; x++)
-    {
-        for (int y = 0; y < (*src)->h; y++)
-        {
-            const int sampley = (y + (int) graphics.lerp(oldscrollamount, scrollamount)) % 240;
-
-            const g2dColor pixel = ReadPixel(*src, x, sampley);
-
-            Uint8 green = G2D_GET_G(pixel);
-            Uint8 blue = G2D_GET_B(pixel);
-
-            const g2dColor pixel_offset = ReadPixel(*src, std::min(x + red_offset, 319), sampley);
-            Uint8 red = G2D_GET_R(pixel_offset);
-
-            double mult;
-            int tmp; /* needed to avoid char overflow */
-            if (isscrolling && sampley > 220 && ((rand() % 10) < 4))
-            {
-                mult = 0.6;
-            }
-            else
-            {
-                mult = 0.2;
-            }
-
-            tmp = red + fRandom() * mult * 254;
-            red = std::min(tmp, 255);
-            tmp = green + fRandom() * mult * 254;
-            green = std::min(tmp, 255);
-            tmp = blue + fRandom() * mult * 254;
-            blue = std::min(tmp, 255);
-
-            if (y % 2 == 0)
-            {
-                red = (Uint8) (red / 1.2f);
-                green = (Uint8) (green / 1.2f);
-                blue = (Uint8) (blue / 1.2f);
-            }
-
-            int distX = (int) ((std::abs(160.0f - x) / 160.0f) * 16);
-            int distY = (int) ((std::abs(120.0f - y) / 120.0f) * 32);
-
-            red = std::max(red - (distX + distY), 0);
-            green = std::max(green - (distX + distY), 0);
-            blue = std::max(blue - (distX + distY), 0);
-
-            const g2dColor color = G2D_RGBA(red, green, blue, G2D_GET_A(pixel));
-            DrawPixel(*dest, x, y, color);
-        }
-    }
-
-    SDL_UpdateTexture(graphics.gameTexture, NULL, (*dest)->pixels, (*dest)->pitch);
-}
-
-bool TakeScreenshot(SDL_Surface** surface)
-{
-    if (surface == NULL)
-    {
-        assert(0 && "surface is NULL!");
-        return false;
-    }
-
-    int width = 0;
-    int height = 0;
-    int result = graphics.query_texture(
-        graphics.gameTexture, NULL, NULL, &width, &height
-    );
-    if (result != 0)
-    {
-        return false;
-    }
-
-    if (*surface == NULL)
-    {
-        *surface = SDL_CreateRGBSurface(0, width, height, 24, 0, 0, 0, 0);
-        if (*surface == NULL)
-        {
-            WHINE_ONCE_ARGS(
-                ("Could not create temporary surface: %s", SDL_GetError())
-            );
-            return false;
-        }
-    }
-
-    if ((*surface)->w != width || (*surface)->h != height)
-    {
-        assert(0 && "Width and height of surface and texture mismatch!");
-        return false;
-    }
-
-    result = graphics.set_render_target(graphics.gameTexture);
-    if (result != 0)
-    {
-        return false;
-    }
-
-    result = SDL_RenderReadPixels(
-        gameScreen.m_renderer, NULL, SDL_PIXELFORMAT_RGB24,
-        (*surface)->pixels, (*surface)->pitch
-    );
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(
-            ("Could not read pixels from renderer: %s", SDL_GetError())
-        );
-        return false;
-    }
-
-    /* Need to manually vertically reverse pixels in Flip Mode. */
-    if (graphics.flipmode)
-    {
-        for (int x = 0; x < (*surface)->w; x++)
-        {
-            for (int y = 0; y < (*surface)->h / 2; y++)
-            {
-                const g2dColor upper = ReadPixel(*surface, x, y);
-                const g2dColor lower = ReadPixel(*surface, x, (*surface)->h - 1 - y);
-                DrawPixel(*surface, x, y, lower);
-                DrawPixel(*surface, x, (*surface)->h - 1 - y, upper);
-            }
-        }
-    }
-
-    return true;
-}
-
-bool UpscaleScreenshot2x(SDL_Surface* src, SDL_Surface** dest)
-{
-    if (src == NULL)
-    {
-        assert(0 && "src is NULL!");
-        return false;
-    }
-    if (dest == NULL)
-    {
-        assert(0 && "dest is NULL!");
-        return false;
-    }
-
-    if (*dest == NULL)
-    {
-        *dest = SDL_CreateRGBSurface(
-            0, src->w * 2, src->h * 2, src->format->BitsPerPixel, 0, 0, 0, 0
-        );
-        if (*dest == NULL)
-        {
-            WHINE_ONCE_ARGS(
-                ("Could not create temporary surface: %s", SDL_GetError())
-            );
-            return false;
-        }
-    }
-
-    int result = SDL_BlitScaled(src, NULL, *dest, NULL);
-    if (result != 0)
-    {
-        WHINE_ONCE_ARGS(("Could not blit surface: %s", SDL_GetError()));
-        return false;
-    }
-
-    return true;
-}
+//     // SDL_UpdateTexture(graphics.gameTexture, NULL, (*dest)->pixels, (*dest)->pitch);
+// }

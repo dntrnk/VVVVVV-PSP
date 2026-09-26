@@ -1,4 +1,5 @@
-#include <SDL_stdinc.h>
+#include <stdlib.h>
+#include <stddef.h>
 
 #include "Alloc.h"
 

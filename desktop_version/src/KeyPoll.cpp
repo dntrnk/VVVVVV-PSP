@@ -21,8 +21,6 @@
 #include "UtilityClass.h"
 #include "Vlogging.h"
 
-bool SaveScreenshot(void);
-
 int inline KeyPoll::getThreshold(void)
 {
     switch (sensitivity)
@@ -261,15 +259,7 @@ void KeyPoll::Poll(void)
                     music.playef(Sound_COIN);
                 }
             }
-
-            if (evt.key.keysym.sym == SDLK_F6 && !evt.key.repeat)
-            {
-                const bool success = SaveScreenshot();
-                game.old_screenshot_border_timer = 255;
-                game.screenshot_border_timer = 255;
-                game.screenshot_saved_success = success;
-            }
-
+            
             BUTTONGLYPHS_keyboard_set_active(true);
 
             if (textentry())

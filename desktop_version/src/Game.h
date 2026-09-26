@@ -353,7 +353,7 @@ public:
     int deathcounts;
 
     int framecounter;
-    bool seed_use_sdl_getticks;
+    bool seed_use_vvv_getticks;
     bool editor_disabled;
     int frames, seconds, minutes, hours;
     bool gamesaved;
@@ -605,10 +605,6 @@ public:
 
     int old_mode_indicator_timer;
     int mode_indicator_timer;
-
-    int old_screenshot_border_timer;
-    int screenshot_border_timer;
-    bool screenshot_saved_success;
 };
 
 #ifndef GAME_DEFINITION

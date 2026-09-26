@@ -14,7 +14,6 @@
 #include "UtilityClass.h"
 #include "VFormat.h"
 
-
 namespace roomname_translator
 {
     bool enabled = false;
@@ -22,7 +21,6 @@ namespace roomname_translator
     bool expl_mode = false;
     bool help_screen = false;
 
-    SDL_Surface* dimbuffer;
     VVV_Rect fullscreen_rect;
 
     void set_enabled(bool value)

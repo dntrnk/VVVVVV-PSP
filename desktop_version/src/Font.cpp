@@ -334,7 +334,7 @@ static uint8_t load_font(FontContainer* container, const char* name)
 
     // We use TEX_GRAYSCALE instead of TEX_COLOR so button glyphs are
     // black & white to fit the PSP style
-    f->image = G2DLoadImage(name_png, white_teeth ? TEX_GRAYSCALE : TEX_WHITE, G2D_CLUT4);
+    f->image = LoadImage(name_png, white_teeth ? TEX_GRAYSCALE : TEX_WHITE, G2D_CLUT4);
     memset(f->glyph_page, 0, sizeof(f->glyph_page));
 
     if (f->image == NULL)
@@ -403,11 +403,11 @@ static uint8_t load_font(FontContainer* container, const char* name)
          * Or well... 2.3 interpreted these as
          * "all unicode from 0 to however much is in the image"... */
 
-        SDL_Surface* temp_surface = LoadImageSurface(name_png);
-        if (temp_surface != NULL)
+        g2dImage* temp_texture = g2dTexLoad(name_png, NULL, 0, (g2dTex_Mode) 0);
+        if (temp_texture != NULL)
         {
-            const uint32_t chars_per_line = temp_surface->w / f->glyph_w;
-            const uint32_t max_codepoint = (temp_surface->h / f->glyph_h) * chars_per_line;
+            const uint32_t chars_per_line = temp_texture->w / f->glyph_w;
+            const uint32_t max_codepoint = (temp_texture->h / f->glyph_h) * chars_per_line;
 
             for (uint32_t codepoint = 0x00; codepoint < max_codepoint; codepoint++)
             {
@@ -423,7 +423,7 @@ static uint8_t load_font(FontContainer* container, const char* name)
                     {
                         for (int pixel_x = 0; pixel_x < f->glyph_w; pixel_x++)
                         {
-                            if (G2D_GET_A(ReadPixel(temp_surface, glyph_x+pixel_x, glyph_y+pixel_y)) > 0)
+                            if (G2D_GET_A(get_pixel(temp_texture, glyph_x+pixel_x, glyph_y+pixel_y)) > 0)
                             {
                                 found_pixel = true;
                                 goto no_more_pixels;
@@ -440,7 +440,7 @@ static uint8_t load_font(FontContainer* container, const char* name)
                 add_glyphinfo(f, codepoint, codepoint);
             }
 
-            VVV_freefunc(SDL_FreeSurface, temp_surface);
+            if (temp_texture) g2dTexFree(&temp_texture);
         }
     }
 

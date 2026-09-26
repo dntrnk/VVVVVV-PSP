@@ -1,8 +1,6 @@
 #ifndef GRAPHICSRESOURCES_H
 #define GRAPHICSRESOURCES_H
 
-#include <SDL.h>
-
 #include "glib2d_helper.h"
 
 enum TextureLoadType
@@ -55,11 +53,7 @@ bool sprites_collision_surface_get_bit(uint32_t (*collision_surface)[16], int x,
 void sprites_collision_surface_set_bit(uint32_t (*collision_surface)[16], int x, int y);
 void sprites_collision_surface_clear_bit(uint32_t (*collision_surface)[16], int x, int y);
 
-SDL_Surface* LoadImageSurface(const char* filename);
-g2dImage* G2DLoadImage(const char *filename, TextureLoadType loadtype, g2dTexFormat format, uint32_t (*collision_surface)[16] = NULL);
-g2dImage* G2DLoadImage(const char *filename, g2dTexFormat format);
-
-bool SaveImage(const SDL_Surface* surface, const char* filename);
-bool SaveScreenshot(void);
+g2dImage* LoadImage(const char *filename, TextureLoadType loadtype, g2dTexFormat format, uint32_t (*collision_surface)[16] = NULL);
+g2dImage* LoadImage(const char *filename, g2dTexFormat format);
 
 #endif /* GRAPHICSRESOURCES_H */
