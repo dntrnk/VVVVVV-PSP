@@ -29,8 +29,6 @@ public:
     bool badSignalEffect;
     int scalingMode;
     bool vsync;
-
-    SDL_Renderer *m_renderer;
 };
 
 #ifndef GAMESCREEN_DEFINITION

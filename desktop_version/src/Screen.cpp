@@ -32,7 +32,6 @@ void ScreenSettings_default(struct ScreenSettings* _this)
 
 void Screen::init(const struct ScreenSettings* settings)
 {
-    m_renderer = NULL;
     windowDisplay = settings->windowDisplay;
     windowWidth = settings->windowWidth;
     windowHeight = settings->windowHeight;
@@ -47,9 +46,6 @@ void Screen::init(const struct ScreenSettings* settings)
 
 void Screen::destroy(void)
 {
-    /* Order matters! */
-    // VVV_freefunc(SDL_DestroyRenderer, m_renderer);
-
     g2dTerm();
 }
 
