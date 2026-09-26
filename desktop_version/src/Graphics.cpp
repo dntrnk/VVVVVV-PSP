@@ -855,7 +855,7 @@ void Graphics::draw_texture_part(g2dImage* image, const int x, const int y, cons
 
 void Graphics::draw_grid_tile(g2dImage* texture, const int t, const int x, const int y, const int width, const int height, const int scalex, const int scaley)
 {
-    draw_grid_tile((g2dImage*) texture, t, x, y, width, height, scalex, scaley, G2D_WHITE);
+    draw_grid_tile(texture, t, x, y, width, height, scalex, scaley, G2D_WHITE);
 }
 
 void Graphics::draw_grid_tile(g2dImage* texture, const int t, const int x, const int y, const int width, const int height, const int scalex, const int scaley, const g2dColor color)
@@ -864,14 +864,14 @@ void Graphics::draw_grid_tile(g2dImage* texture, const int t, const int x, const
 
     const int x2 = (t % (tex_width / width)) * width;
     const int y2 = (t / (tex_width / width)) * height;
-    draw_texture_part((g2dImage*) texture, x, y, x2, y2, width, height, scalex, scaley, color);
+    draw_texture_part(texture, x, y, x2, y2, width, height, scalex, scaley, color);
 }
 
 void Graphics::draw_grid_tile(
     g2dImage* texture, const int t,
     const int x, const int y, const int width, const int height
 ) {
-    draw_grid_tile((g2dImage*) texture, t, x, y, width, height, 1, 1);
+    draw_grid_tile(texture, t, x, y, width, height, 1, 1);
 }
 
 void Graphics::draw_grid_tile(
@@ -880,7 +880,7 @@ void Graphics::draw_grid_tile(
     const int r, const int g, const int b, const int a,
     const int scalex, const int scaley
 ) {
-    draw_grid_tile((g2dImage*) texture, t, x, y, width, height, scalex, scaley, G2D_RGBA(r, g, b, a));
+    draw_grid_tile(texture, t, x, y, width, height, scalex, scaley, G2D_RGBA(r, g, b, a));
 }
 
 void Graphics::draw_grid_tile(
@@ -889,7 +889,7 @@ void Graphics::draw_grid_tile(
     const g2dColor color,
     const int scalex, const int scaley
 ) {
-    draw_grid_tile((g2dImage*) texture, t, x, y, width, height, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color), G2D_GET_A(color), scalex, scaley);
+    draw_grid_tile(texture, t, x, y, width, height, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color), G2D_GET_A(color), scalex, scaley);
 }
 
 void Graphics::draw_grid_tile(
@@ -897,25 +897,186 @@ void Graphics::draw_grid_tile(
     const int x, const int y, const int width, const int height,
     const g2dColor color
 ) {
-    draw_grid_tile((g2dImage*) texture, t, x, y, width, height, color, 1, 1);
+    draw_grid_tile(texture, t, x, y, width, height, color, 1, 1);
 }
 
 void Graphics::draw_grid_tile_flipaware(
     g2dImage* texture, const int t,
-    const int x, const int y, const int width, const int height,
+    const int x, int y, const int width, const int height,
     const g2dColor color
 ) {
     int scale_y = 1;
 
     if (flipmode)
     {
-        if ((t >= 28 && t <= 31) || (t >= 40 && t <= 43) || (t >= 50 && t <= 53)|| (t >= 56 && t <= 65) || (t == 75) || (t >= 82 && t <= 83)  || (t >= 100 && t <= 103) || (t >= 106 && t <= 107) || (t >= 112 && t <= 119) || (t >= 155 && t <= 166) || (t >= 175 && t <= 178))
+        switch (t)
         {
-            scale_y = -1;
+            case 28:
+            case 29:
+            case 30:
+            case 31:
+                // Stop Sign
+                scale_y = -1;
+                break;
+            case 40:
+            case 41:
+            case 42:
+            case 43:
+                // Yes Man
+                scale_y = -1;
+                y -= 12;
+                break;
+            case 50:
+                // Clock
+                scale_y = -1;
+                y -= 15;
+                break;
+            case 51:
+                // Obey
+                scale_y = -1;
+                y -= 18;
+                break;
+            case 52:
+            case 53:
+                // Soldier
+                scale_y = -1;
+                y -= 7;
+                break;
+            case 56:
+            case 57:
+            case 58:
+            case 59:
+                // Skeleton
+                scale_y = -1;
+                y -= 8;
+                break;
+            case 60:
+            case 61:
+                // Megaphone
+                scale_y = -1;
+                break;
+            case 62:
+            {
+                // Special case: Lies Receiver!
+                int tex_width = texture->w;
+
+                const int x2 = (t % (tex_width / 32)) * 32;
+                const int y2 = (t / (tex_width / 32)) * 32;
+
+                draw_texture_part(texture, x, y, x2, y2, 12, 32, 1, 1, color); // Left
+                draw_texture_part(texture, x + 30, y, x2 + 30, y2, 2, 32, 1, 1, color); // Right
+                draw_texture_part(texture, x + 12, y, x2 + 12, y2, 18, 9, 1, 1, color); // Up
+                draw_texture_part(texture, x + 12, y + 26, x2 + 12, y2 + 26, 18, 6, 1, 1, color); // Down
+                draw_texture_part(texture, x + 11, y + 9, x2 + 11, y2 + 9, 19, 17, 1, -1, color); // Center
+                return;
+                break;
+            }
+            case 63:
+                // Lies
+                scale_y = -1;
+                y -= 20;
+                break;
+            case 64:
+            case 65:
+                // Truth
+                scale_y = -1;
+                y -= 22;
+                break;
+            case 76:
+                // Cloud
+                scale_y = -1;
+                y -= 10;
+                break;
+            case 78:
+            case 79:
+            case 80:
+            case 81:
+                // Empty Square
+                scale_y = -1;
+                y -= 16;
+                break;
+            case 82:
+            case 83:
+                // Musketeer
+                scale_y = -1;
+                break;
+            case 92:
+            case 93:
+            case 94:
+            case 95:
+                // Hourglass???
+                scale_y = -1;
+                y -= 16;
+                break;
+            case 100:
+            case 101:
+            case 102:
+            case 103:
+                // Digits
+                scale_y = -1;
+                y -= 18;
+                break;
+            case 106:
+            case 107:
+                // Ghost
+                scale_y = -1;
+                y -= 7;
+                break;
+            case 112:
+            case 113:
+            case 114:
+            case 115:
+                // Heart
+                scale_y = -1;
+                y -= 16;
+                break;
+            case 116:
+            case 117:
+            case 118:
+            case 119:
+                // idk how to name it
+                scale_y = -1;
+                break;
+            case 156:
+            case 157:
+            case 158:
+            case 159:
+            case 160:
+            case 161:
+            case 162:
+            case 163: // Pac-man???
+            case 164:
+            case 165:
+            case 166:
+            case 167: // Glitch
+            case 168:
+            case 169:
+            case 170:
+            case 171:
+                // Striped Block
+                scale_y = -1;
+                y -= 16;
+                break;
+            case 176:
+            case 177:
+            case 178:
+            case 179:
+                // Triangle
+                scale_y = -1;
+                y -= 16;
+                break;
+            case 182:
+            case 183:
+                // Trophy
+                scale_y = -1;
+                y -= 16;
+                break;
+            default:
+                break;
         }
     }
 
-    draw_grid_tile((g2dImage*) texture, t, x, y, width, height, color, 1, scale_y);
+    draw_grid_tile(texture, t, x, y, width, height, color, 1, scale_y);
 }
 
 void Graphics::cutscenebars(void)
