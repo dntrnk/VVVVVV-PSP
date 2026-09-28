@@ -76,7 +76,6 @@ OBJS = \
   src/XMLUtils.o \
   src/Xoshiro.o \
   ../third_party/c-hashmap/map.o \
-  ../third_party/physfs/extras/physfsrwops.o \
   ../third_party/SheenBidi/Source/BidiChain.o \
   ../third_party/SheenBidi/Source/BidiChain.o \
   ../third_party/SheenBidi/Source/BidiTypeLookup.o \
