@@ -247,8 +247,8 @@ void *_g2dSetVertex(void *vp, int i, float vx, float vy) {
     // Coord
     v_p_float = (float *)v_p_color;
 
-    v_p_float[0] = I_OBJ.x + (obj_type == RECTS ? vx * I_OBJ.scale_w : 0.f) + g2dScreenOffsetX;
-    v_p_float[1] = I_OBJ.y + (obj_type == RECTS ? vy * I_OBJ.scale_h : 0.f) + g2dScreenOffsetY;
+    v_p_float[0] = I_OBJ.x + (obj_type == RECTS ? vx * I_OBJ.scale_w : 0.f);
+    v_p_float[1] = I_OBJ.y + (obj_type == RECTS ? vy * I_OBJ.scale_h : 0.f);
 
     // Then apply the rotation
     if (obj_use_rot && obj_type == RECTS) {
@@ -451,10 +451,10 @@ static void _g2dEndRectsTiled() {
                     struct { short u, v; g2dColor col; float x, y, z; } *vv;
                     vv = (void *)sceGuGetMemory(2 * sizeof(*vv));
                     vv[0].u = u0; vv[0].v = v0; vv[0].col = o->color;
-                    vv[0].x = ex0 + g2dScreenOffsetX; vv[0].y = ey0 + g2dScreenOffsetY;
+                    vv[0].x = ex0; vv[0].y = ey0;
                     vv[0].z = o->z;
                     vv[1].u = u1; vv[1].v = v1; vv[1].col = o->color;
-                    vv[1].x = ex1 + g2dScreenOffsetX; vv[1].y = ey1 + g2dScreenOffsetY;
+                    vv[1].x = ex1; vv[1].y = ey1;
                     vv[1].z = o->z;
                     sceGuDrawArray(GU_SPRITES,
                         GU_TEXTURE_16BIT | GU_COLOR_8888 | GU_VERTEX_32BITF | GU_TRANSFORM_2D,
@@ -476,8 +476,8 @@ static void _g2dEndRectsTiled() {
                         fy = o->rot_y + o->rot_cos * ty + o->rot_sin * tx;
                         vv[k].u = pu[j]; vv[k].v = pv[j];
                         vv[k].col = o->color;
-                        vv[k].x = fx + g2dScreenOffsetX;
-                        vv[k].y = fy + g2dScreenOffsetY;
+                        vv[k].x = fx;
+                        vv[k].y = fy;
                         vv[k].z = o->z;
                     }
                     sceGuDrawArray(GU_TRIANGLES,
@@ -736,6 +736,10 @@ void g2dAdd() {
     }
 
     obj_list_size++;
+
+    obj.x += g2dScreenOffsetX;
+    obj.y += g2dScreenOffsetY;
+
     obj.rot_x = obj.x;
     obj.rot_y = obj.y;
     CURRENT_OBJ = obj;
