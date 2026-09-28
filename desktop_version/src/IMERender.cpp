@@ -13,7 +13,7 @@ void ime_render(void)
 {
     render_done = false;
 
-    if (!osk_active || key.imebuffer == "")
+    if (!key.osk_active || key.imebuffer == "")
     {
         return;
     }
