@@ -3096,6 +3096,7 @@ void Graphics::flashlight(void)
         g2dHelperClear(G2D_BLACK);
     }
 
+    fill_rect(G2D_BLACK);
     fill_rect(G2D_RGBA(0xBB, 0xBB, 0xBB, 0xBB));
 }
 
