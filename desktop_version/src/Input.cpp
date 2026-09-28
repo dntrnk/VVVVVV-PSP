@@ -338,8 +338,10 @@ static void toggleflipmode(void)
     /* Some text boxes change depending on Flip Mode, so update text boxes. */
     const bool temp = graphics.flipmode;
     graphics.flipmode = graphics.setflipmode;
+    g2dHelperSetMirrorVertical(graphics.setflipmode);
     recomputetextboxes();
     graphics.flipmode = temp;
+    g2dHelperSetMirrorVertical(temp);
 }
 
 static bool fadetomode = false;
@@ -3249,6 +3251,7 @@ static void mapmenuactionpress(const bool version2_2)
         music.playef(Sound_VIRIDIAN);
         game.gamestate = TITLEMODE;
         graphics.flipmode = false;
+        g2dHelperSetMirrorVertical(false);
         game.ingame_titlemode = true;
         graphics.ingame_fademode = graphics.fademode;
         graphics.fademode = FADE_NONE;

@@ -28,6 +28,7 @@
 void Graphics::init(void)
 {
     flipmode = false;
+    g2dHelperSetMirrorVertical(false);
     setRect(tiles_rect, 0, 0, 8, 8);
     setRect(sprites_rect, 0, 0, 32, 32);
     setRect(footerrect, 0, 230, 320, 10);
@@ -44,6 +45,7 @@ void Graphics::init(void)
     notextoutline = false;
 
     flipmode = false;
+    g2dHelperSetMirrorVertical(false);
     setflipmode = false;
 
     // Initialize backgrounds

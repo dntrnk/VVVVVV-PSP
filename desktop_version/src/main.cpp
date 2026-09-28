@@ -107,6 +107,7 @@ static void teleportermodeinput(void)
 static void flipmodeoff(void)
 {
     graphics.flipmode = false;
+    g2dHelperSetMirrorVertical(false);
 }
 
 static void focused_begin(void);

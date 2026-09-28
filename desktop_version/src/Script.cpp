@@ -2888,6 +2888,7 @@ void scriptclass::startgamemode(const enum StartMode mode)
 
     game.gravitycontrol = game.savegc;
     graphics.flipmode = graphics.setflipmode;
+    g2dHelperSetMirrorVertical(graphics.setflipmode);
 
     if (!map.custommode && !graphics.setflipmode)
     {
@@ -3188,6 +3189,7 @@ void scriptclass::hardreset(void)
     graphics.backgrounddrawn = false;
     graphics.textboxes.clear();
     graphics.flipmode = false; //This will be reset if needs be elsewhere
+    g2dHelperSetMirrorVertical(false);
     graphics.showcutscenebars = false;
     graphics.setbars(0);
 

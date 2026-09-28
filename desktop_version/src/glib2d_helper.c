@@ -4,6 +4,8 @@
 extern "C" {
 #endif
 
+static bool g2d_mirror_v = false;
+
 static struct {
     g2dImage* current_tex;
     bool is_batching;
@@ -43,6 +45,10 @@ void g2dHelperFlip(void) {
 }
 
 void g2dHelperFillRect(int x, int y, int w, int h, g2dColor color) {
+    if (g2d_mirror_v) {
+        y = 240 - y;
+        h = -h;
+    }
     _check_batch(NULL);
     g2dReset();
     g2dSetColor(color);
@@ -59,6 +65,10 @@ void g2dHelperDrawRect(int x, int y, int w, int h, g2dColor color) {
 }
 
 void g2dHelperDrawImage(g2dImage* tex, int x, int y, int w, int h, g2dColor color, int srcx, int srcy, int srcw, int srch) {
+    if (g2d_mirror_v) {
+        y = 240 - y;
+        h = -h;
+    }
     _check_batch(tex);
     g2dReset();
     g2dSetColor(color);
@@ -67,6 +77,10 @@ void g2dHelperDrawImage(g2dImage* tex, int x, int y, int w, int h, g2dColor colo
     g2dSetCropWH(srcw, srch);
     g2dSetScaleWH(w, h);
     g2dAdd();
+}
+
+void g2dHelperSetMirrorVertical(bool mirror) {
+    g2d_mirror_v = mirror;
 }
 
 #ifdef __cplusplus

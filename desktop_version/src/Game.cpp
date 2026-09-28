@@ -7567,6 +7567,7 @@ void Game::quittomenu(void)
     cliplaytest = false;
     graphics.titlebg.tdrawback = true;
     graphics.flipmode = false;
+    g2dHelperSetMirrorVertical(false);
     //Don't be stuck on the summary screen,
     //or "who do you want to play the level with?"
     //or "do you want cutscenes?"
@@ -7715,6 +7716,7 @@ static void setfademode(void)
 static void setflipmode(void)
 {
     graphics.flipmode = graphics.setflipmode;
+    g2dHelperSetMirrorVertical(graphics.setflipmode);
 }
 
 void Game::returntoingame(void)
