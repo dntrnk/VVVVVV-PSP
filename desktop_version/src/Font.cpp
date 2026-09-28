@@ -803,7 +803,7 @@ static Font* fontsel_to_font(int sel, bool* rtl, bool custom)
                 return container_get(&fonts_main, font_idx_level);
             }
         }
-        SDL_FALLTHROUGH;
+        [[fallthrough]];
     case 0:
         *rtl = loc::get_langmeta()->rtl;
         return container_get(&fonts_main, loc::get_langmeta()->font_idx);
@@ -886,7 +886,7 @@ static bool next_wrap(
         case '\n':
         case '|':
             *start += 1;
-            SDL_FALLTHROUGH;
+            [[fallthrough]];
         case '\0':
             return true;
         }

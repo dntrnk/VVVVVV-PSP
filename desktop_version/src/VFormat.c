@@ -1,6 +1,5 @@
 #include "VFormat.h"
 
-#include <SDL.h>
 #include <stdbool.h>
 
 #include "Alloc.h"

@@ -1,4 +1,5 @@
-#include <SDL.h>
+#include <pspkernel.h>
+
 #include <cassert>
 
 #include "ButtonGlyphs.h"
@@ -685,8 +686,8 @@ static void cleanup(void)
     map.destroy();
     NETWORK_shutdown();
     loc::resettext(true);
-    SDL_Quit();
     FILESYSTEM_deinit();
+    sceKernelExitGame();
 }
 
 __attribute__((noreturn)) void VVV_exit(const int exit_code)

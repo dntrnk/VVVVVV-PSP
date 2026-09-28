@@ -1,8 +1,6 @@
 #ifndef TOWERBG_H
 #define TOWERBG_H
 
-#include <SDL.h>
-
 struct TowerBG
 {
     bool tdrawback;

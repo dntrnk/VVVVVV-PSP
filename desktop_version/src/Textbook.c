@@ -1,5 +1,8 @@
 #include "Textbook.h"
 
+#include <stdlib.h>
+#include <string.h>
+
 #include "Alloc.h"
 #include "Vlogging.h"
 

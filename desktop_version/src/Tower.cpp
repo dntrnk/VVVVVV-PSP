@@ -1,6 +1,7 @@
 #include "Tower.h"
 
 #include <stddef.h>
+#include <cstring>
 
 #include "Constants.h"
 #include "MakeAndPlay.h"

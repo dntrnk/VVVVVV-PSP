@@ -1338,7 +1338,7 @@ static void draw_cursor(void)
         else if (ed.c_modifier) graphics.draw_rect(x - 24, y - 24, 24 + 32, 24 + 32, blue); // 7x7
         else if (ed.x_modifier) graphics.draw_rect(x - 16, y - 16, 24 + 16, 24 + 16, blue); // 5x5
         else if (ed.z_modifier) graphics.draw_rect(x - 8, y - 8, 24, 24, blue); // 3x3
-        SDL_FALLTHROUGH;
+        [[fallthrough]];
     case EditorTool_SPIKES:
     case EditorTool_GRAVITY_LINES:
     case EditorTool_ROOMTEXT:
@@ -2482,7 +2482,7 @@ void editorclass::entity_clicked(const int index)
             // Flip the terminal, but if it's not textured as a terminal leave it alone
             entity->p1 = (entity->p1 + 1) % 2;
         }
-        SDL_FALLTHROUGH;
+        [[fallthrough]];
     case 19:
         // Script Boxes (and terminals)
         get_input_line(TEXT_SCRIPT, "Enter script name:", &entity->scriptname);

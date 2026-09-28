@@ -1,8 +1,6 @@
 #define GAMESCREEN_DEFINITION
 #include "Screen.h"
 
-#include <SDL.h>
-
 #include "Alloc.h"
 #include "Constants.h"
 #include "CustomLevels.h"

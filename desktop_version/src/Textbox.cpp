@@ -1,6 +1,5 @@
 #include "Textbox.h"
 
-#include <SDL.h>
 #include <cassert>
 
 #include "Font.h"

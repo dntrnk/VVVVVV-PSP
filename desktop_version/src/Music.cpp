@@ -551,7 +551,7 @@ static const int areamap[] = {
     3, 3, 3, 3, 3, 4, 4, 3, 4,-2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
 };
 
-SDL_COMPILE_TIME_ASSERT(areamap, std::size(areamap) == 20 * 20);
+static_assert(std::size(areamap) == 20 * 20, "areamap must be 20x20");
 
 void musicclass::changemusicarea(int x, int y)
 {

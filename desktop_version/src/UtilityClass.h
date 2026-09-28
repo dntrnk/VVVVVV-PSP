@@ -1,7 +1,6 @@
 #ifndef UTILITYCLASS_H
 #define UTILITYCLASS_H
 
-#include <SDL.h>
 #include <string>
 
 int ss_toi(const std::string& str);

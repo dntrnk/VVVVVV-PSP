@@ -1,7 +1,6 @@
 #ifndef CUSTOMLEVELS_H
 #define CUSTOMLEVELS_H
 
-#include <SDL.h>
 #include <string>
 #include <vector>
 

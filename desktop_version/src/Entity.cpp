@@ -1,8 +1,6 @@
 #define OBJ_DEFINITION
 #include "Entity.h"
 
-#include <SDL.h>
-
 #include "CustomLevels.h"
 #include "Font.h"
 #include "Game.h"

@@ -1,8 +1,8 @@
 #define HELP_DEFINITION
 #include "UtilityClass.h"
 
-#include <SDL.h>
 #include <sstream>
+#include <cstring>
 
 #include "Constants.h"
 #include "Localization.h"

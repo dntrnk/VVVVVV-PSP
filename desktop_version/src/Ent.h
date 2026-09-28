@@ -1,8 +1,6 @@
 #ifndef ENT_H
 #define ENT_H
 
-#include <SDL.h>
-
 #include "glib2d_helper.h"
 
 #define        rn( rx,  ry) ((rx) + ((ry) * 100))

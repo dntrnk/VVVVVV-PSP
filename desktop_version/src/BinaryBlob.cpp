@@ -1,5 +1,7 @@
 #include "BinaryBlob.h"
 
+#include <cstring>
+
 #ifdef VVV_COMPILEMUSIC
 #include <stdio.h>
 #endif

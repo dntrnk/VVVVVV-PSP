@@ -2,7 +2,6 @@
 #define SCRIPT_H
 
 #include <map>
-#include <SDL.h>
 #include <string>
 #include <vector>
 
