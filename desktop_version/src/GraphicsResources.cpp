@@ -666,6 +666,7 @@ g2dImage* LoadImage(const char* filename, const TextureLoadType loadtype, g2dTex
     if (format == G2D_RGBA8888)
     {
         resultTex = tempTex;
+        free(rgbaData);
     }
     else
     {
@@ -687,8 +688,8 @@ g2dImage* LoadImage(const char* filename, const TextureLoadType loadtype, g2dTex
 
         int hw_format = (format == G2D_CLUT8) ? GU_PSM_T8 : GU_PSM_T4;
         _g2dApplyFormat(resultTex, (g2dColor*) tempTex->data, hw_format);
-
         tempTex->data = NULL;
+
         g2dTexFree(&tempTex);
 
         free(rgbaData);
@@ -841,6 +842,7 @@ static void LoadSpritesTranslation(
         if (translated == NULL)
         {
             free(rgbaData);
+            free(original);
             return;
         }
 
@@ -913,6 +915,8 @@ static void LoadSpritesTranslation(
     if (*texture == NULL)
     {
         g2dTexFree(texture);
+        g2dTexFree(&original);
+        g2dTexFree(&translated);
         return;
     }
 
@@ -925,8 +929,9 @@ static void LoadSpritesTranslation(
     (*texture)->swizzled = false;
 
     _g2dApplyFormat(*texture, (g2dColor*) original->data, GU_PSM_T4);
+    original->data = NULL;
 
-    translated->data = NULL;
+    g2dTexFree(&original);
     g2dTexFree(&translated);
 
     _g2dSwizzle(*texture);
@@ -936,7 +941,7 @@ static void LoadSpritesTranslation(
 
 void GraphicsResources::init_translations(void)
 {
-    if (im_sprites_translated) g2dTexFree(&im_sprites_translated);
+    g2dTexFree(&im_sprites_translated);
 
     if (loc::english_sprites)
     {
@@ -989,18 +994,14 @@ void GraphicsResources::init(void)
 
     im_sprites = LoadImage("graphics/sprites.png", TEX_WHITE, G2D_CLUT4, sprites_collision_surface_normal);
     im_flipsprites = LoadImage("graphics/flipsprites.png", TEX_WHITE, G2D_CLUT4, sprites_collision_surface_flipped);
-    if (im_flipsprites) g2dTexFree(&im_flipsprites);
+    g2dTexFree(&im_flipsprites);
 
     im_tiles3 = LoadImage("graphics/tiles3.png", G2D_CLUT8);
     im_teleporter = LoadImage("graphics/teleporter.png", TEX_WHITE, G2D_CLUT4);
 
-    im_image0 = LoadImage("graphics/levelcomplete.png", G2D_CLUT4);
     im_image1 = LoadImage("graphics/minimap.png", G2D_CLUT8);
     im_image2 = LoadImage("graphics/covered.png", G2D_CLUT8);
     im_image3 = LoadImage("graphics/elephant.png", TEX_WHITE, G2D_CLUT4);
-    im_image4 = LoadImage("graphics/gamecomplete.png", G2D_CLUT4);
-    im_image5 = LoadImage("graphics/fliplevelcomplete.png", G2D_CLUT4);
-    im_image6 = LoadImage("graphics/flipgamecomplete.png", G2D_CLUT4);
     im_image7 = LoadImage("graphics/site.png", TEX_WHITE, G2D_CLUT4);
     im_image8 = LoadImage("graphics/site2.png", TEX_WHITE, G2D_CLUT4);
     im_image9 = LoadImage("graphics/site3.png", TEX_WHITE, G2D_CLUT4);
@@ -1017,35 +1018,29 @@ void GraphicsResources::init(void)
 
 void GraphicsResources::destroy(void)
 {
-#define CLEAR(img) if (img) g2dTexFree(&img)
-    CLEAR(im_tiles);
-    CLEAR(im_tiles_white);
-    CLEAR(im_tiles_tint);
-    CLEAR(im_tiles2);
-    CLEAR(im_tiles2_tint);
-    CLEAR(im_tiles3);
-    CLEAR(im_entcolours);
-    CLEAR(im_entcolours_tint);
-    CLEAR(im_sprites);
-    CLEAR(im_flipsprites);
-    CLEAR(im_teleporter);
+    g2dTexFree(&im_tiles);
+    g2dTexFree(&im_tiles_white);
+    g2dTexFree(&im_tiles_tint);
+    g2dTexFree(&im_tiles2);
+    g2dTexFree(&im_tiles2_tint);
+    g2dTexFree(&im_tiles3);
+    g2dTexFree(&im_entcolours);
+    g2dTexFree(&im_entcolours_tint);
+    g2dTexFree(&im_sprites);
+    g2dTexFree(&im_flipsprites);
+    g2dTexFree(&im_teleporter);
 
-    CLEAR(im_image0);
-    CLEAR(im_image1);
-    CLEAR(im_image2);
-    CLEAR(im_image3);
-    CLEAR(im_image4);
-    CLEAR(im_image5);
-    CLEAR(im_image6);
-    CLEAR(im_image7);
-    CLEAR(im_image8);
-    CLEAR(im_image9);
-    CLEAR(im_image10);
-    CLEAR(im_image11);
-    CLEAR(im_image12);
+    g2dTexFree(&im_image1);
+    g2dTexFree(&im_image2);
+    g2dTexFree(&im_image3);
+    g2dTexFree(&im_image7);
+    g2dTexFree(&im_image8);
+    g2dTexFree(&im_image9);
+    g2dTexFree(&im_image10);
+    g2dTexFree(&im_image11);
+    g2dTexFree(&im_image12);
 
-    CLEAR(im_sprites_translated);
-#undef CLEAR
+    g2dTexFree(&im_sprites_translated);
 }
 
 static int _get_or_add_palette_color(g2dColor color, g2dColor *palette, int *pal_count, int max_colors) {

@@ -29,13 +29,9 @@ public:
     g2dImage* im_sprites;
     g2dImage* im_flipsprites;
     g2dImage* im_teleporter;
-    g2dImage* im_image0;
     g2dImage* im_image1;
     g2dImage* im_image2;
     g2dImage* im_image3;
-    g2dImage* im_image4;
-    g2dImage* im_image5;
-    g2dImage* im_image6;
     g2dImage* im_image7;
     g2dImage* im_image8;
     g2dImage* im_image9;

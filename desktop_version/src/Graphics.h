@@ -25,13 +25,9 @@ enum FadeBars
 
 enum ImageNames
 {
-    IMAGE_LEVELCOMPLETE,
     IMAGE_MINIMAP,
     IMAGE_COVERED,
     IMAGE_ELEPHANT,
-    IMAGE_GAMECOMPLETE,
-    IMAGE_FLIPLEVELCOMPLETE,
-    IMAGE_FLIPGAMECOMPLETE,
     IMAGE_SITE,
     IMAGE_SITE2,
     IMAGE_SITE3,
@@ -265,11 +261,6 @@ public:
     bool tiles1_mounted;
     bool tiles2_mounted;
     bool minimap_mounted;
-
-    bool gamecomplete_mounted;
-    bool levelcomplete_mounted;
-    bool flipgamecomplete_mounted;
-    bool fliplevelcomplete_mounted;
 
     void drawtowerbackground(TowerBG& bg_obj);
 

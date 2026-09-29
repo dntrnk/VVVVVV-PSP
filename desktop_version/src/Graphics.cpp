@@ -138,11 +138,6 @@ void Graphics::init(void)
     tiles1_mounted = false;
     tiles2_mounted = false;
     minimap_mounted = false;
-
-    gamecomplete_mounted = false;
-    levelcomplete_mounted = false;
-    flipgamecomplete_mounted = false;
-    fliplevelcomplete_mounted = false;
 }
 
 void Graphics::drawspritesetcol(int x, int y, int t, int c)
@@ -661,73 +656,41 @@ void Graphics::drawgui(void)
             // Level complete
             const char* english = "Level Complete!";
             const char* translation = loc::gettext(english);
-            if (strcmp(english, translation) != 0
-                && !(flipmode && fliplevelcomplete_mounted)
-                && !(!flipmode && levelcomplete_mounted)
-            )
+
+            int sc = 2;
+            int y = 28;
+            if (font::len(0, translation) > 144)
             {
-                int sc = 2;
-                int y = 28;
-                if (font::len(0, translation) > 144)
-                {
-                    // We told translators how long it could be... Ah well, mitigate the damage.
-                    sc = 1;
-                    y += 4;
-                }
-                if (flipmode)
-                {
-                    y = 240 - y - 8 * sc;
-                }
-                g2dColor color = TEXT_COLOUR("cyan");
-                font::print((sc == 2 ? PR_2X : PR_1X) | PR_CEN, -1, y, translation, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color));
+                // We told translators how long it could be... Ah well, mitigate the damage.
+                sc = 1;
+                y += 4;
             }
-            else
+            if (flipmode)
             {
-                if (flipmode)
-                {
-                    drawimage(IMAGE_FLIPLEVELCOMPLETE, 0, 180, true);
-                }
-                else
-                {
-                    drawimage(IMAGE_LEVELCOMPLETE, 0, 12, true);
-                }
+                y = 240 - y - 8 * sc;
             }
+            g2dColor color = TEXT_COLOUR("cyan");
+            font::print((sc == 2 ? PR_2X : PR_1X) | PR_CEN, -1, y, translation, G2D_GET_R(color), G2D_GET_G(color), G2D_GET_B(color));
         }
         else if (textboxes[i].image == TEXTIMAGE_GAMECOMPLETE)
         {
             // Game complete
             const char* english = "Game Complete!";
             const char* translation = loc::gettext(english);
-            if (strcmp(english, translation) != 0
-                && !(flipmode && flipgamecomplete_mounted)
-                && !(!flipmode && gamecomplete_mounted)
-            )
+
+            int sc = 2;
+            int y = 28;
+            if (font::len(0, translation) > 144)
             {
-                int sc = 2;
-                int y = 28;
-                if (font::len(0, translation) > 144)
-                {
-                    // We told translators how long it could be... Ah well, mitigate the damage.
-                    sc = 1;
-                    y += 4;
-                }
-                if (flipmode)
-                {
-                    y = 240 - y - 8 * sc;
-                }
-                font::print((sc == 2 ? PR_2X : PR_1X) | PR_CEN, -1, y, translation, 196, 196, 243);
+                // We told translators how long it could be... Ah well, mitigate the damage.
+                sc = 1;
+                y += 4;
             }
-            else
+            if (flipmode)
             {
-                if (flipmode)
-                {
-                    drawimage(IMAGE_FLIPGAMECOMPLETE, 0, 180, true);
-                }
-                else
-                {
-                    drawimage(IMAGE_GAMECOMPLETE, 0, 12, true);
-                }
+                y = 240 - y - 8 * sc;
             }
+            font::print((sc == 2 ? PR_2X : PR_1X) | PR_CEN, -1, y, translation, 196, 196, 243);
         }
 
         for (size_t index = 0; index < textboxes[i].sprites.size(); index++)
@@ -3247,13 +3210,9 @@ bool Graphics::reloadresources(void)
     MAYBE_FAIL(checktexturesize("sprites.png", grphx.im_sprites, 32, 32));
     MAYBE_FAIL(checktexturesize("teleporter.png", grphx.im_teleporter, 96, 96));
 
-    images[IMAGE_LEVELCOMPLETE] = grphx.im_image0;
     images[IMAGE_MINIMAP] = grphx.im_image1;
     images[IMAGE_COVERED] = grphx.im_image2;
     images[IMAGE_ELEPHANT] = grphx.im_image3;
-    images[IMAGE_GAMECOMPLETE] = grphx.im_image4;
-    images[IMAGE_FLIPLEVELCOMPLETE] = grphx.im_image5;
-    images[IMAGE_FLIPGAMECOMPLETE] = grphx.im_image6;
 
     images[IMAGE_SITE] = grphx.im_image7;
     images[IMAGE_SITE2] = grphx.im_image8;
@@ -3268,11 +3227,6 @@ bool Graphics::reloadresources(void)
     tiles1_mounted = FILESYSTEM_isAssetMounted("graphics/tiles.png");
     tiles2_mounted = FILESYSTEM_isAssetMounted("graphics/tiles2.png");
     minimap_mounted = FILESYSTEM_isAssetMounted("graphics/minimap.png");
-
-    gamecomplete_mounted = FILESYSTEM_isAssetMounted("graphics/gamecomplete.png");
-    levelcomplete_mounted = FILESYSTEM_isAssetMounted("graphics/levelcomplete.png");
-    flipgamecomplete_mounted = FILESYSTEM_isAssetMounted("graphics/flipgamecomplete.png");
-    fliplevelcomplete_mounted = FILESYSTEM_isAssetMounted("graphics/fliplevelcomplete.png");
 
     return true;
 

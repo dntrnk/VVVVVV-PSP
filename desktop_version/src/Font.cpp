@@ -440,7 +440,7 @@ static uint8_t load_font(FontContainer* container, const char* name)
                 add_glyphinfo(f, codepoint, codepoint);
             }
 
-            if (temp_texture) g2dTexFree(&temp_texture);
+            g2dTexFree(&temp_texture);
         }
     }
 
@@ -708,7 +708,7 @@ void load_custom(const char* name)
 
 void unload_font(Font* f)
 {
-    if (f->image) g2dTexFree(&f->image);
+    g2dTexFree(&f->image);
 
     for (int i = 0; i < FONT_N_PAGES; i++)
     {
