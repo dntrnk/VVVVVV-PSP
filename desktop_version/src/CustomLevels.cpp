@@ -1714,6 +1714,7 @@ void customlevelclass::generatecustomminimap(void)
     map.custommmysize = 180 - (map.custommmyoff * 2);
 
     // Start drawing the minimap
+    memset(graphics.grphx.im_image12->data, 0, graphics.grphx.im_image12->tw * graphics.grphx.im_image12->th * sizeof(uint32_t));
 
     // Scan over the map size
     for (int j2 = 0; j2 < mapheight; j2++)
