@@ -28,7 +28,6 @@
 
 #include <algorithm>
 
-#include <SDL.h>
 #include <stdint.h>
 #include <string>
 

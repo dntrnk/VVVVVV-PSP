@@ -4,6 +4,7 @@
 #include <pspgu.h>
 #include <malloc.h>
 #include <cassert>
+#include <cmath>
 
 #include <inttypes.h>
 #include <time.h>
@@ -150,9 +151,9 @@ static g2dImage* _G2DLoadTiledFromPNG(const unsigned char* fileData, size_t file
             if (loadtype == TEX_WHITE) {
                 c = G2D_RGBA(255, 255, 255, G2D_GET_A(c));
             } else if (loadtype == TEX_GRAYSCALE) {
-                Uint8 r = G2D_GET_R(c) * 0.299;
-                Uint8 g = G2D_GET_G(c) * 0.587;
-                Uint8 b = G2D_GET_B(c) * 0.114;
+                uint8_t r = G2D_GET_R(c) * 0.299;
+                uint8_t g = G2D_GET_G(c) * 0.587;
+                uint8_t b = G2D_GET_B(c) * 0.114;
                 const double gray = floor(r + g + b + 0.5);
                 c = G2D_RGBA(gray, gray, gray, G2D_GET_A(c));
             }
@@ -217,9 +218,9 @@ pass1_done:
                     if (loadtype == TEX_WHITE) {
                         c = G2D_RGBA(255, 255, 255, G2D_GET_A(c));
                     } else if (loadtype == TEX_GRAYSCALE) {
-                        Uint8 r = G2D_GET_R(c) * 0.299;
-                        Uint8 g = G2D_GET_G(c) * 0.587;
-                        Uint8 b = G2D_GET_B(c) * 0.114;
+                        uint8_t r = G2D_GET_R(c) * 0.299;
+                        uint8_t g = G2D_GET_G(c) * 0.587;
+                        uint8_t b = G2D_GET_B(c) * 0.114;
                         const double gray = floor(r + g + b + 0.5);
                         c = G2D_RGBA(gray, gray, gray, G2D_GET_A(c));
                     }
@@ -423,9 +424,9 @@ pass1_done:
                     if (loadtype == TEX_WHITE) {
                         col = G2D_RGBA(255, 255, 255, G2D_GET_A(col));
                     } else if (loadtype == TEX_GRAYSCALE) {
-                        Uint8 rr = G2D_GET_R(col) * 0.299;
-                        Uint8 gg = G2D_GET_G(col) * 0.587;
-                        Uint8 bb = G2D_GET_B(col) * 0.114;
+                        uint8_t rr = G2D_GET_R(col) * 0.299;
+                        uint8_t gg = G2D_GET_G(col) * 0.587;
+                        uint8_t bb = G2D_GET_B(col) * 0.114;
                         const double gray = floor(rr + gg + bb + 0.5);
                         col = G2D_RGBA(gray, gray, gray, G2D_GET_A(col));
                     }
@@ -447,9 +448,9 @@ pass1_done:
                     if (loadtype == TEX_WHITE) {
                         col = G2D_RGBA(255, 255, 255, G2D_GET_A(col));
                     } else if (loadtype == TEX_GRAYSCALE) {
-                        Uint8 rr = G2D_GET_R(col) * 0.299;
-                        Uint8 gg = G2D_GET_G(col) * 0.587;
-                        Uint8 bb = G2D_GET_B(col) * 0.114;
+                        uint8_t rr = G2D_GET_R(col) * 0.299;
+                        uint8_t gg = G2D_GET_G(col) * 0.587;
+                        uint8_t bb = G2D_GET_B(col) * 0.114;
                         const double gray = floor(rr + gg + bb + 0.5);
                         col = G2D_RGBA(gray, gray, gray, G2D_GET_A(col));
                     }
@@ -640,9 +641,9 @@ g2dImage* LoadImage(const char* filename, const TextureLoadType loadtype, g2dTex
                 g2dColor color = get_pixel(tempTex, x, y);
 
                 // Magic numbers used for grayscaling (eyes perceive certain colors brighter than others)
-                Uint8 r = G2D_GET_R(color) * 0.299;
-                Uint8 g = G2D_GET_G(color) * 0.587;
-                Uint8 b = G2D_GET_B(color) * 0.114;
+                uint8_t r = G2D_GET_R(color) * 0.299;
+                uint8_t g = G2D_GET_G(color) * 0.587;
+                uint8_t b = G2D_GET_B(color) * 0.114;
 
                 const double gray = floor(r + g + b + 0.5);
 
@@ -901,7 +902,7 @@ static void LoadSpritesTranslation(
                 g2dColor* trow = tdata + (src.y + j) * translated->tw + src.x;
 
                 for (int i = 0; i < src.w; i++) {
-                    Uint8 a = G2D_GET_A(trow[i]);
+                    uint8_t a = G2D_GET_A(trow[i]);
                     wrow[i] = G2D_RGBA(255, 255, 255, a);
                 }
             }

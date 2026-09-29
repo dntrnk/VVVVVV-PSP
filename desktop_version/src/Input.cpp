@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <vector>
 #include <cassert>
+#include <cmath>
 
 #include "ButtonGlyphs.h"
 #include "Credits.h"
@@ -28,285 +29,6 @@
 #include "Script.h"
 #include "UtilityClass.h"
 #include "Vlogging.h"
-
-static void updatebuttonmappings(int bind)
-{
-    for (
-        SDL_GameControllerButton i = SDL_CONTROLLER_BUTTON_A;
-        i < SDL_CONTROLLER_BUTTON_DPAD_UP;
-        i = (SDL_GameControllerButton) (i + 1)
-    ) {
-        if (key.isDown(i))
-        {
-            if (!game.gpmenu_confirming || i != game.gpmenu_lastbutton)
-            {
-                game.gpmenu_confirming = true;
-                game.gpmenu_lastbutton = i;
-
-                // Is this button already in the list for this action?
-                std::vector<SDL_GameControllerButton>* vec = NULL;
-                switch (bind)
-                {
-                case 1: vec = &game.controllerButton_flip; break;
-                case 2: vec = &game.controllerButton_map; break;
-                case 3: vec = &game.controllerButton_esc; break;
-                case 4: vec = &game.controllerButton_restart; break;
-                case 5: vec = &game.controllerButton_interact; break;
-                default: return;
-                }
-
-                game.gpmenu_showremove = false;
-                for (size_t j = 0; j < vec->size(); j += 1)
-                {
-                    if (i == (*vec)[j])
-                    {
-                        game.gpmenu_showremove = true;
-                        break;
-                    }
-                }
-
-                return;
-            }
-            game.gpmenu_confirming = false;
-
-            bool dupe = false;
-            switch (bind)
-            {
-            case 1:
-            {
-                size_t j;
-                for (j = 0; j < game.controllerButton_flip.size(); j += 1)
-                {
-                    if (i == game.controllerButton_flip[j])
-                    {
-                        dupe = true;
-                        game.controllerButton_flip.erase(game.controllerButton_flip.begin() + j);
-                    }
-                }
-                if (!dupe)
-                {
-                    game.controllerButton_flip.push_back(i);
-                }
-                music.playef(Sound_VIRIDIAN);
-                for (j = 0; j < game.controllerButton_map.size(); j += 1)
-                {
-                    if (i == game.controllerButton_map[j])
-                    {
-                        game.controllerButton_map.erase(game.controllerButton_map.begin() + j);
-                    }
-                }
-                for (j = 0; j < game.controllerButton_esc.size(); j += 1)
-                {
-                    if (i == game.controllerButton_esc[j])
-                    {
-                        game.controllerButton_esc.erase(game.controllerButton_esc.begin() + j);
-                    }
-                }
-                for (j = 0; j < game.controllerButton_restart.size(); j += 1)
-                {
-                    if (i == game.controllerButton_restart[j])
-                    {
-                        game.controllerButton_restart.erase(game.controllerButton_restart.begin() + j);
-                    }
-                }
-                for (j = 0; j < game.controllerButton_interact.size(); j += 1)
-                {
-                    if (i == game.controllerButton_interact[j])
-                    {
-                        game.controllerButton_interact.erase(game.controllerButton_interact.begin() + j);
-                    }
-                }
-                break;
-            }
-            case 2:
-            {
-                size_t j;
-                for (j = 0; j < game.controllerButton_map.size(); j += 1)
-                {
-                    if (i == game.controllerButton_map[j])
-                    {
-                        dupe = true;
-                        game.controllerButton_map.erase(game.controllerButton_map.begin() + j);
-                    }
-                }
-                if (!dupe)
-                {
-                    game.controllerButton_map.push_back(i);
-                }
-                music.playef(Sound_VIRIDIAN);
-                for (j = 0; j < game.controllerButton_flip.size(); j += 1)
-                {
-                    if (i == game.controllerButton_flip[j])
-                    {
-                        game.controllerButton_flip.erase(game.controllerButton_flip.begin() + j);
-                    }
-                }
-                for (j = 0; j < game.controllerButton_esc.size(); j += 1)
-                {
-                    if (i == game.controllerButton_esc[j])
-                    {
-                        game.controllerButton_esc.erase(game.controllerButton_esc.begin() + j);
-                    }
-                }
-                for (j = 0; j < game.controllerButton_restart.size(); j += 1)
-                {
-                    if (i == game.controllerButton_restart[j])
-                    {
-                        game.controllerButton_restart.erase(game.controllerButton_restart.begin() + j);
-                    }
-                }
-                for (j = 0; j < game.controllerButton_interact.size(); j += 1)
-                {
-                    if (i == game.controllerButton_interact[j])
-                    {
-                        game.controllerButton_interact.erase(game.controllerButton_interact.begin() + j);
-                    }
-                }
-                break;
-            }
-            case 3:
-            {
-                size_t j;
-                for (j = 0; j < game.controllerButton_esc.size(); j += 1)
-                {
-                    if (i == game.controllerButton_esc[j])
-                    {
-                        dupe = true;
-                        game.controllerButton_esc.erase(game.controllerButton_esc.begin() + j);
-                    }
-                }
-                if (!dupe)
-                {
-                    game.controllerButton_esc.push_back(i);
-                }
-                music.playef(Sound_VIRIDIAN);
-                for (j = 0; j < game.controllerButton_flip.size(); j += 1)
-                {
-                    if (i == game.controllerButton_flip[j])
-                    {
-                        game.controllerButton_flip.erase(game.controllerButton_flip.begin() + j);
-                    }
-                }
-                for (j = 0; j < game.controllerButton_map.size(); j += 1)
-                {
-                    if (i == game.controllerButton_map[j])
-                    {
-                        game.controllerButton_map.erase(game.controllerButton_map.begin() + j);
-                    }
-                }
-                for (j = 0; j < game.controllerButton_restart.size(); j += 1)
-                {
-                    if (i == game.controllerButton_restart[j])
-                    {
-                        game.controllerButton_restart.erase(game.controllerButton_restart.begin() + j);
-                    }
-                }
-                for (j = 0; j < game.controllerButton_interact.size(); j += 1)
-                {
-                    if (i == game.controllerButton_interact[j])
-                    {
-                        game.controllerButton_interact.erase(game.controllerButton_interact.begin() + j);
-                    }
-                }
-                break;
-            }
-            case 4:
-            {
-                size_t j;
-                for (j = 0; j < game.controllerButton_restart.size(); j += 1)
-                {
-                    if (i == game.controllerButton_restart[j])
-                    {
-                        dupe = true;
-                        game.controllerButton_restart.erase(game.controllerButton_restart.begin() + j);
-                    }
-                }
-                if (!dupe)
-                {
-                    game.controllerButton_restart.push_back(i);
-                }
-                music.playef(Sound_VIRIDIAN);
-                for (j = 0; j < game.controllerButton_flip.size(); j += 1)
-                {
-                    if (i == game.controllerButton_flip[j])
-                    {
-                        game.controllerButton_flip.erase(game.controllerButton_flip.begin() + j);
-                    }
-                }
-                for (j = 0; j < game.controllerButton_map.size(); j += 1)
-                {
-                    if (i == game.controllerButton_map[j])
-                    {
-                        game.controllerButton_map.erase(game.controllerButton_map.begin() + j);
-                    }
-                }
-                for (j = 0; j < game.controllerButton_esc.size(); j += 1)
-                {
-                    if (i == game.controllerButton_esc[j])
-                    {
-                        game.controllerButton_esc.erase(game.controllerButton_esc.begin() + j);
-                    }
-                }
-                for (j = 0; j < game.controllerButton_interact.size(); j += 1)
-                {
-                    if (i == game.controllerButton_interact[j])
-                    {
-                        game.controllerButton_interact.erase(game.controllerButton_interact.begin() + j);
-                    }
-                }
-                break;
-            }
-            case 5:
-            {
-                size_t j;
-                for (j = 0; j < game.controllerButton_interact.size(); j += 1)
-                {
-                    if (i == game.controllerButton_interact[j])
-                    {
-                        dupe = true;
-                        game.controllerButton_interact.erase(game.controllerButton_interact.begin() + j);
-                    }
-                }
-                if (!dupe)
-                {
-                    game.controllerButton_interact.push_back(i);
-                }
-                music.playef(Sound_VIRIDIAN);
-                for (j = 0; j < game.controllerButton_flip.size(); j += 1)
-                {
-                    if (i == game.controllerButton_flip[j])
-                    {
-                        game.controllerButton_flip.erase(game.controllerButton_flip.begin() + j);
-                    }
-                }
-                for (j = 0; j < game.controllerButton_map.size(); j += 1)
-                {
-                    if (i == game.controllerButton_map[j])
-                    {
-                        game.controllerButton_map.erase(game.controllerButton_map.begin() + j);
-                    }
-                }
-                for (j = 0; j < game.controllerButton_esc.size(); j += 1)
-                {
-                    if (i == game.controllerButton_esc[j])
-                    {
-                        game.controllerButton_esc.erase(game.controllerButton_esc.begin() + j);
-                    }
-                }
-                for (j = 0; j < game.controllerButton_restart.size(); j += 1)
-                {
-                    if (i == game.controllerButton_restart[j])
-                    {
-                        game.controllerButton_restart.erase(game.controllerButton_restart.begin() + j);
-                    }
-                }
-                break;
-            }
-
-            }
-        }
-    }
-}
 
 /* Also used in KeyPoll.cpp. */
 void recomputetextboxes(void)
@@ -1292,8 +1014,9 @@ static void menuactionpress(void)
         else if (game.currentmenuoption == (int)game.menuoptions.size()-2)
         {
             // play the cutscene, from clipboard
-            game.cutscenetest_menu_play_id = std::string(SDL_GetClipboardText());
-            startmode(Start_CUTSCENETEST);
+            // game.cutscenetest_menu_play_id = std::string(SDL_GetClipboardText());
+            // startmode(Start_CUTSCENETEST);
+            music.playef(Sound_CRY);
         }
         else if (game.currentmenuoption == (int)game.menuoptions.size()-1)
         {
@@ -2230,21 +1953,20 @@ void titleinput(void)
 
     if (graphics.flipmode)
     {
-        if (key.isDown(KEYBOARD_LEFT) || key.isDown(KEYBOARD_DOWN) || key.isDown(KEYBOARD_a) ||  key.isDown(KEYBOARD_s) || key.controllerWantsRight(true)) game.press_left = true;
-        if (key.isDown(KEYBOARD_RIGHT) || key.isDown(KEYBOARD_UP)  || key.isDown(KEYBOARD_d) ||  key.isDown(KEYBOARD_w) || key.controllerWantsLeft(true)) game.press_right = true;
+        if (key.controllerWantsRight(true)) game.press_left = true;
+        if (key.controllerWantsLeft(true)) game.press_right = true;
     }
     else if (game.currentmenuname == Menu::language)
     {
-        if (key.isDown(KEYBOARD_UP) || key.isDown(KEYBOARD_w) || key.controllerWantsUp())
+        if (key.controllerWantsUp())
         {
             game.press_left = true;
         }
-        if (key.isDown(KEYBOARD_DOWN) || key.isDown(KEYBOARD_s) || key.controllerWantsDown())
+        if (key.controllerWantsDown())
         {
             game.press_right = true;
         }
-        if (key.isDown(KEYBOARD_LEFT) || key.isDown(KEYBOARD_a) || key.controllerWantsLeft(false)
-        || key.isDown(KEYBOARD_RIGHT) || key.isDown(KEYBOARD_d) || key.controllerWantsRight(false))
+        if (key.controllerWantsLeft(false) || key.controllerWantsRight(false))
         {
             lang_press_horizontal = true;
             game.press_right = true;
@@ -2252,76 +1974,45 @@ void titleinput(void)
     }
     else
     {
-        SDL_Keycode left, right, a, d;
         bool controller_up = key.controllerWantsUp();
         bool controller_down = key.controllerWantsDown();
         if (!font::is_rtl(PR_FONT_INTERFACE))
         {
-            left = KEYBOARD_LEFT;
-            right = KEYBOARD_RIGHT;
-            a = KEYBOARD_a;
-            d = KEYBOARD_d;
             controller_up |= key.controllerWantsLeft(false);
             controller_down |= key.controllerWantsRight(false);
         }
         else
         {
-            left = KEYBOARD_RIGHT;
-            right = KEYBOARD_LEFT;
-            a = KEYBOARD_d;
-            d = KEYBOARD_a;
             controller_up |= key.controllerWantsRight(false);
             controller_down |= key.controllerWantsLeft(false);
         }
 
-        if (key.isDown(left) || key.isDown(KEYBOARD_UP) || key.isDown(a) ||  key.isDown(KEYBOARD_w) || controller_up)
+        if (controller_up)
         {
             game.press_left = true;
         }
-        if (key.isDown(right) || key.isDown(KEYBOARD_DOWN)  || key.isDown(d) ||  key.isDown(KEYBOARD_s) || controller_down)
+        if (controller_down)
         {
             game.press_right = true;
         }
     }
-    if (key.isDown(KEYBOARD_z) || key.isDown(KEYBOARD_SPACE) || key.isDown(KEYBOARD_v) || key.isDown(game.controllerButton_flip)) game.press_action = true;
-    //|| key.isDown(KEYBOARD_UP) || key.isDown(KEYBOARD_DOWN)) game.press_action = true; //on menus, up and down don't work as action
-    if (key.isDown(KEYBOARD_ENTER)) game.press_map = true;
+    if (key.isDown(game.controllerButton_flip)) game.press_action = true;
+    if (key.isDown(game.controllerButton_map)) game.press_map = true;
 
     //In the menu system, all keypresses are single taps rather than holds. Therefore this test has to be done for all presses
-    if (!game.press_action && !game.press_left && !game.press_right && !key.isDown(27) && !key.isDown(game.controllerButton_esc)) game.jumpheld = false;
+    if (!game.press_action && !game.press_left && !game.press_right && !key.isDown(game.controllerButton_esc)) game.jumpheld = false;
     if (!game.press_map) game.mapheld = false;
 
     if (!game.jumpheld && graphics.fademode == FADE_NONE)
     {
-        if (game.press_action || game.press_left || game.press_right || game.press_map || key.isDown(27) || key.isDown(game.controllerButton_esc))
+        if (game.press_action || game.press_left || game.press_right || game.press_map || key.isDown(game.controllerButton_esc))
         {
             game.jumpheld = true;
         }
 
-        static bool controller_held = false;
-
-        if (    game.currentmenuname == Menu::controller &&
-                game.currentmenuoption > 0 &&
-                game.currentmenuoption < 6 &&
-                (game.separate_interact || game.currentmenuoption < 5) &&
-                key.controllerButtonDown()      )
-        {
-            if (!controller_held)
-            {
-                controller_held = true;
-                updatebuttonmappings(game.currentmenuoption);
-                game.savestatsandsettings_menu();
-            }
-            return;
-        }
-        else
-        {
-            controller_held = false;
-        }
-
         if (game.menustart
         && game.menucountdown <= 0
-        && (key.isDown(27) || key.isDown(game.controllerButton_esc)))
+        && (key.isDown(game.controllerButton_esc)))
         {
             if (game.currentmenuname == Menu::language && loc::pre_title_lang_menu)
             {
@@ -2503,28 +2194,27 @@ void gameinput(void)
         game.press_action = false;
         game.press_interact = false;
 
-        if (key.isDown(KEYBOARD_LEFT) || key.isDown(KEYBOARD_a) || key.controllerWantsLeft(false))
+        if (key.controllerWantsLeft(false))
         {
             game.press_left = true;
         }
-        if (key.isDown(KEYBOARD_RIGHT) || key.isDown(KEYBOARD_d) || key.controllerWantsRight(false))
+        if (key.controllerWantsRight(false))
         {
             game.press_right = true;
         }
-        if (key.isDown(KEYBOARD_z) || key.isDown(KEYBOARD_SPACE) || key.isDown(KEYBOARD_v)
-                || key.isDown(KEYBOARD_UP) || key.isDown(KEYBOARD_DOWN) || key.isDown(KEYBOARD_w) || key.isDown(KEYBOARD_s)|| key.isDown(game.controllerButton_flip))
+        if (key.isDown(game.controllerButton_flip))
         {
             game.press_action = true;
         }
 
-        if (key.isDown(KEYBOARD_e) || key.isDown(game.controllerButton_interact))
+        if (key.isDown(game.controllerButton_interact))
         {
             game.press_interact = true;
         }
     }
 
     game.press_map = false;
-    if (key.isDown(KEYBOARD_ENTER) || key.isDown(SDLK_KP_ENTER) || key.isDown(game.controllerButton_map)  )
+    if (key.isDown(game.controllerButton_map))
     {
         game.press_map = true;
     }
@@ -2540,8 +2230,7 @@ void gameinput(void)
         if (game.pausescript)
         {
             game.press_action = false;
-            if (key.isDown(KEYBOARD_z) || key.isDown(KEYBOARD_SPACE) || key.isDown(KEYBOARD_v)
-                    || key.isDown(KEYBOARD_UP) || key.isDown(KEYBOARD_DOWN) || key.isDown(KEYBOARD_w) || key.isDown(KEYBOARD_s) || key.isDown(game.controllerButton_flip)) game.press_action = true;
+            if (key.isDown(game.controllerButton_flip)) game.press_action = true;
         }
 
         if (game.press_action && !game.jumpheld)
@@ -2934,7 +2623,7 @@ void gameinput(void)
         game.menupage = 30; // Pause screen
     }
 
-    if (game.deathseq == -1 && (key.isDown(SDLK_r) || key.isDown(game.controllerButton_restart)) && !game.nodeathmode)// && map.custommode) //Have fun glitchrunners!
+    if (game.deathseq == -1 && (key.isDown(game.controllerButton_restart)) && !game.nodeathmode)// && map.custommode) //Have fun glitchrunners!
     {
         game.deathseq = 30;
     }
@@ -3023,37 +2712,28 @@ void mapinput(void)
     && ((!version2_2 && !game.fadetomenu && game.fadetomenudelay <= 0 && !game.fadetolab && game.fadetolabdelay <= 0)
     || graphics.fademode == FADE_NONE))
     {
-        SDL_Keycode left, right, a, d;
         bool controller_up = key.controllerWantsUp();
         bool controller_down = key.controllerWantsDown();
         if (!font::is_rtl(PR_FONT_INTERFACE))
         {
-            left = KEYBOARD_LEFT;
-            right = KEYBOARD_RIGHT;
-            a = KEYBOARD_a;
-            d = KEYBOARD_d;
             controller_up |= key.controllerWantsLeft(false);
             controller_down |= key.controllerWantsRight(false);
         }
         else
         {
-            left = KEYBOARD_RIGHT;
-            right = KEYBOARD_LEFT;
-            a = KEYBOARD_d;
-            d = KEYBOARD_a;
             controller_up |= key.controllerWantsRight(false);
             controller_down |= key.controllerWantsLeft(false);
         }
 
-        if (key.isDown(left) || key.isDown(KEYBOARD_UP) || key.isDown(a) ||  key.isDown(KEYBOARD_w)|| controller_up)
+        if (controller_up)
         {
             game.press_left = true;
         }
-        if (key.isDown(right) || key.isDown(KEYBOARD_DOWN) || key.isDown(d) ||  key.isDown(KEYBOARD_s)|| controller_down)
+        if (controller_down)
         {
             game.press_right = true;
         }
-        if (key.isDown(KEYBOARD_z) || key.isDown(KEYBOARD_SPACE) || key.isDown(KEYBOARD_v) || key.isDown(game.controllerButton_flip))
+        if (key.isDown(game.controllerButton_flip))
         {
             game.press_action = true;
         }
@@ -3061,7 +2741,7 @@ void mapinput(void)
         || (game.menupage >= 20 && game.menupage <= 21)
         || (game.menupage >= 30 && game.menupage <= 32))
         {
-            if (key.isDown(KEYBOARD_ENTER) || key.isDown(game.controllerButton_map) ) game.press_map = true;
+            if (key.isDown(game.controllerButton_map) ) game.press_map = true;
             if (key.isDown(27) && !game.mapheld)
             {
                 game.mapheld = true;
@@ -3083,7 +2763,7 @@ void mapinput(void)
         }
         else
         {
-            if (key.isDown(KEYBOARD_ENTER) || key.isDown(27)|| key.isDown(game.controllerButton_map) ) game.press_map = true;
+            if (key.isDown(game.controllerButton_map)) game.press_map = true;
         }
 
         //In the menu system, all keypresses are single taps rather than holds. Therefore this test has to be done for all presses
@@ -3285,15 +2965,14 @@ void teleporterinput(void)
 
     if(graphics.menuoffset==0)
     {
-        if (key.isDown(KEYBOARD_LEFT)|| key.isDown(KEYBOARD_a) || key.controllerWantsLeft(false) ) game.press_left = true;
-        if (key.isDown(KEYBOARD_RIGHT) || key.isDown(KEYBOARD_d)|| key.controllerWantsRight(false) ) game.press_right = true;
-        if (key.isDown(KEYBOARD_z) || key.isDown(KEYBOARD_SPACE) || key.isDown(KEYBOARD_v)
-                || key.isDown(KEYBOARD_UP) || key.isDown(KEYBOARD_DOWN)||  key.isDown(KEYBOARD_w)||  key.isDown(KEYBOARD_s) || key.isDown(game.controllerButton_flip)) game.press_action = true;
-        if (!game.separate_interact && (key.isDown(KEYBOARD_ENTER) || key.isDown(game.controllerButton_map)))
+        if (key.controllerWantsLeft(false) ) game.press_left = true;
+        if (key.controllerWantsRight(false) ) game.press_right = true;
+        if (key.isDown(game.controllerButton_flip)) game.press_action = true;
+        if (!game.separate_interact && key.isDown(game.controllerButton_map))
         {
             game.press_map = true;
         }
-        if (key.isDown(KEYBOARD_e) || key.isDown(game.controllerButton_interact))
+        if (key.isDown(game.controllerButton_interact))
         {
             game.press_interact = true;
         }
@@ -3425,7 +3104,7 @@ void gamecompleteinput(void)
     graphics.titlebg.bypos += graphics.titlebg.bscroll;
     game.oldcreditposition = game.creditposition;
 
-    if (key.isDown(KEYBOARD_z) || key.isDown(KEYBOARD_SPACE) || key.isDown(KEYBOARD_v) || key.isDown(game.controllerButton_flip))
+    if (key.isDown(game.controllerButton_flip))
     {
         game.creditposition -= 6;
         if (game.creditposition <= -Credits::creditmaxposition)
@@ -3442,7 +3121,7 @@ void gamecompleteinput(void)
         }
         game.press_action = true;
     }
-    if (key.isDown(KEYBOARD_ENTER)|| key.isDown(game.controllerButton_map)) game.press_map = true;
+    if (key.isDown(game.controllerButton_map)) game.press_map = true;
 
     if (!game.mapheld)
     {
@@ -3473,7 +3152,7 @@ void gamecompleteinput2(void)
     //Do this here because input comes first
     game.oldcreditposx = game.creditposx;
 
-    if (key.isDown(KEYBOARD_z) || key.isDown(KEYBOARD_SPACE) || key.isDown(KEYBOARD_v) || key.isDown(game.controllerButton_flip))
+    if (key.isDown(game.controllerButton_flip))
     {
         game.creditposx++;
         game.oldcreditposx++;
@@ -3487,7 +3166,7 @@ void gamecompleteinput2(void)
         }
         game.press_action = true;
     }
-    if (key.isDown(KEYBOARD_ENTER) || key.isDown(game.controllerButton_map)) game.press_map = true;
+    if (key.isDown(game.controllerButton_map)) game.press_map = true;
 
     if (!game.mapheld)
     {

@@ -63,15 +63,15 @@ namespace level_debugger
             return;
         }
 
-        if (key.isDown(SDLK_y))
-        {
-            if (!debug_held)
-            {
-                debug_held = true;
-                active = !active;
-            }
-        }
-        else
+        // if (key.isDown(SDLK_y)) // KEYBOARD_LATER
+        // {
+        //     if (!debug_held)
+        //     {
+        //         debug_held = true;
+        //         active = !active;
+        //     }
+        // }
+        // else
         {
             debug_held = false;
         }
@@ -81,15 +81,15 @@ namespace level_debugger
             return;
         }
 
-        if (key.isDown(SDLK_TAB))
-        {
-            if (!tab_held)
-            {
-                tab_held = true;
-                should_pause = !should_pause;
-            }
-        }
-        else
+        // if (key.isDown(SDLK_TAB)) // KEYBOARD_LATER
+        // {
+        //     if (!tab_held)
+        //     {
+        //         tab_held = true;
+        //         should_pause = !should_pause;
+        //     }
+        // }
+        // else
         {
             tab_held = false;
         }
@@ -114,7 +114,8 @@ namespace level_debugger
                         grabber_offset_x = key.mousex - obj.entities[i].xp;
                         grabber_offset_y = key.mousey - obj.entities[i].yp;
 
-                        if (!key.keymap[SDLK_LSHIFT] && !key.keymap[SDLK_RSHIFT])
+                        // if (!key.keymap[SDLK_LSHIFT] && !key.keymap[SDLK_RSHIFT]) // Later
+                        if (true)
                         {
                             for (int j = 0; j < (int) obj.blocks.size(); j++)
                             {
@@ -201,11 +202,11 @@ namespace level_debugger
             int new_xp = key.mousex - grabber_offset_x;
             int new_yp = key.mousey - grabber_offset_y;
 
-            if (key.isDown(SDLK_LSHIFT) || key.isDown(SDLK_RSHIFT))
-            {
-                new_xp -= new_xp % 8;
-                new_yp -= new_yp % 8;
-            }
+            // if (key.isDown(SDLK_LSHIFT) || key.isDown(SDLK_RSHIFT)) // KEYBOARD_LATER
+            // {
+            //     new_xp -= new_xp % 8;
+            //     new_yp -= new_yp % 8;
+            // }
 
             obj.entities[held_entity].xp = new_xp;
             obj.entities[held_entity].yp = new_yp;
@@ -220,11 +221,11 @@ namespace level_debugger
             int new_xp = key.mousex - grabber_offset_x;
             int new_yp = key.mousey - grabber_offset_y;
 
-            if (key.isDown(SDLK_LSHIFT) || key.isDown(SDLK_RSHIFT))
-            {
-                new_xp -= new_xp % 8;
-                new_yp -= new_yp % 8;
-            }
+            // if (key.isDown(SDLK_LSHIFT) || key.isDown(SDLK_RSHIFT)) // KEYBOARD_LATER
+            // {
+            //     new_xp -= new_xp % 8;
+            //     new_yp -= new_yp % 8;
+            // }
 
             obj.blocks[held_block].xp = new_xp;
             obj.blocks[held_block].yp = new_yp;
@@ -314,7 +315,7 @@ namespace level_debugger
 
         int line = 0;
 
-        if (key.isDown(SDLK_u))
+        /* if (key.isDown(SDLK_u)) // KEYBOARD_LATER
         {
             g2dColor on = G2D_RGB(220 - (help.glow), 220 - (help.glow), 255 - (help.glow / 2));
             g2dColor off = G2D_RGB(220 / 1.5 - (help.glow), 220 / 1.5 - (help.glow), 255 / 1.5 - (help.glow / 2));
@@ -337,7 +338,7 @@ namespace level_debugger
                 }
             }
         }
-        else if (hovered == -1)
+        else*/ if (hovered == -1)
         {
             render_coords(line++, "Room", game.roomx % 100, game.roomy % 100);
             render_coords(line++, "Cursor", key.mousex, key.mousey);

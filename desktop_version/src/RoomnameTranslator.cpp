@@ -233,23 +233,23 @@ namespace roomname_translator
     }
 
 
-    static bool key_pressed_once(SDL_Keycode keyc, bool* held)
-    {
-        if (key.isDown(keyc))
-        {
-            if (!*held)
-            {
-                *held = true;
-                return true;
-            }
-        }
-        else
-        {
-            *held = false;
-        }
+    // static bool key_pressed_once(SDL_Keycode keyc, bool* held)
+    // {
+    //     if (key.isDown(keyc))
+    //     {
+    //         if (!*held)
+    //         {
+    //             *held = true;
+    //             return true;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         *held = false;
+    //     }
 
-        return false;
-    }
+    //     return false;
+    // }
 
     static void save_explanation(const char* explanation, const char* success_message)
     {
@@ -307,152 +307,152 @@ namespace roomname_translator
     {
         // Returns true if input "caught" and should not go to gameinput
 
-        if (key.isDown(SDLK_ESCAPE) && held_escape)
-        {
-            // Avoid opening the pause menu
-            return true;
-        }
-        else
+        // if (key.isDown(SDLK_ESCAPE) && held_escape) // KEYBOARD_LATER
+        // {
+        //     // Avoid opening the pause menu
+        //     return true;
+        // }
+        // else
         {
             held_escape = false;
         }
 
         if (help_screen)
         {
-            if ((key.isDown(SDLK_LCTRL) || key.isDown(SDLK_RCTRL)) && key_pressed_once(SDLK_e, &held_e))
-            {
-                expl_mode = !expl_mode;
-            }
+            // if ((key.isDown(SDLK_LCTRL) || key.isDown(SDLK_RCTRL)) && key_pressed_once(SDLK_e, &held_e)) // KEYBOARD_LATER
+            // {
+            //     expl_mode = !expl_mode;
+            // }
 
-            if (key_pressed_once(SDLK_ESCAPE, &held_escape) || key_pressed_once(SDLK_F1, &held_f1))
-            {
-                help_screen = false;
-            }
+            // if (key_pressed_once(SDLK_ESCAPE, &held_escape) || key_pressed_once(SDLK_F1, &held_f1))
+            // {
+            //     help_screen = false;
+            // }
 
             return true;
         }
 
         if (key.textentry())
         {
-            if (key_pressed_once(SDLK_ESCAPE, &held_escape))
-            {
-                // Without saving
-                key.disabletextentry();
-            }
+            // if (key_pressed_once(SDLK_ESCAPE, &held_escape))
+            // {
+            //     // Without saving
+            //     key.disabletextentry();
+            // }
 
-            if (key_pressed_once(SDLK_RETURN, &held_return))
-            {
-                key.disabletextentry();
+            // if (key_pressed_once(SDLK_RETURN, &held_return))
+            // {
+            //     key.disabletextentry();
 
-                if (!expl_mode)
-                {
-                    if (loc::lang == "en")
-                    {
-                        graphics.createtextboxflipme("ERROR: Can't add EN-EN translation", -1, 176, TEXT_COLOUR("red"));
-                        graphics.textboxoriginalcontextauto();
-                        graphics.textboxprintflags(PR_FONT_8X8);
-                        graphics.textboxcenterx();
-                        graphics.textboxtimer(50);
-                        graphics.textboxapplyposition();
-                    }
-                    else
-                    {
-                        save_translation(key.keybuffer.c_str());
-                    }
-                }
-                else
-                {
-                    save_explanation(key.keybuffer.c_str(), "Explanation saved!");
-                }
+            //     if (!expl_mode)
+            //     {
+            //         if (loc::lang == "en")
+            //         {
+            //             graphics.createtextboxflipme("ERROR: Can't add EN-EN translation", -1, 176, TEXT_COLOUR("red"));
+            //             graphics.textboxoriginalcontextauto();
+            //             graphics.textboxprintflags(PR_FONT_8X8);
+            //             graphics.textboxcenterx();
+            //             graphics.textboxtimer(50);
+            //             graphics.textboxapplyposition();
+            //         }
+            //         else
+            //         {
+            //             save_translation(key.keybuffer.c_str());
+            //         }
+            //     }
+            //     else
+            //     {
+            //         save_explanation(key.keybuffer.c_str(), "Explanation saved!");
+            //     }
 
-                edit_mode = false;
-                game.mapheld = true;
-            }
+            //     edit_mode = false;
+            //     game.mapheld = true;
+            // }
 
             return true;
         }
 
-        if (key_pressed_once(SDLK_F1, &held_f1))
-        {
-            help_screen = true;
-        }
+        // if (key_pressed_once(SDLK_F1, &held_f1))
+        // {
+        //     help_screen = true;
+        // }
 
-        if (key_pressed_once(SDLK_TAB, &held_tab) && !level_debugger::is_active())
-        {
-            edit_mode = !edit_mode;
-        }
+        // if (key_pressed_once(SDLK_TAB, &held_tab) && !level_debugger::is_active())
+        // {
+        //     edit_mode = !edit_mode;
+        // }
 
-        if (key_pressed_once(SDLK_i, &held_i))
-        {
-            if (game.intimetrial)
-            {
-                // We'll let you enable it in a time trial, but with a twist.
-                if (!game.timetrialcheater)
-                {
-                    game.sabotage_time_trial();
-                }
-            }
-            else if (game.incompetitive())
-            {
-                return edit_mode;
-            }
+        // if (key_pressed_once(SDLK_i, &held_i))
+        // {
+        //     if (game.intimetrial)
+        //     {
+        //         // We'll let you enable it in a time trial, but with a twist.
+        //         if (!game.timetrialcheater)
+        //         {
+        //             game.sabotage_time_trial();
+        //         }
+        //     }
+        //     else if (game.incompetitive())
+        //     {
+        //         return edit_mode;
+        //     }
 
-            map.invincibility = !map.invincibility;
-        }
+        //     map.invincibility = !map.invincibility;
+        // }
 
         if (edit_mode)
         {
-            if (key_pressed_once(SDLK_ESCAPE, &held_escape))
-            {
-                edit_mode = false;
-                return true;
-            }
+            // if (key_pressed_once(SDLK_ESCAPE, &held_escape))
+            // {
+            //     edit_mode = false;
+            //     return true;
+            // }
 
-            if ((key.isDown(SDLK_LCTRL) || key.isDown(SDLK_RCTRL)) && key_pressed_once(SDLK_e, &held_e))
-            {
-                expl_mode = !expl_mode;
-                return true;
-            }
+            // if ((key.isDown(SDLK_LCTRL) || key.isDown(SDLK_RCTRL)) && key_pressed_once(SDLK_e, &held_e))
+            // {
+            //     expl_mode = !expl_mode;
+            //     return true;
+            // }
 
-            if (key_pressed_once(SDLK_RETURN, &held_return) || key_pressed_once(SDLK_e, &held_e))
-            {
-                if (map.roomname_special || map.roomname[0] == '\0')
-                {
-                    return true;
-                }
+            // if (key_pressed_once(SDLK_RETURN, &held_return) || key_pressed_once(SDLK_e, &held_e))
+            // {
+            //     if (map.roomname_special || map.roomname[0] == '\0')
+            //     {
+            //         return true;
+            //     }
 
-                key.enabletextentry();
-                if (!expl_mode)
-                {
-                    key.keybuffer = loc::get_roomname_translation(map.custommode, game.roomx, game.roomy);
-                }
-                else
-                {
-                    key.keybuffer = loc::get_roomname_explanation(map.custommode, game.roomx, game.roomy);
-                }
-            }
+            //     key.enabletextentry();
+            //     if (!expl_mode)
+            //     {
+            //         key.keybuffer = loc::get_roomname_translation(map.custommode, game.roomx, game.roomy);
+            //     }
+            //     else
+            //     {
+            //         key.keybuffer = loc::get_roomname_explanation(map.custommode, game.roomx, game.roomy);
+            //     }
+            // }
 
-            if (expl_mode && key_pressed_once(SDLK_PERIOD, &held_period))
-            {
-                const char* old_explanation = loc::get_roomname_explanation(map.custommode, game.roomx, game.roomy);
-                const char* new_explanation = NULL;
-                const char* success_message;
-                if (old_explanation[0] == '\0')
-                {
-                    new_explanation = ".";
-                    success_message = "Blank explanation set!";
-                }
-                else if (strcmp(old_explanation, ".") == 0)
-                {
-                    new_explanation = "";
-                    success_message = "Blank explanation deleted!";
-                }
+            // if (expl_mode && key_pressed_once(SDLK_PERIOD, &held_period))
+            // {
+            //     const char* old_explanation = loc::get_roomname_explanation(map.custommode, game.roomx, game.roomy);
+            //     const char* new_explanation = NULL;
+            //     const char* success_message;
+            //     if (old_explanation[0] == '\0')
+            //     {
+            //         new_explanation = ".";
+            //         success_message = "Blank explanation set!";
+            //     }
+            //     else if (strcmp(old_explanation, ".") == 0)
+            //     {
+            //         new_explanation = "";
+            //         success_message = "Blank explanation deleted!";
+            //     }
 
-                if (new_explanation != NULL)
-                {
-                    save_explanation(new_explanation, success_message);
-                }
-            }
+            //     if (new_explanation != NULL)
+            //     {
+            //         save_explanation(new_explanation, success_message);
+            //     }
+            // }
         }
 
         return edit_mode;

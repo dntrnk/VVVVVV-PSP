@@ -1,7 +1,6 @@
 #define GRAPHICS_DEFINITION
 #include "Graphics.h"
 
-#include <SDL.h>
 #include <cassert>
 
 #include "Alloc.h"
@@ -3119,8 +3118,8 @@ void Graphics::screenshake(void)
 
 void Graphics::updatescreenshake(void)
 {
-    screenshake_x = 80 + static_cast<Sint32>((fRandom() * 7) - 4);
-    screenshake_y = 16 + static_cast<Sint32>((fRandom() * 7) - 4);
+    screenshake_x = 80 + static_cast<int>((fRandom() * 7) - 4);
+    screenshake_y = 16 + static_cast<int>((fRandom() * 7) - 4);
 }
 
 void Graphics::render(void)
@@ -3206,7 +3205,7 @@ g2dColor Graphics::RGBf(int r, int g, int b)
     r = (r + 128) / 3;
     g = (g + 128) / 3;
     b = (b + 128) / 3;
-    const g2dColor color = G2D_RGB((Uint8) r, (Uint8) g, (Uint8) b);
+    const g2dColor color = G2D_RGB((uint8_t) r, (uint8_t) g, (uint8_t) b);
     return color;
 }
 

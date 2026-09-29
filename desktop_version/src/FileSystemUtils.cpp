@@ -1,7 +1,6 @@
 #include "FileSystemUtils.h"
 
 #include <physfs.h>
-#include <SDL.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <tinyxml2.h>
@@ -277,12 +276,6 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
         );
         VVV_exit(1);
         return 0;
-    }
-
-    snprintf(output, sizeof(output), "%s%s", basePath, "gamecontrollerdb.txt");
-    if (SDL_GameControllerAddMappingsFromFile(output) < 0)
-    {
-        vlog_info("gamecontrollerdb.txt not found!");
     }
 
     isInit = true;

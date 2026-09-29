@@ -6,7 +6,6 @@
 #include "VVVCompat.h"
 
 #include <map>
-#include <SDL.h>
 #include <string>
 #include <vector>
 
@@ -145,7 +144,7 @@ public:
     void register_tilecol(EditorTilesets tileset, int index, const char* foreground_type, int foreground_base, const char* background_type, int background_base, bool direct);
     void register_tilecol(EditorTilesets tileset, int index, const char* foreground_type, int foreground_base, const char* background_type, int background_base);
 
-    void register_tool(EditorTools tool, const char* name, const char* keychar, SDL_KeyCode key, bool shift);
+    void register_tool(EditorTools tool, const char* name, const char* keychar, bool shift);
 
     void draw_tool(EditorTools tool, int x, int y);
 
@@ -204,7 +203,6 @@ public:
 
     const char* tool_names[NUM_EditorTools];
     const char* tool_key_chars[NUM_EditorTools];
-    SDL_KeyCode tool_keys[NUM_EditorTools];
     bool tool_requires_shift[NUM_EditorTools];
 
     EditorTools current_tool;

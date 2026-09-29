@@ -1,8 +1,6 @@
 #ifndef LEVELDEBUGGER_H
 #define LEVELDEBUGGER_H
 
-#include <SDL.h>
-
 namespace level_debugger
 {
     bool is_pausing(void);

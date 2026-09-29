@@ -1,6 +1,7 @@
 #include <pspkernel.h>
 
 #include <cassert>
+#include <cmath>
 
 #include "ButtonGlyphs.h"
 #include "CustomLevels.h"
@@ -36,6 +37,30 @@
 
 #include "controls.h"
 
+PSP_MODULE_INFO("VVVVVV", 0, 1, 0);
+PSP_MAIN_THREAD_ATTR(THREAD_ATTR_VFPU | THREAD_ATTR_USER);
+
+char list[0x20000] __attribute__((aligned(64)));
+
+int exit_callback(int arg1, int arg2, void *common) {
+    sceKernelExitGame();
+    return 0;
+}
+
+int callback_thread(SceSize args, void *argp) {
+    int cbid = sceKernelCreateCallback("Exit Callback", exit_callback, NULL);
+    sceKernelRegisterExitCallback(cbid);
+    sceKernelSleepThreadCB();
+    return 0;
+}
+
+int setup_callbacks(void) {
+    int thid = sceKernelCreateThread("update_thread", callback_thread, 0x11, 0xFA0, 0, 0);
+    if (thid >= 0)
+        sceKernelStartThread(thid, 0, 0);
+    return thid;
+}
+
 scriptclass script;
 
 std::vector<CustomEntity> customentities;
@@ -63,15 +88,12 @@ static std::string playassets;
 
 static std::string playtestname;
 
-static volatile Uint32 time_ = 0;
-static volatile Uint32 timePrev = 0;
-static volatile Uint32 accumulator = 0;
+static volatile uint32_t time_ = 0;
+static volatile uint32_t timePrev = 0;
+static volatile uint32_t accumulator = 0;
 
-static volatile Uint32 f_time = 0;
-static volatile Uint32 f_timePrev = 0;
-
-extern const unsigned short _ctype_b[];
-const unsigned short *__ctype_ptr__ = _ctype_b;
+static volatile uint32_t f_time = 0;
+static volatile uint32_t f_timePrev = 0;
 
 enum FuncType
 {
@@ -376,6 +398,8 @@ static void keep_console_open(const bool open_console)
 
 int main(int argc, char *argv[])
 {
+    setup_callbacks();
+
     char* baseDir = NULL;
     char* assetsPath = NULL;
     char* langDir = NULL;
@@ -389,12 +413,6 @@ int main(int argc, char *argv[])
     loc::show_translator_menu = true;
 #endif
 
-    SDL_SetHintWithPriority(SDL_HINT_IME_SHOW_UI, "1", SDL_HINT_OVERRIDE);
-    SDL_SetHintWithPriority(SDL_HINT_IME_SUPPORT_EXTENDED_TEXT, "1", SDL_HINT_OVERRIDE);
-
-    /* We already do the button swapping in ButtonGlyphs, disable SDL's swapping */
-    SDL_SetHintWithPriority(SDL_HINT_GAMECONTROLLER_USE_BUTTON_LABELS, "0", SDL_HINT_OVERRIDE);
-
     if(!FILESYSTEM_init(argv[0], baseDir, assetsPath, langDir, fontsDir))
     {
         vlog_error("Unable to initialize filesystem!");
@@ -402,12 +420,6 @@ int main(int argc, char *argv[])
         VVV_exit(1);
     }
 
-    SDL_Init(
-        // SDL_INIT_VIDEO |
-        // SDL_INIT_AUDIO |
-        SDL_INIT_JOYSTICK |
-        SDL_INIT_GAMECONTROLLER
-    );
     VVV_TicksInit();
 
     controls_init();
@@ -648,12 +660,12 @@ int main(int argc, char *argv[])
     {
         f_time = VVV_GetTicks();
 
-        const Uint32 f_timetaken = f_time - f_timePrev;
+        const uint32_t f_timetaken = f_time - f_timePrev;
         const int timestep = game.get_timestep();
-        if (!game.over30mode && f_timetaken < (Uint32) timestep)
+        if (!game.over30mode && f_timetaken < (uint32_t) timestep)
         {
-            const volatile Uint32 f_delay = timestep - f_timetaken;
-            VVV_Delay((Uint32) f_delay);
+            const volatile uint32_t f_delay = timestep - f_timetaken;
+            VVV_Delay((uint32_t) f_delay);
             f_time = VVV_GetTicks();
         }
 
@@ -702,7 +714,7 @@ static void inline deltaloop(void)
     const float rawdeltatime = static_cast<float>(time_ - timePrev);
     accumulator += rawdeltatime;
 
-    Uint32 timesteplimit = game.get_timestep();
+    uint32_t timesteplimit = game.get_timestep();
 
     while (accumulator >= timesteplimit)
     {
@@ -811,34 +823,6 @@ static enum LoopCode loop_end(void)
 
     //We did editorinput, now it's safe to turn this off
     key.linealreadyemptykludge = false;
-
-    //Mute button
-    if (key.isDown(KEYBOARD_m) && game.mutebutton<=0 && !key.textentry())
-    {
-        game.mutebutton = 8;
-        if (game.muted)
-        {
-            game.muted = false;
-        }
-        else
-        {
-            game.muted = true;
-        }
-    }
-    if(game.mutebutton>0)
-    {
-        game.mutebutton--;
-    }
-
-    if (key.isDown(KEYBOARD_n) && game.musicmutebutton <= 0 && !key.textentry())
-    {
-        game.musicmutebutton = 8;
-        game.musicmuted = !game.musicmuted;
-    }
-    if (game.musicmutebutton > 0)
-    {
-        game.musicmutebutton--;
-    }
 
     music.updatemutestate();
 

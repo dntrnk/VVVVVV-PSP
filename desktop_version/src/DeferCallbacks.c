@@ -1,7 +1,7 @@
 #include "DeferCallbacks.h"
 
-#include <SDL.h>
 #include <assert.h>
+#include <stddef.h>
 
 /* Callbacks to be deferred to the end of each sequence of gamestate functions
  * in main. Useful for fixing frame-flicker glitches when doing a state

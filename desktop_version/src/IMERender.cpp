@@ -1,5 +1,3 @@
-#include <SDL.h>
-
 #include "Constants.h"
 #include "Font.h"
 #include "Graphics.h"

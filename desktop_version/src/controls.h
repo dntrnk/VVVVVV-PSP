@@ -10,11 +10,13 @@ extern "C" {
 
 #include <pspctrl.h>
 
+typedef unsigned int psp_key;
+
 void controls_init(void);
 void controls_read(void);
-bool controls_pressed(const unsigned int button);
-bool controls_held(const unsigned int button);
-bool controls_released(const unsigned int button);
+bool controls_pressed(const psp_key button);
+bool controls_held(const psp_key button);
+bool controls_released(const psp_key button);
 int controls_AnalogX(void);
 int controls_AnalogY(void);
 

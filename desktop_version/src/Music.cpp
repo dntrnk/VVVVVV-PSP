@@ -501,9 +501,7 @@ void musicclass::processmusic(void)
 
     float final_vol = ((float)musicVolume / VVV_MAX_VOLUME)
                     * ((float)user_music_volume / USER_VOLUME_MAX);
-    if (game.muted || game.musicmuted) {
-        final_vol = 0.0f;
-    }
+    
     MusicChannel::SetVolume(final_vol);
 
     if (nicefade && halted()) {
@@ -651,28 +649,13 @@ void musicclass::updatemutestate(void)
     float sound_vol;
     float music_vol;
 
-    if (game.muted)
-    {
-        sound_vol = 0.0f;
-        music_vol = 0.0f;
-    }
-    else
-    {
-        sound_vol = (float)user_sound_volume / USER_VOLUME_MAX;
+    sound_vol = (float)user_sound_volume / USER_VOLUME_MAX;
 
-        if (game.musicmuted)
-        {
-            music_vol = 0.0f;
-        }
-        else
-        {
-            /* musicVolume (0..VVV_MAX_VOLUME) is the fade-controlled value.
-             * user_music_volume scales it from the menu. */
-            music_vol = ((float)user_music_volume / USER_VOLUME_MAX)
-                      * ((float)musicVolume / VVV_MAX_VOLUME);
-        }
-    }
-
+    /* musicVolume (0..VVV_MAX_VOLUME) is the fade-controlled value.
+        * user_music_volume scales it from the menu. */
+    music_vol = ((float)user_music_volume / USER_VOLUME_MAX)
+                * ((float)musicVolume / VVV_MAX_VOLUME);
+    
     if (sound_vol > 1.0f) sound_vol = 1.0f;
     if (music_vol > 1.0f) music_vol = 1.0f;
 

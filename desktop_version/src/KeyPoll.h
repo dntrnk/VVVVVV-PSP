@@ -2,38 +2,15 @@
 #define KEYPOLL_H
 
 #include <map> // FIXME: I should feel very bad for using C++ -flibit
-#include <SDL.h>
 #include <string>
 #include <vector>
+#include <cstdint>
 
-enum Kybrd
-{
-    KEYBOARD_UP = SDLK_UP,
-    KEYBOARD_DOWN = SDLK_DOWN,
-    KEYBOARD_LEFT = SDLK_LEFT,
-    KEYBOARD_RIGHT = SDLK_RIGHT,
-    KEYBOARD_ENTER = SDLK_RETURN,
-    KEYBOARD_SPACE = SDLK_SPACE,
-
-    KEYBOARD_w = SDLK_w,
-    KEYBOARD_s = SDLK_s,
-    KEYBOARD_a = SDLK_a,
-    KEYBOARD_d = SDLK_d,
-    KEYBOARD_e = SDLK_e,
-    KEYBOARD_m = SDLK_m,
-    KEYBOARD_n = SDLK_n,
-
-    KEYBOARD_v = SDLK_v,
-    KEYBOARD_z = SDLK_z,
-
-    KEYBOARD_BACKSPACE = SDLK_BACKSPACE
-};
+#include "controls.h"
 
 class KeyPoll
 {
 public:
-    std::map<SDL_Keycode, bool> keymap;
-
     bool isActive;
 
     bool resetWindow;
@@ -50,11 +27,8 @@ public:
 
     void Poll(void);
 
-    bool isDown(SDL_Keycode key);
+    bool isDown(psp_key key);
 
-    bool isDown(std::vector<SDL_GameControllerButton> buttons);
-    bool isDown(SDL_GameControllerButton button);
-    bool controllerButtonDown(void);
     bool controllerWantsLeft(bool includeVert);
     bool controllerWantsRight(bool includeVert);
     bool controllerWantsUp(void);
@@ -86,10 +60,8 @@ public:
     bool linealreadyemptykludge;
 
 private:
-    std::map<SDL_JoystickID, SDL_GameController*> controllers;
-    std::map<SDL_GameControllerButton, bool> buttonmap;
     int xVel, yVel;
-    Uint32 wasFullscreen;
+    uint32_t wasFullscreen;
 };
 
 #ifndef KEY_DEFINITION

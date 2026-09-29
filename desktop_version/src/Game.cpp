@@ -6,6 +6,7 @@
 #include <string.h>
 #include <tinyxml2.h>
 #include <cassert>
+#include <cmath>
 
 #include "ButtonGlyphs.h"
 #include "Constants.h"
@@ -34,81 +35,6 @@
 #include "VFormat.h"
 #include "Vlogging.h"
 #include "XMLUtils.h"
-
-static bool GetButtonFromString(const char *pText, SDL_GameControllerButton *button)
-{
-    if (*pText == '0' ||
-        *pText == 'a' ||
-        *pText == 'A')
-    {
-        *button = SDL_CONTROLLER_BUTTON_A;
-        return true;
-    }
-    if (strcmp(pText, "1") == 0 ||
-        *pText == 'b' ||
-        *pText == 'B')
-    {
-        *button = SDL_CONTROLLER_BUTTON_B;
-        return true;
-    }
-    if (*pText == '2' ||
-        *pText == 'x' ||
-        *pText == 'X')
-    {
-        *button = SDL_CONTROLLER_BUTTON_X;
-        return true;
-    }
-    if (*pText == '3' ||
-        *pText == 'y' ||
-        *pText == 'Y')
-    {
-        *button = SDL_CONTROLLER_BUTTON_Y;
-        return true;
-    }
-    if (*pText == '4' ||
-        strcasecmp(pText, "BACK") == 0)
-    {
-        *button = SDL_CONTROLLER_BUTTON_BACK;
-        return true;
-    }
-    if (*pText == '5' ||
-        strcasecmp(pText, "GUIDE") == 0)
-    {
-        *button = SDL_CONTROLLER_BUTTON_GUIDE;
-        return true;
-    }
-    if (*pText == '6' ||
-        strcasecmp(pText, "START") == 0)
-    {
-        *button = SDL_CONTROLLER_BUTTON_START;
-        return true;
-    }
-    if (*pText == '7' ||
-        strcasecmp(pText, "LS") == 0)
-    {
-        *button = SDL_CONTROLLER_BUTTON_LEFTSTICK;
-        return true;
-    }
-    if (*pText == '8' ||
-        strcasecmp(pText, "RS") == 0)
-    {
-        *button = SDL_CONTROLLER_BUTTON_RIGHTSTICK;
-        return true;
-    }
-    if (*pText == '9' ||
-        strcasecmp(pText, "LB") == 0)
-    {
-        *button = SDL_CONTROLLER_BUTTON_LEFTSHOULDER;
-        return true;
-    }
-    if (strcmp(pText, "10") == 0 ||
-        strcasecmp(pText, "RB") == 0)
-    {
-        *button = SDL_CONTROLLER_BUTTON_RIGHTSHOULDER;
-        return true;
-    }
-    return false;
-}
 
 // Unfortunate forward-declare... My hands are pretty tied
 static void loadthissummary(
@@ -148,11 +74,6 @@ void Game::init(void)
     saverx = 0;
     savery = 0;
     savecolour = 0;
-
-    mutebutton = 0;
-    muted = false;
-    musicmuted = false;
-    musicmutebutton = 0;
 
     glitchrunkludge = false;
     gamestate = TITLEMODE;
@@ -254,7 +175,6 @@ void Game::init(void)
     levelpage=0;
     playcustomlevel=0;
 
-    gpmenu_lastbutton = SDL_CONTROLLER_BUTTON_INVALID;
     gpmenu_confirming = false;
     gpmenu_showremove = false;
 
@@ -382,42 +302,11 @@ void Game::init(void)
 
 void Game::setdefaultcontrollerbuttons(void)
 {
-    if (controllerButton_flip.size() < 1)
-    {
-        controllerButton_flip.push_back(SDL_CONTROLLER_BUTTON_A);
-    }
-    if (controllerButton_map.size() < 1)
-    {
-        controllerButton_map.push_back(SDL_CONTROLLER_BUTTON_Y);
-    }
-    if (controllerButton_esc.size() < 1)
-    {
-        controllerButton_esc.push_back(SDL_CONTROLLER_BUTTON_B);
-    }
-    if (controllerButton_restart.size() < 1)
-    {
-        controllerButton_restart.push_back(SDL_CONTROLLER_BUTTON_RIGHTSHOULDER);
-    }
-    if (controllerButton_interact.size() < 1)
-    {
-        controllerButton_interact.push_back(SDL_CONTROLLER_BUTTON_X);
-    }
-
-    /* If one of the arrays was empty, and others weren't, we might now have conflicts...
-     * A crucial one is if the ACTION button is also "ESC", because then you can't
-     * fix it with just a controller anymore, which might make the game unplayable.
-     * This is similar to updatebuttonmappings() in Input.cpp, except less... complete? */
-    for (size_t f = 0; f < controllerButton_flip.size(); f++)
-    {
-        for (size_t e = 0; e < controllerButton_esc.size(); e++)
-        {
-            if (controllerButton_flip[f] == controllerButton_esc[e])
-            {
-                controllerButton_esc.erase(controllerButton_esc.begin() + e);
-                break;
-            }
-        }
-    }
+    controllerButton_flip = PSP_CTRL_CROSS;
+    controllerButton_map = PSP_CTRL_TRIANGLE;
+    controllerButton_esc = PSP_CTRL_CIRCLE;
+    controllerButton_restart = PSP_CTRL_RTRIGGER;
+    controllerButton_interact = PSP_CTRL_SQUARE;
 }
 
 void Game::lifesequence(void)
@@ -4703,13 +4592,6 @@ void Game::loadstats(struct ScreenSettings* screen_settings)
 
 void Game::deserializesettings(tinyxml2::XMLElement* dataNode, struct ScreenSettings* screen_settings)
 {
-    // Don't duplicate controller buttons!
-    controllerButton_flip.clear();
-    controllerButton_map.clear();
-    controllerButton_esc.clear();
-    controllerButton_restart.clear();
-    controllerButton_interact.clear();
-
     for (tinyxml2::XMLElement* pElem = dataNode;
     pElem != NULL;
     pElem = pElem->NextSiblingElement())
@@ -4863,55 +4745,20 @@ if (strcmp(pKey, "fullscreen") == 0)
             separate_interact = false;
         }
 
-        if (strcmp(pKey, "flipButton") == 0)
-        {
-            SDL_GameControllerButton newButton;
-            if (GetButtonFromString(pText, &newButton))
-            {
-                controllerButton_flip.push_back(newButton);
-            }
-        }
+        controllerButton_flip = PSP_CTRL_CROSS;
 
-        if (strcmp(pKey, "enterButton") == 0)
-        {
-            SDL_GameControllerButton newButton;
-            if (GetButtonFromString(pText, &newButton))
-            {
-                controllerButton_map.push_back(newButton);
-            }
-        }
+        controllerButton_map = PSP_CTRL_TRIANGLE;
 
-        if (strcmp(pKey, "escButton") == 0)
-        {
-            SDL_GameControllerButton newButton;
-            if (GetButtonFromString(pText, &newButton))
-            {
-                controllerButton_esc.push_back(newButton);
-            }
-        }
+        controllerButton_esc = PSP_CTRL_CIRCLE;
 
-        if (strcmp(pKey, "restartButton") == 0)
-        {
-            SDL_GameControllerButton newButton;
-            if (GetButtonFromString(pText, &newButton))
-            {
-                controllerButton_restart.push_back(newButton);
-            }
-        }
+        controllerButton_restart = PSP_CTRL_RTRIGGER;
 
-        if (strcmp(pKey, "interactButton") == 0)
-        {
-            SDL_GameControllerButton newButton;
-            if (GetButtonFromString(pText, &newButton))
-            {
-                controllerButton_interact.push_back(newButton);
-            }
-        }
+        controllerButton_interact = PSP_CTRL_SQUARE;
 
-        if (strcmp(pKey, "controllerSensitivity") == 0)
-        {
-            key.sensitivity = help.Int(pText);
-        }
+        // if (strcmp(pKey, "controllerSensitivity") == 0)
+        // {
+        //     key.sensitivity = help.Int(pText);
+        // }
 
         if (strcmp(pKey, "lang") == 0)
         {
@@ -5127,69 +4974,7 @@ void Game::serializesettings(tinyxml2::XMLElement* dataNode, const struct Screen
 
     xml::update_tag(dataNode, "separate_interact", (int) separate_interact);
 
-    // Delete all controller buttons we had previously.
-    // dataNode->FirstChildElement() shouldn't be NULL at this point...
-    // we've already added a bunch of elements
-    for (tinyxml2::XMLElement* element = dataNode->FirstChildElement();
-    element != NULL;
-    /* Increment code handled separately */)
-    {
-        const char* name = element->Name();
-
-        if (strcmp(name, "flipButton") == 0
-        || strcmp(name, "enterButton") == 0
-        || strcmp(name, "escButton") == 0
-        || strcmp(name, "restartButton") == 0
-        || strcmp(name, "interactButton") == 0)
-        {
-            // Can't just doc.DeleteNode(element) and then go to next,
-            // element->NextSiblingElement() will be NULL.
-            // Instead, store pointer of element we want to delete. Then
-            // increment `element`. And THEN delete the element.
-            tinyxml2::XMLElement* delete_this = element;
-
-            element = element->NextSiblingElement();
-
-            doc.DeleteNode(delete_this);
-            continue;
-        }
-
-        element = element->NextSiblingElement();
-    }
-
-    // Now add them
-    for (size_t i = 0; i < controllerButton_flip.size(); i += 1)
-    {
-        tinyxml2::XMLElement* msg = doc.NewElement("flipButton");
-        msg->LinkEndChild(doc.NewText(help.String((int) controllerButton_flip[i]).c_str()));
-        dataNode->LinkEndChild(msg);
-    }
-    for (size_t i = 0; i < controllerButton_map.size(); i += 1)
-    {
-        tinyxml2::XMLElement* msg = doc.NewElement("enterButton");
-        msg->LinkEndChild(doc.NewText(help.String((int) controllerButton_map[i]).c_str()));
-        dataNode->LinkEndChild(msg);
-    }
-    for (size_t i = 0; i < controllerButton_esc.size(); i += 1)
-    {
-        tinyxml2::XMLElement* msg = doc.NewElement("escButton");
-        msg->LinkEndChild(doc.NewText(help.String((int) controllerButton_esc[i]).c_str()));
-        dataNode->LinkEndChild(msg);
-    }
-    for (size_t i = 0; i < controllerButton_restart.size(); i += 1)
-    {
-        tinyxml2::XMLElement* msg = doc.NewElement("restartButton");
-        msg->LinkEndChild(doc.NewText(help.String((int) controllerButton_restart[i]).c_str()));
-        dataNode->LinkEndChild(msg);
-    }
-    for (size_t i = 0; i < controllerButton_interact.size(); i += 1)
-    {
-        tinyxml2::XMLElement* msg = doc.NewElement("interactButton");
-        msg->LinkEndChild(doc.NewText(help.String((int) controllerButton_interact[i]).c_str()));
-        dataNode->LinkEndChild(msg);
-    }
-
-    xml::update_tag(dataNode, "controllerSensitivity", key.sensitivity);
+    // xml::update_tag(dataNode, "controllerSensitivity", key.sensitivity);
 
     xml::update_tag(dataNode, "lang", loc::lang.c_str());
     xml::update_tag(dataNode, "lang_set", (int) loc::lang_set);
@@ -7816,11 +7601,11 @@ int Game::get_timestep(void)
 {
     if ((gamestate == GAMEMODE || (gamestate == TELEPORTERMODE && !useteleporter)) &&
     level_debugger::is_active() &&
-    !level_debugger::is_pausing() &&
-    key.isDown(SDLK_f))
-    {
-        return 1;
-    }
+    !level_debugger::is_pausing() && false) return 1;
+    // key.isDown(SDLK_f)) // KEYBOARD_LATER
+    // {
+    //     return 1;
+    // }
 
     switch (gamestate)
     {

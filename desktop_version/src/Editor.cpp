@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <cmath>
 
 #include "controls.h"
 
@@ -34,23 +35,23 @@ editorclass::editorclass(void)
 {
     reset();
 
-    register_tool(EditorTool_WALLS, "Walls", "1", SDLK_1, false);
-    register_tool(EditorTool_BACKING, "Backing", "2", SDLK_2, false);
-    register_tool(EditorTool_SPIKES, "Spikes", "3", SDLK_3, false);
-    register_tool(EditorTool_TRINKETS, "Trinkets", "4", SDLK_4, false);
-    register_tool(EditorTool_CHECKPOINTS, "Checkpoints", "5", SDLK_5, false);
-    register_tool(EditorTool_DISAPPEARING_PLATFORMS, "Disappearing Platforms", "6", SDLK_6, false);
-    register_tool(EditorTool_CONVEYORS, "Conveyors", "7", SDLK_7, false);
-    register_tool(EditorTool_MOVING_PLATFORMS, "Moving Platforms", "8", SDLK_8, false);
-    register_tool(EditorTool_ENEMIES, "Enemies", "9", SDLK_9, false);
-    register_tool(EditorTool_GRAVITY_LINES, "Gravity Lines", "0", SDLK_0, false);
-    register_tool(EditorTool_ROOMTEXT, "Roomtext", "R", SDLK_r, false);
-    register_tool(EditorTool_TERMINALS, "Terminals", "T", SDLK_t, false);
-    register_tool(EditorTool_SCRIPTS, "Script Boxes", "Y", SDLK_y, false);
-    register_tool(EditorTool_WARP_TOKENS, "Warp Tokens", "U", SDLK_u, false);
-    register_tool(EditorTool_WARP_LINES, "Warp Lines", "I", SDLK_i, false);
-    register_tool(EditorTool_CREWMATES, "Crewmates", "O", SDLK_o, false);
-    register_tool(EditorTool_START_POINT, "Start Point", "P", SDLK_p, false);
+    register_tool(EditorTool_WALLS, "Walls", "1", false);
+    register_tool(EditorTool_BACKING, "Backing", "2", false);
+    register_tool(EditorTool_SPIKES, "Spikes", "3", false);
+    register_tool(EditorTool_TRINKETS, "Trinkets", "4", false);
+    register_tool(EditorTool_CHECKPOINTS, "Checkpoints", "5", false);
+    register_tool(EditorTool_DISAPPEARING_PLATFORMS, "Disappearing Platforms", "6", false);
+    register_tool(EditorTool_CONVEYORS, "Conveyors", "7", false);
+    register_tool(EditorTool_MOVING_PLATFORMS, "Moving Platforms", "8", false);
+    register_tool(EditorTool_ENEMIES, "Enemies", "9", false);
+    register_tool(EditorTool_GRAVITY_LINES, "Gravity Lines", "0", false);
+    register_tool(EditorTool_ROOMTEXT, "Roomtext", "R", false);
+    register_tool(EditorTool_TERMINALS, "Terminals", "T", false);
+    register_tool(EditorTool_SCRIPTS, "Script Boxes", "Y", false);
+    register_tool(EditorTool_WARP_TOKENS, "Warp Tokens", "U", false);
+    register_tool(EditorTool_WARP_LINES, "Warp Lines", "I", false);
+    register_tool(EditorTool_CREWMATES, "Crewmates", "O", false);
+    register_tool(EditorTool_START_POINT, "Start Point", "P", false);
 
     static const short basic[] = {
         121, 121, 121, 121, 121, 121, 121, 160, 121, 121, 121, 121, 121, 121, 121,
@@ -423,11 +424,10 @@ void editorclass::show_note(const char* text)
     note = text;
 }
 
-void editorclass::register_tool(EditorTools tool, const char* name, const char* keychar, const SDL_KeyCode key, const bool shift)
+void editorclass::register_tool(EditorTools tool, const char* name, const char* keychar, const bool shift)
 {
     tool_names[tool] = name;
     tool_key_chars[tool] = keychar;
-    tool_keys[tool] = key;
     tool_requires_shift[tool] = shift;
 }
 
@@ -2957,7 +2957,8 @@ static void handle_draw_input()
 {
     extern editorclass ed;
 
-    bool shift_down = key.keymap[SDLK_LSHIFT] || key.keymap[SDLK_RSHIFT];
+    bool shift_down = false;
+    // bool shift_down = key.keymap[SDLK_LSHIFT] || key.keymap[SDLK_RSHIFT]; // EDITOR-LATER
 
     if (shift_down && !ed.shiftkey)
     {
@@ -2975,57 +2976,58 @@ static void handle_draw_input()
     }
     else
     {
-        if (key.keymap[SDLK_F1])
-        {
-            ed.switch_tileset(shift_down);
-            ed.keydelay = 6;
-        }
-        if (key.keymap[SDLK_F2])
-        {
-            ed.switch_tilecol(shift_down);
-            ed.keydelay = 6;
-        }
-        if (key.keymap[SDLK_F3])
-        {
-            ed.switch_enemy(shift_down);
-            ed.keydelay = 6;
-        }
-        if (key.keymap[SDLK_F4])
-        {
-            ed.keydelay = 6;
-            ed.substate = EditorSubState_DRAW_BOX;
-            ed.box_corner = BoxCorner_FIRST;
-            ed.box_type = BoxType_ENEMY;
-        }
-        if (key.keymap[SDLK_F5])
-        {
-            ed.keydelay = 6;
-            ed.substate = EditorSubState_DRAW_BOX;
-            ed.box_corner = BoxCorner_FIRST;
-            ed.box_type = BoxType_PLATFORM;
-        }
-        if (key.keymap[SDLK_F10])
-        {
-            if (cl.getroomprop(ed.levx, ed.levy)->directmode == 1)
-            {
-                cl.setroomdirectmode(ed.levx, ed.levy, 0);
-                ed.show_note(loc::gettext("Direct Mode Disabled"));
-                ed.clamp_tilecol(ed.levx, ed.levy, true);
-            }
-            else
-            {
-                cl.setroomdirectmode(ed.levx, ed.levy, 1);
-                ed.show_note(loc::gettext("Direct Mode Enabled"));
-            }
-            graphics.backgrounddrawn = false;
+        // EDITOR-LATER
+        // if (key.keymap[SDLK_F1])
+        // {
+        //     ed.switch_tileset(shift_down);
+        //     ed.keydelay = 6;
+        // }
+        // if (key.keymap[SDLK_F2])
+        // {
+        //     ed.switch_tilecol(shift_down);
+        //     ed.keydelay = 6;
+        // }
+        // if (key.keymap[SDLK_F3])
+        // {
+        //     ed.switch_enemy(shift_down);
+        //     ed.keydelay = 6;
+        // }
+        // if (key.keymap[SDLK_F4])
+        // {
+        //     ed.keydelay = 6;
+        //     ed.substate = EditorSubState_DRAW_BOX;
+        //     ed.box_corner = BoxCorner_FIRST;
+        //     ed.box_type = BoxType_ENEMY;
+        // }
+        // if (key.keymap[SDLK_F5])
+        // {
+        //     ed.keydelay = 6;
+        //     ed.substate = EditorSubState_DRAW_BOX;
+        //     ed.box_corner = BoxCorner_FIRST;
+        //     ed.box_type = BoxType_PLATFORM;
+        // }
+        // if (key.keymap[SDLK_F10])
+        // {
+        //     if (cl.getroomprop(ed.levx, ed.levy)->directmode == 1)
+        //     {
+        //         cl.setroomdirectmode(ed.levx, ed.levy, 0);
+        //         ed.show_note(loc::gettext("Direct Mode Disabled"));
+        //         ed.clamp_tilecol(ed.levx, ed.levy, true);
+        //     }
+        //     else
+        //     {
+        //         cl.setroomdirectmode(ed.levx, ed.levy, 1);
+        //         ed.show_note(loc::gettext("Direct Mode Enabled"));
+        //     }
+        //     graphics.backgrounddrawn = false;
 
-            ed.updatetiles = true;
-            ed.keydelay = 6;
-        }
+        //     ed.updatetiles = true;
+        //     ed.keydelay = 6;
+        // }
 
         for (int i = 0; i < NUM_EditorTools; i++)
         {
-            if (key.keymap[ed.tool_keys[i]] &&
+            if (false && // key.keymap[ed.tool_keys[i]]
                 ((shift_down && ed.tool_requires_shift[i]) ||
                     (!shift_down && !ed.tool_requires_shift[i])))
             {
@@ -3033,69 +3035,78 @@ static void handle_draw_input()
             }
         }
 
-        if (key.keymap[SDLK_w])
-        {
-            ed.switch_warpdir(shift_down);
-            ed.keydelay = 6;
-        }
-        if (key.keymap[SDLK_e])
-        {
-            ed.keydelay = 6;
-            ed.get_input_line(TEXT_ROOMNAME, "Enter new room name:", const_cast<std::string*>(&(cl.getroomprop(ed.levx, ed.levy)->roomname)));
-            game.mapheld = true;
-        }
-        if (key.keymap[SDLK_g])
-        {
-            ed.keydelay = 6;
-            ed.get_input_line(TEXT_GOTOROOM, "Enter room coordinates x,y:", NULL);
-            game.mapheld = true;
-        }
+        // EDITOR-LATER
+        // if (key.keymap[SDLK_w])
+        // {
+        //     ed.switch_warpdir(shift_down);
+        //     ed.keydelay = 6;
+        // }
+        // if (key.keymap[SDLK_e])
+        // {
+        //     ed.keydelay = 6;
+        //     ed.get_input_line(TEXT_ROOMNAME, "Enter new room name:", const_cast<std::string*>(&(cl.getroomprop(ed.levx, ed.levy)->roomname)));
+        //     game.mapheld = true;
+        // }
+        // if (key.keymap[SDLK_g])
+        // {
+        //     ed.keydelay = 6;
+        //     ed.get_input_line(TEXT_GOTOROOM, "Enter room coordinates x,y:", NULL);
+        //     game.mapheld = true;
+        // }
 
         //Save and load
-        if (key.keymap[SDLK_s])
-        {
-            ed.keydelay = 6;
-            ed.get_input_line(TEXT_SAVE, "Enter map filename to save as:", &(ed.filename));
-            game.mapheld = true;
-        }
+        // if (key.keymap[SDLK_s]) // EDITOR-LATER
+        // {
+        //     ed.keydelay = 6;
+        //     ed.get_input_line(TEXT_SAVE, "Enter map filename to save as:", &(ed.filename));
+        //     game.mapheld = true;
+        // }
 
-        if (key.keymap[SDLK_l])
-        {
-            ed.keydelay = 6;
-            ed.get_input_line(TEXT_LOAD, "Enter map filename to load:", &(ed.filename));
-            game.mapheld = true;
-        }
+        // if (key.keymap[SDLK_l])
+        // {
+        //     ed.keydelay = 6;
+        //     ed.get_input_line(TEXT_LOAD, "Enter map filename to load:", &(ed.filename));
+        //     game.mapheld = true;
+        // }
 
-        ed.f_modifier = key.keymap[SDLK_f];
-        ed.h_modifier = key.keymap[SDLK_h];
-        ed.v_modifier = key.keymap[SDLK_v];
-        ed.b_modifier = key.keymap[SDLK_b];
-        ed.c_modifier = key.keymap[SDLK_c];
-        ed.x_modifier = key.keymap[SDLK_x];
-        ed.z_modifier = key.keymap[SDLK_z];
+        // ed.f_modifier = key.keymap[SDLK_f];
+        // ed.h_modifier = key.keymap[SDLK_h];
+        // ed.v_modifier = key.keymap[SDLK_v];
+        // ed.b_modifier = key.keymap[SDLK_b];
+        // ed.c_modifier = key.keymap[SDLK_c];
+        // ed.x_modifier = key.keymap[SDLK_x];
+        // ed.z_modifier = key.keymap[SDLK_z];
+        
+        ed.f_modifier = false;
+        ed.h_modifier = false;
+        ed.v_modifier = false;
+        ed.b_modifier = false;
+        ed.c_modifier = false;
+        ed.x_modifier = false;
+        ed.z_modifier = false;
 
         const int room = ed.levx + ed.levy * cl.maxwidth;
         const int plat_speed = cl.roomproperties[room].platv;
 
-        if (key.keymap[SDLK_COMMA] || controls_held(PSP_CTRL_LTRIGGER))
+        if (controls_held(PSP_CTRL_LTRIGGER))
         {
-            if (key.keymap[SDLK_LCTRL] || key.keymap[SDLK_RCTRL])
-            {
-                cl.roomproperties[room].platv = plat_speed - 1;
-            }
-            else
+            // if (key.keymap[SDLK_LCTRL] || key.keymap[SDLK_RCTRL]) // EDITOR-LATER
+            // {
+            //     cl.roomproperties[room].platv = plat_speed - 1;
+            // }
+            // else
             {
                 ed.current_tool = (EditorTools) POS_MOD(ed.current_tool - 1, NUM_EditorTools);
             }
             ed.keydelay = 6;
         }
-        else if (key.keymap[SDLK_PERIOD] || controls_held(PSP_CTRL_RTRIGGER))
+        else if (controls_held(PSP_CTRL_RTRIGGER))
         {
-            if (key.keymap[SDLK_LCTRL] || key.keymap[SDLK_RCTRL])
-            {
-                cl.roomproperties[room].platv = plat_speed + 1;
-            }
-            else
+            // if (key.keymap[SDLK_LCTRL] || key.keymap[SDLK_RCTRL]) // EDITOR-LATER
+            // {
+            //     cl.roomproperties[room].platv = plat_speed + 1;
+            // }
+            // else
             {
                 ed.current_tool = (EditorTools) POS_MOD(ed.current_tool + 1, NUM_EditorTools);
             }
@@ -3114,7 +3125,7 @@ static void handle_draw_input()
             ed.show_note(buffer);
         }
 
-        if (key.keymap[SDLK_SPACE] || controls_held(PSP_CTRL_SQUARE))
+        if (controls_held(PSP_CTRL_SQUARE))
         {
             ed.toolbox_open = !ed.toolbox_open;
             ed.keydelay = 6;
@@ -3171,10 +3182,10 @@ void editorinput(void)
     ed.tilex = std::clamp(cursor_x, 0, SCREEN_WIDTH_PIXELS - 1) / 8;
     ed.tiley = std::clamp(cursor_y, 0, SCREEN_HEIGHT_PIXELS - 1) / 8;
 
-    bool up_pressed = key.isDown(SDLK_UP) || key.isDown(SDL_CONTROLLER_BUTTON_DPAD_UP);
-    bool down_pressed = key.isDown(SDLK_DOWN) || key.isDown(SDL_CONTROLLER_BUTTON_DPAD_DOWN);
-    bool left_pressed = key.isDown(SDLK_LEFT) || key.isDown(SDL_CONTROLLER_BUTTON_DPAD_LEFT);
-    bool right_pressed = key.isDown(SDLK_RIGHT) || key.isDown(SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+    bool up_pressed = key.isDown(PSP_CTRL_UP);
+    bool down_pressed = key.isDown(PSP_CTRL_DOWN);
+    bool left_pressed = key.isDown(PSP_CTRL_LEFT);
+    bool right_pressed = key.isDown(PSP_CTRL_RIGHT);
 
     game.press_left = false;
     game.press_right = false;
@@ -3182,51 +3193,54 @@ void editorinput(void)
     game.press_map = false;
     game.press_interact = false;
 
-    if (key.isDown(KEYBOARD_LEFT) || key.isDown(KEYBOARD_a) || key.controllerWantsLeft(false))
+    if (key.controllerWantsLeft(false))
     {
         game.press_left = true;
     }
-    if (key.isDown(KEYBOARD_RIGHT) || key.isDown(KEYBOARD_d) || key.controllerWantsRight(false))
+    if (key.controllerWantsRight(false))
     {
         game.press_right = true;
     }
-    if (key.isDown(KEYBOARD_z) || key.isDown(KEYBOARD_SPACE) || key.isDown(KEYBOARD_v) || key.isDown(game.controllerButton_flip))
+    if (key.isDown(game.controllerButton_flip))
     {
         game.press_action = true;
     };
 
-    if (key.keymap[SDLK_F9] && (ed.keydelay == 0)) {
-        ed.keydelay = 30;
-        ed.show_note(loc::gettext("Reloaded resources"));
-        graphics.reloadresources();
-    }
+    // if (key.keymap[SDLK_F9] && (ed.keydelay == 0)) { // EDITOR-LATER
+    //     ed.keydelay = 30;
+    //     ed.show_note(loc::gettext("Reloaded resources"));
+    //     graphics.reloadresources();
+    // }
 
     // Was escape just pressed?
     bool escape_pressed = false;
-    if ((key.isDown(27) || controls_held(PSP_CTRL_START)) && !ed.settingskey)
+    if ((controls_held(PSP_CTRL_START)) && !ed.settingskey)
     {
         ed.settingskey = true;
         escape_pressed = true;
     }
-    else if (!key.isDown(27) && !controls_held(PSP_CTRL_START))
+    else if (!controls_held(PSP_CTRL_START))
     {
         ed.settingskey = false;
     }
 
     // What about enter?
     bool enter_pressed = false;
-    if ((key.isDown(KEYBOARD_ENTER) || controls_held(PSP_CTRL_TRIANGLE)) && !game.mapheld)
+    if ((controls_held(PSP_CTRL_TRIANGLE)) && !game.mapheld)
     {
         game.mapheld = true;
         enter_pressed = true;
     }
-    else if (!key.isDown(KEYBOARD_ENTER) && !controls_held(PSP_CTRL_TRIANGLE))
+    else if (!controls_held(PSP_CTRL_TRIANGLE))
     {
         game.mapheld = false;
     }
 
-    bool shift_down = key.keymap[SDLK_LSHIFT] || key.keymap[SDLK_RSHIFT];
-    bool ctrl_down = key.keymap[SDLK_LCTRL] || key.keymap[SDLK_RCTRL];
+    // bool shift_down = key.keymap[SDLK_LSHIFT] || key.keymap[SDLK_RSHIFT]; // EDITOR-LATER
+    // bool ctrl_down = key.keymap[SDLK_LCTRL] || key.keymap[SDLK_RCTRL];
+
+    bool shift_down = false;
+    bool ctrl_down = false;
 
     // Do different things depending on the current state (and substate)
     switch (ed.state)
@@ -3529,8 +3543,6 @@ void editorinput(void)
 
     // We're in the menu!
     case EditorState_MENU:
-        up_pressed |= key.isDown(KEYBOARD_w);
-        down_pressed |= key.isDown(KEYBOARD_s);
 
         switch (ed.substate)
         {
@@ -3653,8 +3665,6 @@ void editorinput(void)
         {
         case EditorSubState_MAIN:
         {
-            up_pressed |= key.isDown(KEYBOARD_w);
-            down_pressed |= key.isDown(KEYBOARD_s);
 
             if (escape_pressed)
             {
@@ -3689,17 +3699,17 @@ void editorinput(void)
                 ed.script_list_offset = ed.selected_script - 8;
             }
 
-            if (!key.keymap[SDLK_BACKSPACE])
-            {
-                ed.backspace_held = false;
-            }
+            // if (!key.keymap[SDLK_BACKSPACE]) // EDITOR-LATER
+            // {
+            //     ed.backspace_held = false;
+            // }
 
-            if (key.keymap[SDLK_BACKSPACE] && !ed.backspace_held && !script.customscripts.empty())
-            {
-                ed.backspace_held = true;
-                music.playef(Sound_CRY);
-                ed.remove_script(script.customscripts[(script.customscripts.size() - 1) - ed.selected_script].name);
-            }
+            // if (key.keymap[SDLK_BACKSPACE] && !ed.backspace_held && !script.customscripts.empty()) // EDITOR-LATER
+            // {
+            //     ed.backspace_held = true;
+            //     music.playef(Sound_CRY);
+            //     ed.remove_script(script.customscripts[(script.customscripts.size() - 1) - ed.selected_script].name);
+            // }
 
             if (!game.press_action && !game.press_left && !game.press_right && !up_pressed && !down_pressed && !key.isDown(27))
             {

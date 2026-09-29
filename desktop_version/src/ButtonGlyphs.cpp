@@ -1,6 +1,5 @@
 #include "ButtonGlyphs.h"
 
-#include <SDL.h>
 #include <cassert>
 
 #include "Game.h"
@@ -78,86 +77,7 @@ ButtonGlyphKey;
 
 static char glyph[GLYPH_TOTAL][5];
 
-typedef enum
-{
-    LAYOUT_NINTENDO_SWITCH_PRO,
-    LAYOUT_NINTENDO_SWITCH_JOYCON_L,
-    LAYOUT_NINTENDO_SWITCH_JOYCON_R,
-    LAYOUT_DECK,
-    LAYOUT_PLAYSTATION,
-    LAYOUT_XBOX,
-    LAYOUT_GENERIC,
-
-    /* Added after 2.4 */
-    LAYOUT_GAMECUBE,
-
-    LAYOUT_TOTAL
-}
-ButtonGlyphLayout;
-
-/* SDL provides Xbox buttons, we'd like to show the correct
- * (controller-specific) glyphs or labels for those... */
-static const char* glyph_layout[LAYOUT_TOTAL][SDL_CONTROLLER_BUTTON_RIGHTSHOULDER + 1] = {
-    { // NINTENDO_SWITCH_PRO
-        glyph[GLYPH_NINTENDO_DECK_B], glyph[GLYPH_NINTENDO_DECK_A],
-        glyph[GLYPH_NINTENDO_DECK_Y], glyph[GLYPH_NINTENDO_DECK_X],
-        glyph[GLYPH_NINTENDO_MINUS], "HOME", glyph[GLYPH_NINTENDO_PLUS],
-        glyph[GLYPH_NINTENDO_XBOX_LSTICK], glyph[GLYPH_NINTENDO_XBOX_RSTICK],
-        glyph[GLYPH_NINTENDO_L], glyph[GLYPH_NINTENDO_R]
-    },
-    { // NINTENDO_SWITCH_JOYCON_L
-        glyph[GLYPH_NINTENDO_GENERIC_ACTIONDOWN], glyph[GLYPH_NINTENDO_GENERIC_ACTIONRIGHT],
-        glyph[GLYPH_NINTENDO_GENERIC_ACTIONLEFT], glyph[GLYPH_NINTENDO_GENERIC_ACTIONUP],
-        "CAPTURE", "GUIDE", glyph[GLYPH_NINTENDO_MINUS],
-        glyph[GLYPH_NINTENDO_GENERIC_STICK], glyph[GLYPH_NINTENDO_XBOX_RSTICK],
-        glyph[GLYPH_NINTENDO_SL], glyph[GLYPH_NINTENDO_SR]
-    },
-    { // NINTENDO_SWITCH_JOYCON_R
-        glyph[GLYPH_NINTENDO_GENERIC_ACTIONDOWN], glyph[GLYPH_NINTENDO_GENERIC_ACTIONRIGHT],
-        glyph[GLYPH_NINTENDO_GENERIC_ACTIONLEFT], glyph[GLYPH_NINTENDO_GENERIC_ACTIONUP],
-        "HOME", "GUIDE", glyph[GLYPH_NINTENDO_PLUS],
-        glyph[GLYPH_NINTENDO_GENERIC_STICK], glyph[GLYPH_NINTENDO_XBOX_RSTICK],
-        glyph[GLYPH_NINTENDO_SL], glyph[GLYPH_NINTENDO_SR]
-    },
-    { // DECK
-        glyph[GLYPH_NINTENDO_DECK_A], glyph[GLYPH_NINTENDO_DECK_B],
-        glyph[GLYPH_NINTENDO_DECK_X], glyph[GLYPH_NINTENDO_DECK_Y],
-        glyph[GLYPH_XBOX_DECK_VIEW], "GUIDE", glyph[GLYPH_XBOX_DECK_MENU],
-        glyph[GLYPH_PLAYSTATION_DECK_L3], glyph[GLYPH_PLAYSTATION_DECK_R3],
-        glyph[GLYPH_PLAYSTATION_DECK_L1], glyph[GLYPH_PLAYSTATION_DECK_R1]
-    },
-    { // PLAYSTATION
-        glyph[GLYPH_PLAYSTATION_CROSS], glyph[GLYPH_PLAYSTATION_CIRCLE],
-        glyph[GLYPH_PLAYSTATION_SQUARE], glyph[GLYPH_PLAYSTATION_TRIANGLE],
-        glyph[GLYPH_PLAYSTATION_OPTIONS], "PS", glyph[GLYPH_PLAYSTATION_START],
-        glyph[GLYPH_PLAYSTATION_DECK_L3], glyph[GLYPH_PLAYSTATION_DECK_R3],
-        glyph[GLYPH_PLAYSTATION_DECK_L1], glyph[GLYPH_PLAYSTATION_DECK_R1]
-    },
-    { // XBOX
-        glyph[GLYPH_XBOX_A], glyph[GLYPH_XBOX_B],
-        glyph[GLYPH_XBOX_X], glyph[GLYPH_XBOX_Y],
-        glyph[GLYPH_XBOX_DECK_VIEW], "GUIDE", glyph[GLYPH_XBOX_DECK_MENU],
-        glyph[GLYPH_NINTENDO_XBOX_LSTICK], glyph[GLYPH_NINTENDO_XBOX_RSTICK],
-        glyph[GLYPH_XBOX_LB], glyph[GLYPH_XBOX_RB]
-    },
-    { // GENERIC
-        glyph[GLYPH_NINTENDO_GENERIC_ACTIONDOWN], glyph[GLYPH_NINTENDO_GENERIC_ACTIONRIGHT],
-        glyph[GLYPH_NINTENDO_GENERIC_ACTIONLEFT], glyph[GLYPH_NINTENDO_GENERIC_ACTIONUP],
-        "SELECT", "GUIDE", "START",
-        glyph[GLYPH_NINTENDO_XBOX_LSTICK], glyph[GLYPH_NINTENDO_XBOX_RSTICK],
-        glyph[GLYPH_GENERIC_L], glyph[GLYPH_GENERIC_R]
-    },
-    { // GAMECUBE
-        glyph[GLYPH_NINTENDO_GAMECUBE_A], glyph[GLYPH_NINTENDO_GAMECUBE_X],
-        glyph[GLYPH_NINTENDO_GAMECUBE_B], glyph[GLYPH_NINTENDO_GAMECUBE_Y],
-        glyph[GLYPH_UNKNOWN], glyph[GLYPH_UNKNOWN], "START",
-        glyph[GLYPH_UNKNOWN], glyph[GLYPH_UNKNOWN],
-        glyph[GLYPH_UNKNOWN], glyph[GLYPH_NINTENDO_GAMECUBE_Z]
-    }
-};
-
 static bool keyboard_is_active = true;
-static ButtonGlyphLayout layout = LAYOUT_GENERIC;
 
 void BUTTONGLYPHS_init(void)
 {
@@ -188,11 +108,6 @@ void BUTTONGLYPHS_keyboard_set_active(bool active)
     keyboard_is_active = active;
 }
 
-void BUTTONGLYPHS_update_layout(SDL_GameController *c)
-{
-    layout = LAYOUT_PLAYSTATION;
-}
-
 const char* BUTTONGLYPHS_get_wasd_text(void)
 {
     /* Returns the string to use in Welcome Aboard */
@@ -203,27 +118,20 @@ const char* BUTTONGLYPHS_get_wasd_text(void)
     return loc::gettext("Press left/right to move");
 }
 
-const char* BUTTONGLYPHS_sdlbutton_to_glyph(const SDL_GameControllerButton button)
-{
-    if (button < 0 || button > SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
-    {
-        assert(0 && "Unhandled button!");
-        return glyph[GLYPH_UNKNOWN];
-    }
-
-    return glyph_layout[layout][button];
-}
-
-static const char* glyph_for_vector(
-    const std::vector<SDL_GameControllerButton>& buttons,
-    const int index
+static const char* glyph_for_button(
+    const psp_key button
 ) {
-    if (index < 0 || index >= (int) buttons.size())
+    switch (button)
     {
-        return NULL;
+        case PSP_CTRL_CIRCLE:   return glyph[GLYPH_PLAYSTATION_CIRCLE];
+        case PSP_CTRL_TRIANGLE: return glyph[GLYPH_PLAYSTATION_TRIANGLE];
+        case PSP_CTRL_SQUARE:   return glyph[GLYPH_PLAYSTATION_SQUARE];
+        case PSP_CTRL_CROSS:    return glyph[GLYPH_PLAYSTATION_CROSS];
+        case PSP_CTRL_START:    return glyph[GLYPH_PLAYSTATION_START];
+        case PSP_CTRL_LTRIGGER: return glyph[GLYPH_PLAYSTATION_DECK_L1];
+        case PSP_CTRL_RTRIGGER: return glyph[GLYPH_PLAYSTATION_DECK_R1];
+        default:                return glyph[GLYPH_UNKNOWN];
     }
-
-    return BUTTONGLYPHS_sdlbutton_to_glyph(buttons[index]);
 }
 
 const char* BUTTONGLYPHS_get_button(const ActionSet actionset, const Action action, int binding)
@@ -252,7 +160,7 @@ const char* BUTTONGLYPHS_get_button(const ActionSet actionset, const Action acti
         case Action_Menu_Accept:
             if (show_controller)
             {
-                return glyph_for_vector(game.controllerButton_flip, binding);
+                return glyph_for_button(game.controllerButton_flip);
             }
             return loc::gettext("ACTION");
         }
@@ -263,7 +171,7 @@ const char* BUTTONGLYPHS_get_button(const ActionSet actionset, const Action acti
         case Action_InGame_ACTION:
             if (show_controller)
             {
-                return glyph_for_vector(game.controllerButton_flip, binding);
+                return glyph_for_button(game.controllerButton_flip);
             }
             return loc::gettext("ACTION");
 
@@ -274,9 +182,9 @@ const char* BUTTONGLYPHS_get_button(const ActionSet actionset, const Action acti
                  * This is messy, but let's not show the wrong thing here... */
                 if (game.separate_interact)
                 {
-                    return glyph_for_vector(game.controllerButton_interact, binding);
+                    return glyph_for_button(game.controllerButton_interact);
                 }
-                return glyph_for_vector(game.controllerButton_map, binding);
+                return glyph_for_button(game.controllerButton_map);
             }
             if (game.separate_interact)
             {
@@ -287,21 +195,21 @@ const char* BUTTONGLYPHS_get_button(const ActionSet actionset, const Action acti
         case Action_InGame_Map:
             if (show_controller)
             {
-                return glyph_for_vector(game.controllerButton_map, binding);
+                return glyph_for_button(game.controllerButton_map);
             }
             return loc::gettext("ENTER");
 
         case Action_InGame_Esc:
             if (show_controller)
             {
-                return glyph_for_vector(game.controllerButton_esc, binding);
+                return glyph_for_button(game.controllerButton_esc);
             }
             return loc::gettext("ESC");
 
         case Action_InGame_Restart:
             if (show_controller)
             {
-                return glyph_for_vector(game.controllerButton_restart, binding);
+                return glyph_for_button(game.controllerButton_restart);
             }
             return "R";
         }
@@ -310,42 +218,6 @@ const char* BUTTONGLYPHS_get_button(const ActionSet actionset, const Action acti
 
     assert(0 && "Trying to get label/glyph for unknown action!");
     return glyph[GLYPH_UNKNOWN];
-}
-
-char* BUTTONGLYPHS_get_all_gamepad_buttons(
-    char* buffer,
-    size_t buffer_len,
-    const ActionSet actionset,
-    const int action
-) {
-    /* Gives a list of all controller bindings, for in the menu */
-    Action union_action;
-    union_action.intval = action;
-    buffer[0] = '\0';
-    size_t cur = 0;
-    const char* glyph;
-    int binding = 0;
-    while ((glyph = BUTTONGLYPHS_get_button(actionset, union_action, binding)))
-    {
-        if (binding > 0 && buffer_len >= 1)
-        {
-            buffer[cur] = '/';
-            cur++;
-            buffer_len--;
-        }
-
-        size_t glyph_len = strlcpy(&buffer[cur], glyph, buffer_len);
-        if (glyph_len >= buffer_len)
-        {
-            // Truncation occurred, we're done
-            return buffer;
-        }
-        cur += glyph_len;
-        buffer_len -= glyph_len;
-
-        binding++;
-    }
-    return buffer;
 }
 
 } // extern "C"

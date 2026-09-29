@@ -1,10 +1,11 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <SDL.h>
 #include <map>
 #include <string>
 #include <vector>
+
+#include "controls.h"
 
 #include "Font.h"
 #include "ScreenSettings.h"
@@ -338,11 +339,6 @@ public:
     int gravitycontrol;
     bool isingamecompletescreen(void);
 
-    bool muted;
-    int mutebutton;
-    bool musicmuted;
-    int musicmutebutton;
-
     int tapleft, tapright;
 
     //Menu interaction stuff
@@ -401,7 +397,6 @@ public:
     int creditposx, creditposy, creditposdelay;
     int oldcreditposx;
 
-    SDL_GameControllerButton gpmenu_lastbutton;
     bool gpmenu_confirming;
     bool gpmenu_showremove;
 
@@ -545,11 +540,11 @@ public:
     std::map<std::string, int> customlevelstats;
 
 
-    std::vector<SDL_GameControllerButton> controllerButton_map;
-    std::vector<SDL_GameControllerButton> controllerButton_flip;
-    std::vector<SDL_GameControllerButton> controllerButton_esc;
-    std::vector<SDL_GameControllerButton> controllerButton_restart;
-    std::vector<SDL_GameControllerButton> controllerButton_interact;
+    psp_key controllerButton_map;
+    psp_key controllerButton_flip;
+    psp_key controllerButton_esc;
+    psp_key controllerButton_restart;
+    psp_key controllerButton_interact;
 
     bool skipfakeload;
     bool ghostsenabled;
