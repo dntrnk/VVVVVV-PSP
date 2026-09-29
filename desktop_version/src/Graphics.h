@@ -150,6 +150,8 @@ public:
 
     void drawpartimage(int t, int xp, int yp, int wp, int hp);
 
+    void drawpartimagecol(const int t, const int xp, const int yp, const g2dColor ct, const int wp, const int hp);
+
     void drawimage(int t, int xp, int yp, bool cent=false);
 
     void drawimagecol(int t, int xp, int yp, g2dColor ct, bool cent= false);

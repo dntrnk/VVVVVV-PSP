@@ -792,6 +792,15 @@ void Graphics::drawpartimage(const int t, const int xp, const int yp, const int 
     draw_texture_part(images[t], xp, yp, 0, 0, wp, hp, 1, 1, G2D_WHITE);
 }
 
+void Graphics::drawpartimagecol(const int t, const int xp, const int yp, const g2dColor ct, const int wp, const int hp)
+{
+    if (!INBOUNDS_ARR(t, images) || images[t] == NULL)
+    {
+        return;
+    }
+    draw_texture_part(images[t], xp, yp, 0, 0, wp, hp, 1, 1, ct);
+}
+
 void Graphics::draw_texture(g2dImage* image, const int x, const int y, g2dColor color)
 {
     g2dHelperDrawImage(image, x, y, image->w, image->h, color, 0, 0, image->w, image->h);
