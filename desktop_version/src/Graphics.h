@@ -32,7 +32,6 @@ enum ImageNames
     IMAGE_SITE2,
     IMAGE_SITE3,
     IMAGE_ENDING,
-    IMAGE_SITE4,
     IMAGE_CUSTOMMINIMAP,
     NUM_IMAGES
 };

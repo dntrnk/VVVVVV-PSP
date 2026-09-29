@@ -1006,7 +1006,6 @@ void GraphicsResources::init(void)
     im_image8 = LoadImage("graphics/site2.png", TEX_WHITE, G2D_CLUT4);
     im_image9 = LoadImage("graphics/site3.png", TEX_WHITE, G2D_CLUT4);
     im_image10 = LoadImage("graphics/ending.png", G2D_CLUT4);
-    im_image11 = LoadImage("graphics/site4.png", TEX_WHITE, G2D_CLUT4);
 
     im_sprites_translated = NULL;
 
@@ -1037,7 +1036,6 @@ void GraphicsResources::destroy(void)
     g2dTexFree(&im_image8);
     g2dTexFree(&im_image9);
     g2dTexFree(&im_image10);
-    g2dTexFree(&im_image11);
     g2dTexFree(&im_image12);
 
     g2dTexFree(&im_sprites_translated);

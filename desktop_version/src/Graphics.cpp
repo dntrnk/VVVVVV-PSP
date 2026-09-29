@@ -3227,7 +3227,6 @@ bool Graphics::reloadresources(void)
     images[IMAGE_SITE2] = grphx.im_image8;
     images[IMAGE_SITE3] = grphx.im_image9;
     images[IMAGE_ENDING] = grphx.im_image10;
-    images[IMAGE_SITE4] = grphx.im_image11;
     images[IMAGE_CUSTOMMINIMAP] = grphx.im_image12;
 
     music.destroy();

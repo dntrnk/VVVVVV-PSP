@@ -36,7 +36,6 @@ public:
     g2dImage* im_image8;
     g2dImage* im_image9;
     g2dImage* im_image10;
-    g2dImage* im_image11;
     g2dImage* im_image12;
 
     g2dImage* im_sprites_translated;
