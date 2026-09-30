@@ -128,8 +128,8 @@ static const char* glyph_for_button(
         case PSP_CTRL_SQUARE:   return glyph[GLYPH_PLAYSTATION_SQUARE];
         case PSP_CTRL_CROSS:    return glyph[GLYPH_PLAYSTATION_CROSS];
         case PSP_CTRL_START:    return glyph[GLYPH_PLAYSTATION_START];
-        case PSP_CTRL_LTRIGGER: return glyph[GLYPH_PLAYSTATION_DECK_L1];
-        case PSP_CTRL_RTRIGGER: return glyph[GLYPH_PLAYSTATION_DECK_R1];
+        case PSP_CTRL_LTRIGGER: return glyph[GLYPH_NINTENDO_L];
+        case PSP_CTRL_RTRIGGER: return glyph[GLYPH_NINTENDO_R];
         default:                return glyph[GLYPH_UNKNOWN];
     }
 }
@@ -205,6 +205,13 @@ const char* BUTTONGLYPHS_get_button(const ActionSet actionset, const Action acti
                 return glyph_for_button(game.controllerButton_esc);
             }
             return loc::gettext("ESC");
+
+        case Action_InGame_LTrigger:
+            if (show_controller)
+            {
+                return glyph_for_button(PSP_CTRL_LTRIGGER);
+            }
+            return ",";
 
         case Action_InGame_Restart:
             if (show_controller)

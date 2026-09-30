@@ -1579,8 +1579,8 @@ static void draw_toolbox(const char* coords)
     char changetooltext[SCREEN_WIDTH_CHARS + 1];
     vformat_buf(changetooltext, sizeof(changetooltext),
         loc::gettext("{button1} and {button2} keys change tool"),
-        "button1:str, button2:str",
-        ",", "."
+        "button1:but, button2:but",
+        vformat_button(ActionSet_InGame, Action_InGame_LTrigger), vformat_button(ActionSet_InGame, Action_InGame_Restart)
     );
     font::print(PR_CJK_HIGH | PR_RIGHT, 320, 232, changetooltext, 196, 196, 255 - help.glow);
 
