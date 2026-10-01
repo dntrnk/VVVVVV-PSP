@@ -347,23 +347,44 @@ bool cycle_language(bool should_recompute_textboxes)
 
 void KeyPoll::Poll(void)
 {
-    static int raw_mousex = 0;
-    static int raw_mousey = 0;
+    // Mouse movement
+    static int mousespeed = 4;
+    static int mousetimer = 0;
 
-    VVV_Rect rect = {0, 0, 320, 240};
+    if (stickWantsLeft() || stickWantsRight() || stickWantsUp() || stickWantsDown())
+    {
+        mousetimer++;
 
-    int window_width = 320;
-    int window_height = 240;
+        if (mousetimer == 10)
+        {
+            mousespeed = 5;
+        }
+        else if (mousetimer == 20)
+        {
+            mousespeed = 6;
+        }
+        else if (mousetimer == 30)
+        {
+            mousespeed = 7;
+        }
+        else if (mousetimer == 40)
+        {
+            mousespeed = 8;
+        }
+    }
+    else
+    {
+        mousetimer = 0;
+        mousespeed = 4;
+    }
 
-    int scaled_window_width = 320;
-    int scaled_window_height = 240;
+    if (stickWantsLeft()) mousex -= mousespeed;
+    if (stickWantsRight()) mousex += mousespeed;
+    if (stickWantsUp()) mousey -= mousespeed;
+    if (stickWantsDown()) mousey += mousespeed;
 
-    float scale_x = (float)window_width / (float)scaled_window_width;
-    float scale_y = (float)window_height / (float)scaled_window_height;
-
-    // Use screen stretch information to modify the coordinates (as we implement stretching manually)
-    mousex = ((raw_mousex * scale_x) - rect.x) * SCREEN_WIDTH_PIXELS / rect.w;
-    mousey = ((raw_mousey * scale_y) - rect.y) * SCREEN_HEIGHT_PIXELS / rect.h;
+    mousex = std::clamp(mousex, 0, SCREEN_WIDTH_PIXELS - 1);
+    mousey = std::clamp(mousey, 0, SCREEN_HEIGHT_PIXELS - 1);
 }
 
 bool KeyPoll::isDown(psp_key key)

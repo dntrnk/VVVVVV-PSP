@@ -3158,9 +3158,6 @@ void editorinput(void)
 {
     extern editorclass ed;
 
-    static int cursor_x = 0;
-    static int cursor_y = 0;
-
     if (graphics.fademode == FADE_FADING_OUT)
     {
         return;
@@ -3169,16 +3166,8 @@ void editorinput(void)
     ed.old_tilex = ed.tilex;
     ed.old_tiley = ed.tiley;
 
-    if (key.stickWantsLeft()) cursor_x -= 4;
-    if (key.stickWantsRight()) cursor_x += 4;
-    if (key.stickWantsUp()) cursor_y -= 4;
-    if (key.stickWantsDown()) cursor_y += 4;
-
-    cursor_x = std::clamp(cursor_x, 0, SCREEN_WIDTH_PIXELS - 1);
-    cursor_y = std::clamp(cursor_y, 0, SCREEN_HEIGHT_PIXELS - 1);
-
-    ed.tilex = std::clamp(cursor_x, 0, SCREEN_WIDTH_PIXELS - 1) / 8;
-    ed.tiley = std::clamp(cursor_y, 0, SCREEN_HEIGHT_PIXELS - 1) / 8;
+    ed.tilex = key.mousex / 8;
+    ed.tiley = key.mousey / 8;
 
     bool up_pressed = key.isDown(PSP_CTRL_UP);
     bool down_pressed = key.isDown(PSP_CTRL_DOWN);
