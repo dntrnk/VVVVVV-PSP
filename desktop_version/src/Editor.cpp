@@ -700,29 +700,36 @@ static void editormenurender(int tr, int tg, int tb)
 
 static void draw_background_grid(void)
 {
-    for (int j = 0; j < 30; j++)
-    {
-        for (int i = 0; i < 40; i++)
-        {
-            if (i == 19 || i == 20 || j == 14 || j == 29)
-            {
-                // Major guidelines
-                graphics.draw_rect(i * 8, j * 8, 7, 7, G2D_RGB(32, 32, 32));
-            }
-            else if (i == 9 || i == 30 || j == 6 || j == 7 || j == 21 || j == 22)
-            {
-                // Minor guidelines
-                graphics.draw_rect(i * 8, j * 8, 7, 7, G2D_RGB(24, 24, 24));
-            }
-            else if (i % 4 == 0 || j % 4 == 0)
-            {
-                graphics.draw_rect(i * 8, j * 8, 7, 7, G2D_RGB(16, 16, 16));
-            }
-            else
-            {
-                graphics.draw_rect(i * 8, j * 8, 7, 7, G2D_RGB(8, 8, 8));
-            }
+    graphics.fill_rect(0, 0, 319, 239, G2D_RGB(16, 16, 16));
+
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 7; j++) {
+            graphics.fill_rect(8 + i * 32, 8 + j * 32, 23, 23, G2D_RGB(8, 8, 8));
         }
+    }
+
+    graphics.fill_rect(72, 0, 7, 239, G2D_RGB(24, 24, 24));
+    graphics.fill_rect(240, 0, 7, 239, G2D_RGB(24, 24, 24));
+
+    graphics.fill_rect(0, 48, 319, 15, G2D_RGB(24, 24, 24));
+    graphics.fill_rect(0, 168, 319, 15, G2D_RGB(24, 24, 24));
+
+    graphics.fill_rect(152, 0, 15, 239, G2D_RGB(32, 32, 32));
+    graphics.fill_rect(0, 112, 319, 7, G2D_RGB(32, 32, 32));
+    graphics.fill_rect(0, 232, 319, 7, G2D_RGB(32, 32, 32));
+
+    for (int i = 0; i < 40; i++) {
+        for (int j = 0; j < 30; j++) {
+            graphics.fill_rect(1 + i * 8, 1 + j * 8, 5, 5, G2D_BLACK);
+        }
+    }
+
+    for (int i = 0; i < 40; i++) {
+        graphics.fill_rect(7 + i * 8, 0, 1, 240, G2D_BLACK);
+    }
+
+    for (int i = 0; i < 30; i++) {
+        graphics.fill_rect(0, 7 + i * 8, 320, 1, G2D_BLACK);
     }
 }
 
@@ -1764,11 +1771,16 @@ void editorrender(void)
     switch (ed.state)
     {
     case EditorState_DRAW:
-        // Draw the editor guidelines
-        draw_background_grid();
-
-        // Draw the background, if any, over the guidelines
-        draw_background(room->warpdir);
+        if (room->warpdir == 0)
+        {
+            // Draw the editor guidelines
+            draw_background_grid();
+        }
+        else
+        {
+            // Draw the background, if any, over the guidelines
+            draw_background(room->warpdir);
+        }
 
         graphics.drawmap();
         draw_edgeguides();
