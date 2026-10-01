@@ -2060,8 +2060,6 @@ static void input_submitted(void)
 
     bool reset_text_mode = true;
 
-    key.disabletextentry();
-
     ed.substate = EditorSubState_MAIN;
 
     switch (ed.current_text_mode)
@@ -2170,7 +2168,7 @@ static void input_submitted(void)
         ed.substate = EditorSubState_MENU_INPUT;
         reset_text_mode = false;
         key.keybuffer = cl.Desc2;
-        key.enabletextentry();
+        key.enabletextentry(loc::gettext("change description"));
         ed.current_text_ptr = &(key.keybuffer);
         break;
     case TEXT_DESC2:
@@ -2182,7 +2180,7 @@ static void input_submitted(void)
             ed.substate = EditorSubState_MENU_INPUT;
             reset_text_mode = false;
             key.keybuffer = cl.Desc3;
-            key.enabletextentry();
+            key.enabletextentry(loc::gettext("change description"));
             ed.current_text_ptr = &(key.keybuffer);
         }
         else
@@ -2666,9 +2664,9 @@ static void editormenuactionpress(void)
 
             ed.current_text_mode = TEXT_TITLE;
             ed.substate = EditorSubState_MENU_INPUT;
-            key.keybuffer = cl.title;
+            key.keybuffer = title_is_gettext ? loc::gettext("Untitled Level") : cl.title;
             music.playef(Sound_VIRIDIAN);
-            key.enabletextentry();
+            key.enabletextentry((loc::gettext("change name")));
             ed.current_text_ptr = &(key.keybuffer);
             break;
         }
@@ -2678,9 +2676,9 @@ static void editormenuactionpress(void)
 
             ed.current_text_mode = TEXT_CREATOR;
             ed.substate = EditorSubState_MENU_INPUT;
-            key.keybuffer = cl.creator;
+            key.keybuffer = creator_is_gettext ? loc::gettext("Unknown") : cl.creator;
             music.playef(Sound_VIRIDIAN);
-            key.enabletextentry();
+            key.enabletextentry(loc::gettext("change author"));
             ed.current_text_ptr = &(key.keybuffer);
             break;
         }
@@ -2689,7 +2687,7 @@ static void editormenuactionpress(void)
             ed.substate = EditorSubState_MENU_INPUT;
             key.keybuffer = cl.Desc1;
             music.playef(Sound_VIRIDIAN);
-            key.enabletextentry();
+            key.enabletextentry(loc::gettext("change description"));
             ed.current_text_ptr = &(key.keybuffer);
             break;
         case 3:
@@ -2697,7 +2695,7 @@ static void editormenuactionpress(void)
             ed.substate = EditorSubState_MENU_INPUT;
             key.keybuffer=cl.website;
             music.playef(Sound_VIRIDIAN);
-            key.enabletextentry();
+            key.enabletextentry(loc::gettext("change website"));
             ed.current_text_ptr = &(key.keybuffer);
             break;
         case 4:
@@ -3153,7 +3151,7 @@ void editorclass::get_input_line(const enum TextMode mode, const std::string& pr
 
     old_entity_text = key.keybuffer;
 
-    key.enabletextentry();
+    key.enabletextentry(loc::gettext(current_text_desc.c_str()));
 }
 
 void editorinput(void)
@@ -3513,7 +3511,6 @@ void editorinput(void)
             if (escape_pressed)
             {
                 // Cancel it, and remove the enemy it's tied to if necessary
-                key.disabletextentry();
                 if (ed.current_text_mode >= FIRST_ENTTEXT && ed.current_text_mode <= LAST_ENTTEXT)
                 {
                     *ed.current_text_ptr = ed.old_entity_text;
@@ -3642,7 +3639,6 @@ void editorinput(void)
             if (escape_pressed && key.textentry())
             {
                 ed.substate = EditorSubState_MAIN;
-                key.disabletextentry();
                 ed.current_text_mode = TEXT_NONE;
 
                 music.playef(Sound_VIRIDIAN);
@@ -3753,8 +3749,6 @@ void editorinput(void)
 
                 // Alright, now re-add the script.
                 ed.create_script(ed.current_script, ed.script_buffer);
-
-                key.disabletextentry();
             }
 
             if (ed.keydelay > 0) ed.keydelay--;

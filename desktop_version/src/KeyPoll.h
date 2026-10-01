@@ -21,9 +21,7 @@ public:
 
     KeyPoll(void);
 
-    void enabletextentry(void);
-
-    void disabletextentry(void);
+    void enabletextentry(const char* desc = NULL);
 
     void Poll(void);
 

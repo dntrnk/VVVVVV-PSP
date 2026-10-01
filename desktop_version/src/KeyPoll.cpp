@@ -77,7 +77,97 @@ KeyPoll::KeyPoll(void)
     osk_status = sceUtilityOskGetStatus();
 }
 
-void KeyPoll::enabletextentry(void)
+static void utf16_to_utf8(const uint16_t* src, char* dst, size_t dst_size)
+{
+    size_t j = 0;
+    for (size_t i = 0; src[i] != 0 && j < dst_size - 4; i++)
+    {
+        uint16_t cp = src[i];
+
+        if (cp < 0x80)
+        {
+            // ASCII (1 byte)
+            dst[j++] = (char)cp;
+        }
+        else if (cp < 0x800)
+        {
+            // 2 bytes (cyrillic, latin with diacritics)
+            dst[j++] = (char)(0xC0 | (cp >> 6));
+            dst[j++] = (char)(0x80 | (cp & 0x3F));
+        }
+        else
+        {
+            // 3 bytes (CJK, rare symbols)
+            dst[j++] = (char)(0xE0 | (cp >> 12));
+            dst[j++] = (char)(0x80 | ((cp >> 6) & 0x3F));
+            dst[j++] = (char)(0x80 | (cp & 0x3F));
+        }
+    }
+    dst[j] = 0;
+}
+
+static void utf8_to_utf16(const char* src, uint16_t* dst, size_t dst_size)
+{
+    if (src == NULL || dst_size == 0)
+    {
+        if (dst_size > 0) dst[0] = 0;
+        return;
+    }
+
+    size_t j = 0;
+    for (size_t i = 0; src[i] != '\0' && j < dst_size - 1; )
+    {
+        unsigned char c = (unsigned char)src[i];
+
+        if (c < 0x80)
+        {
+            // ASCII
+            dst[j++] = c;
+            i += 1;
+        }
+        else if ((c & 0xE0) == 0xC0)
+        {
+            // 2-byte UTF-8 (cyrillic, latin with diacritic)
+            if (src[i + 1] == '\0') break;
+            uint16_t cp = ((c & 0x1F) << 6)
+                        | ((unsigned char)src[i + 1] & 0x3F);
+            dst[j++] = cp;
+            i += 2;
+        }
+        else if ((c & 0xF0) == 0xE0)
+        {
+            // 3-byte UTF-8
+            if (src[i + 2] == '\0') break;
+            uint16_t cp = ((c & 0x0F) << 12)
+                        | (((unsigned char)src[i + 1] & 0x3F) << 6)
+                        | ((unsigned char)src[i + 2] & 0x3F);
+            dst[j++] = cp;
+            i += 3;
+        }
+        else
+        {
+            // 4-byte UTF-8 (emoji) — PSP OSK don't support this, so let's put a '?' there
+            dst[j++] = '?';
+            i += 4;
+        }
+    }
+    dst[j] = 0;
+}
+
+static void capitalize_and_convert(const char* src, uint16_t* dst, size_t dst_size)
+{
+    utf8_to_utf16(src, dst, dst_size);
+
+    if (dst[0] == 0) return;
+
+    uint16_t cp = dst[0];
+    if (cp >= 'a' && cp <= 'z') cp = cp - 'a' + 'A';
+    else if (cp >= 0x0430 && cp <= 0x044F) cp = cp - 0x20; // а-я -> А-Я
+    else if (cp == 0x0451) cp = 0x0401; // ё -> Ё
+    dst[0] = cp;
+}
+
+void KeyPoll::enabletextentry(const char* desc /*= NULL*/)
 {
     if (osk_active) return;
     osk_active = true;
@@ -89,28 +179,49 @@ void KeyPoll::enabletextentry(void)
     memset(osk_intext, 0, sizeof(osk_intext));
     memset(osk_outtext, 0, sizeof(osk_outtext));
 
-    for (size_t i = 0; i < keybuffer.size() && i < 255; i++)
+    utf8_to_utf16(keybuffer.c_str(), osk_intext, sizeof(osk_intext) / sizeof(osk_intext[0]));
+
+    int sys_lang = PSP_UTILITY_OSK_LANGUAGE_ENGLISH;
+    sceUtilityGetSystemParamInt(PSP_SYSTEMPARAM_ID_INT_LANGUAGE, &sys_lang);
+
+    int button_swap = 0;
+    sceUtilityGetSystemParamInt(PSP_SYSTEMPARAM_ID_INT_UNKNOWN, &button_swap);
+
+    static uint16_t osk_desc_buffer[128];
+    memset(osk_desc_buffer, 0, sizeof(osk_desc_buffer));
+
+    if (desc != NULL)
     {
-        osk_intext[i] = (uint16_t)(unsigned char)keybuffer[i];
+        capitalize_and_convert(desc, osk_desc_buffer, 128);
     }
 
     SceUtilityOskData oskData;
     memset(&oskData, 0, sizeof(oskData));
-    oskData.language = PSP_UTILITY_OSK_LANGUAGE_ENGLISH;
+    oskData.language = sys_lang;
     oskData.lines = 1;
     oskData.unk_24 = 0;
-    oskData.inputtype = PSP_UTILITY_OSK_INPUTTYPE_ALL;
-    oskData.desc = NULL;
+
+    oskData.inputtype = PSP_UTILITY_OSK_INPUTTYPE_LATIN_LOWERCASE |
+                        PSP_UTILITY_OSK_INPUTTYPE_LATIN_UPPERCASE |
+                        PSP_UTILITY_OSK_INPUTTYPE_RUSSIAN_LOWERCASE |
+                        PSP_UTILITY_OSK_INPUTTYPE_RUSSIAN_UPPERCASE |
+                        PSP_UTILITY_OSK_INPUTTYPE_JAPANESE_HIRAGANA |
+                        PSP_UTILITY_OSK_INPUTTYPE_JAPANESE_HALF_KATAKANA |
+                        PSP_UTILITY_OSK_INPUTTYPE_JAPANESE_KATAKANA |
+                        PSP_UTILITY_OSK_INPUTTYPE_JAPANESE_KANJI |
+                        PSP_UTILITY_OSK_INPUTTYPE_KOREAN;
+    
+    oskData.desc = (desc != NULL) ? osk_desc_buffer : NULL;
     oskData.intext = osk_intext;
     oskData.outtext = osk_outtext;
     oskData.outtextlength = sizeof(osk_outtext) / sizeof(osk_outtext[0]);
-    oskData.outtextlimit = 255;
+    oskData.outtextlimit = 127;
 
     SceUtilityOskParams oskParams;
     memset(&oskParams, 0, sizeof(oskParams));
     oskParams.base.size = sizeof(oskParams);
-    oskParams.base.language = PSP_UTILITY_OSK_LANGUAGE_ENGLISH;
-    oskParams.base.buttonSwap = PSP_UTILITY_ACCEPT_CROSS;
+    oskParams.base.language = sys_lang;
+    oskParams.base.buttonSwap = button_swap;
     oskParams.base.graphicsThread = 0x11;
     oskParams.base.accessThread = 0x13;
     oskParams.base.fontThread = 0x12;
@@ -123,7 +234,6 @@ void KeyPoll::enabletextentry(void)
     int done = 0;
     while (!done)
     {
-        // Тут надо бы нарисовать фон, но можно и просто clear
         g2dClear(G2D_BLACK);
 
         sceGuFinish();
@@ -151,28 +261,13 @@ void KeyPoll::enabletextentry(void)
         g2dFlip(G2D_VSYNC);
     }
 
-    keybuffer.clear();
-    for (int i = 0; osk_outtext[i] != 0 && i < 256; i++)
-    {
-        keybuffer += (char)(osk_outtext[i] & 0xFF);
-    }
+    char utf8_out[385];  // 256 symbols × 3 byte max + extra
+    utf16_to_utf8(osk_outtext, utf8_out, sizeof(utf8_out));
+    keybuffer = utf8_out;
 
     osk_active = false;
     osk_done = true;
     osk_just_closed = true;
-}
-
-void KeyPoll::disabletextentry(void)
-{
-    imebuffer = "";
-    imebuffer_start = 0;
-    imebuffer_length = 0;
-
-    if (osk_active)
-    {
-        sceUtilityOskShutdownStart();
-        osk_active = false;
-    }
 }
 
 bool KeyPoll::textentry(void)
