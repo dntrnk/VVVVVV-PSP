@@ -349,24 +349,6 @@ void KeyPoll::Poll(void)
 {
     static int raw_mousex = 0;
     static int raw_mousey = 0;
-    // SDL_Event evt;
-
-    // while (SDL_PollEvent(&evt))
-    // {
-    //     switch (evt.type)
-    //     {
-
-    //     case SDL_RENDER_TARGETS_RESET:
-    //         gameScreen.recacheTextures();
-    //         break;
-
-    //     /* Quit Event */
-    //     case SDL_QUIT:
-    //         VVV_exit(0);
-    //         break;
-    //     }
-
-    // }
 
     VVV_Rect rect = {0, 0, 320, 240};
 

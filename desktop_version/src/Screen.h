@@ -15,8 +15,6 @@ public:
 
     void RenderPresent(void);
 
-    void recacheTextures(void);
-
     bool isForcedFullscreen(void);
 
     int windowDisplay;

@@ -69,33 +69,6 @@ void Screen::RenderPresent(void)
     g2dHelperFlip();
 }
 
-void Screen::recacheTextures(void)
-{
-    // Fix for d3d9, which clears target textures sometimes (ex. toggling vsync, switching fullscreen, etc...)
-
-    // Signal cached textures to be redrawn fully
-    graphics.backgrounddrawn = false;
-    graphics.foregrounddrawn = false;
-    graphics.towerbg.tdrawback = true;
-    graphics.titlebg.tdrawback = true;
-
-    if (game.gamestate == MAPMODE || game.ingame_titlemode)
-    {
-        // Redraw the cached gameplay texture if we're in the map screen.
-        // Additionally, reset alpha so things don't jitter when re-entering gameplay.
-        float oldAlpha = graphics.alpha;
-        graphics.alpha = 0;
-        gamerender();
-        graphics.alpha = oldAlpha;
-    }
-
-    if (map.custommode)
-    {
-        // If we're in a custom level, regenerate the minimap, which also got cleared.
-        cl.generatecustomminimap();
-    }
-}
-
 bool Screen::isForcedFullscreen(void)
 {
     /* This is just a check to see if we're on a desktop or tenfoot setup.
