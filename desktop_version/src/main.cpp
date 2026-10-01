@@ -1,4 +1,5 @@
 #include <pspkernel.h>
+#include <psppower.h>
 
 #include <cassert>
 #include <cmath>
@@ -399,6 +400,9 @@ static void keep_console_open(const bool open_console)
 int main(int argc, char *argv[])
 {
     setup_callbacks();
+
+    if (scePowerGetCpuClockFrequency() != 333)
+        scePowerSetClockFrequency(333, 333, 166);
 
     char* baseDir = NULL;
     char* assetsPath = NULL;
