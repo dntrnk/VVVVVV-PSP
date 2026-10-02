@@ -45,6 +45,34 @@ struct TextboxFormat
     unsigned short padtowidth; // pad to X pixels (0 to disable)
 };
 
+typedef enum {
+    AR,
+    CA,
+    CY,
+    DE,
+    EN,
+    EO,
+    ES,
+    ES_419,
+    FA,
+    FR,
+    GA,
+    IT,
+    JA,
+    KO,
+    NL,
+    PL,
+    RU,
+    SZL,
+    TR,
+    UK,
+    ZH,
+    ES_AR,
+    PT_BR,
+    PT_PT,
+    ZH_TW
+} LangCode;
+
 extern int lang_set;
 static const int lang_set_current = 2;
 extern bool pre_title_lang_menu;
@@ -55,6 +83,7 @@ extern bool english_sprites;
 extern std::string new_level_font;
 extern LangMeta langmeta;
 extern std::vector<LangMeta> languagelist;
+extern LangCode lang_code;
 extern int languagelist_curlang;
 extern bool show_translator_menu;
 extern size_t limitscheck_current_overflow;

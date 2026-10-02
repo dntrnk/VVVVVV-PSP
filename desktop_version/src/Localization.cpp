@@ -20,6 +20,8 @@ bool english_sprites = false;
 std::string new_level_font = "";
 LangMeta langmeta;
 
+LangCode lang_code = EN;
+
 // language screen list
 std::vector<LangMeta> languagelist;
 int languagelist_curlang;

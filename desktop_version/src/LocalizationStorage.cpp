@@ -8,7 +8,6 @@
 #include "FileSystemUtils.h"
 #include "Font.h"
 #include "Graphics.h"
-#include "Render.h" // for renderupdatelangcode()
 #include "Unused.h"
 #include "UtilityClass.h"
 #include "VFormat.h"
@@ -140,6 +139,34 @@ static void map_store_translation(Textbook* textbook, hashmap* map, const char* 
     }
 
     hashmap_set(map, tb_eng, strlen(tb_eng), (uintptr_t) tb_tra);
+}
+
+static void updatelangcode(void) {
+    if (loc::lang == "AR") {lang_code = AR; return;}
+    if (loc::lang == "CA") {lang_code = CA; return;}
+    if (loc::lang == "CY") {lang_code = CY; return;}
+    if (loc::lang == "DE") {lang_code = DE; return;}
+    if (loc::lang == "EN") {lang_code = EN; return;}
+    if (loc::lang == "EO") {lang_code = EO; return;}
+    if (loc::lang == "ES") {lang_code = ES; return;}
+    if (loc::lang == "ES_419") {lang_code = ES_419; return;}
+    if (loc::lang == "FA") {lang_code = FA; return;}
+    if (loc::lang == "FR") {lang_code = FR; return;}
+    if (loc::lang == "GA") {lang_code = GA; return;}
+    if (loc::lang == "IT") {lang_code = IT; return;}
+    if (loc::lang == "JA") {lang_code = JA; return;}
+    if (loc::lang == "KO") {lang_code = KO; return;}
+    if (loc::lang == "NL") {lang_code = NL; return;}
+    if (loc::lang == "PL") {lang_code = PL; return;}
+    if (loc::lang == "RU") {lang_code = RU; return;}
+    if (loc::lang == "SZL") {lang_code = SZL; return;}
+    if (loc::lang == "TR") {lang_code = TR; return;}
+    if (loc::lang == "UK") {lang_code = UK; return;}
+    if (loc::lang == "ZH") {lang_code = ZH; return;}
+    if (loc::lang == "es_AR") {lang_code = ES_AR; return;}
+    if (loc::lang == "pt_BR") {lang_code = PT_BR; return;}
+    if (loc::lang == "pt_PT") {lang_code = PT_PT; return;}
+    if (loc::lang == "zh_TW") {lang_code = ZH_TW; return;}
 }
 
 unsigned char form_for_count(int n)
@@ -1069,7 +1096,7 @@ void loadtext(bool check_max)
         loadtext_custom(NULL);
     }
 
-    renderupdatelangcode();
+    updatelangcode();
 }
 
 void loadlanguagelist(void)

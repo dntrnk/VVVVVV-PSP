@@ -3,8 +3,6 @@
 
 extern bool render_pause_first_frame;
 
-void renderupdatelangcode(void);
-
 void titlerender(void);
 
 void gamerender(void);
