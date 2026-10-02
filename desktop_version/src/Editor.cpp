@@ -3690,13 +3690,12 @@ void editorinput(void)
         }
         break;
 
-    case EditorState_SCRIPTS:
+        case EditorState_SCRIPTS:
     {
         switch (ed.substate)
         {
         case EditorSubState_MAIN:
         {
-
             if (controls_pressed(PSP_CTRL_CIRCLE))
             {
                 music.playef(Sound_VIRIDIAN);
@@ -3730,18 +3729,6 @@ void editorinput(void)
                 ed.script_list_offset = ed.selected_script - 8;
             }
 
-            // if (!key.keymap[SDLK_BACKSPACE]) // EDITOR-LATER
-            // {
-            //     ed.backspace_held = false;
-            // }
-
-            // if (key.keymap[SDLK_BACKSPACE] && !ed.backspace_held && !script.customscripts.empty()) // EDITOR-LATER
-            // {
-            //     ed.backspace_held = true;
-            //     music.playef(Sound_CRY);
-            //     ed.remove_script(script.customscripts[(script.customscripts.size() - 1) - ed.selected_script].name);
-            // }
-
             if (!game.press_action && !game.press_left && !game.press_right && !up_pressed && !down_pressed && !key.isDown(27))
             {
                 game.jumpheld = false;
@@ -3754,13 +3741,12 @@ void editorinput(void)
                     game.jumpheld = true;
                 }
 
-                if ((game.press_action || game.press_map) && !script.customscripts.empty())
+                if ((controls_pressed(PSP_CTRL_CROSS) || game.press_action || game.press_map) && !script.customscripts.empty())
                 {
                     game.mapheld = true;
                     ed.substate = EditorSubState_SCRIPTS_EDIT;
                     key.keybuffer = "";
                     music.playef(Sound_VIRIDIAN);
-                    key.enabletextentry();
                     ed.current_text_ptr = &(key.keybuffer);
                     ed.current_script = script.customscripts[(script.customscripts.size() - 1) - ed.selected_script].name;
                     ed.load_script_in_editor(ed.current_script);
@@ -3776,13 +3762,10 @@ void editorinput(void)
         }
         case EditorSubState_SCRIPTS_EDIT:
         {
-            // Script editor!
             if (controls_pressed(PSP_CTRL_CIRCLE))
             {
                 music.playef(Sound_VIRIDIAN);
                 ed.substate = EditorSubState_MAIN;
-
-                // Alright, now re-add the script.
                 ed.create_script(ed.current_script, ed.script_buffer);
             }
 
@@ -3792,66 +3775,87 @@ void editorinput(void)
             {
                 ed.keydelay = 3;
                 ed.script_cursor_y = std::max(0, ed.script_cursor_y - 1);
-
                 key.keybuffer = ed.script_buffer[ed.script_cursor_y];
+                ed.script_cursor_x = UTF8_total_codepoints(ed.script_buffer[ed.script_cursor_y].c_str());
             }
 
             if (down_pressed && ed.keydelay <= 0)
             {
                 ed.keydelay = 3;
                 ed.script_cursor_y = std::min((int) ed.script_buffer.size() - 1, ed.script_cursor_y + 1);
-
                 key.keybuffer = ed.script_buffer[ed.script_cursor_y];
+                ed.script_cursor_x = UTF8_total_codepoints(ed.script_buffer[ed.script_cursor_y].c_str());
             }
 
-            if (key.linealreadyemptykludge)
+            if (controls_pressed(PSP_CTRL_CROSS))
             {
-                ed.keydelay = 6;
-                key.linealreadyemptykludge = false;
-            }
-
-            if (key.pressedbackspace && ed.script_buffer[ed.script_cursor_y] == "" && ed.keydelay <= 0)
-            {
-                //Remove this line completely
-                ed.remove_line(ed.script_cursor_y);
-                ed.script_cursor_y = std::max(0, ed.script_cursor_y - 1);
                 key.keybuffer = ed.script_buffer[ed.script_cursor_y];
-                ed.keydelay = 6;
+                key.enabletextentry();
+
+                ed.script_buffer[ed.script_cursor_y] = key.keybuffer;
+                ed.script_cursor_x = UTF8_total_codepoints(ed.script_buffer[ed.script_cursor_y].c_str());
             }
 
-            /* Remove all pipes, they are the line separator in the XML
-             * When this loop reaches the end, it wraps to SIZE_MAX; SIZE_MAX + 1 is 0 */
-            {size_t i; for (i = key.keybuffer.length() - 1; i + 1 > 0; --i)
+            if (controls_pressed(PSP_CTRL_TRIANGLE))
             {
-                if (key.keybuffer[i] == '|')
+                ed.script_cursor_y++;
+                ed.insert_line(ed.script_cursor_y);
+                key.keybuffer = "";
+                ed.script_cursor_x = 0;
+
+                if (ed.script_cursor_y < ed.script_offset + SCRIPT_LINE_PADDING)
                 {
-                    key.keybuffer.erase(key.keybuffer.begin() + i);
+                    ed.script_offset = std::max(0, ed.script_cursor_y - SCRIPT_LINE_PADDING);
                 }
-            }}
 
-            ed.script_buffer[ed.script_cursor_y] = key.keybuffer;
-            ed.script_cursor_x = UTF8_total_codepoints(ed.script_buffer[ed.script_cursor_y].c_str());
-
-            if (enter_pressed)
-            {
-                //Continue to next line
-                if (ed.script_cursor_y >= (int)ed.script_buffer.size()) //we're on the last line
+                if (ed.script_cursor_y > ed.script_offset + ed.lines_visible - SCRIPT_LINE_PADDING)
                 {
-                    ed.script_cursor_y++;
+                    ed.script_offset = std::min((int) ed.script_buffer.size() - ed.lines_visible + SCRIPT_LINE_PADDING, ed.script_cursor_y - ed.lines_visible + SCRIPT_LINE_PADDING);
+                }
+            }
+
+            if (controls_pressed(PSP_CTRL_SQUARE))
+            {
+                if (ed.script_buffer.size() <= 1)
+                {
+                    ed.script_buffer[0] = "";
+                    ed.script_cursor_y = 0;
+                    key.keybuffer = "";
+                    ed.script_cursor_x = 0;
+                }
+                else
+                {
+                    ed.remove_line(ed.script_cursor_y);
+
+                    if (ed.script_cursor_y >= (int) ed.script_buffer.size())
+                    {
+                        ed.script_cursor_y = (int) ed.script_buffer.size() - 1;
+                    }
+
+                    ed.script_cursor_y = std::max(0, ed.script_cursor_y);
 
                     key.keybuffer = ed.script_buffer[ed.script_cursor_y];
                     ed.script_cursor_x = UTF8_total_codepoints(ed.script_buffer[ed.script_cursor_y].c_str());
                 }
-                else
-                {
-                    //We're not, insert a line instead
-                    ed.script_cursor_y++;
 
-                    ed.insert_line(ed.script_cursor_y);
-                    key.keybuffer = "";
-                    ed.script_cursor_x = 0;
+                ed.keydelay = 6;
+
+                if (ed.script_cursor_y < ed.script_offset + SCRIPT_LINE_PADDING)
+                {
+                    ed.script_offset = std::max(0, ed.script_cursor_y - SCRIPT_LINE_PADDING);
+                }
+
+                if (ed.script_cursor_y > ed.script_offset + ed.lines_visible - SCRIPT_LINE_PADDING)
+                {
+                    ed.script_offset = std::min((int) ed.script_buffer.size() - ed.lines_visible + SCRIPT_LINE_PADDING, ed.script_cursor_y - ed.lines_visible + SCRIPT_LINE_PADDING);
                 }
             }
+
+            if (!key.osk_just_closed)
+            {
+                ed.script_buffer[ed.script_cursor_y] = key.keybuffer;
+            }
+            key.osk_just_closed = false;
 
             if (ed.script_cursor_y < ed.script_offset + SCRIPT_LINE_PADDING)
             {
