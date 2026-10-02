@@ -212,6 +212,13 @@ const char* BUTTONGLYPHS_get_button(const ActionSet actionset, const Action acti
                 return glyph_for_button(PSP_CTRL_LTRIGGER);
             }
             return ",";
+        
+        case Action_InGame_Square:
+            if (show_controller)
+            {
+                return glyph_for_button(PSP_CTRL_SQUARE);
+            }
+            return "";
 
         case Action_InGame_Restart:
             if (show_controller)

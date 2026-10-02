@@ -1624,6 +1624,13 @@ static void draw_main_ui(void)
     }
     else
     {
+        char spaceshifttext[SCREEN_WIDTH_CHARS + 1];
+        vformat_buf(spaceshifttext, sizeof(spaceshifttext),
+            (loc::lang == "JA") ? "{button1} ↑  SELECT ↑" : "{button1} ^  SELECT ^",
+            "button1:but",
+            vformat_button(ActionSet_InGame, Action_InGame_Square)
+        );
+
         if (room->roomname != "")
         {
             int font_height = font::height(PR_FONT_LEVEL);
@@ -1640,12 +1647,12 @@ static void draw_main_ui(void)
             graphics.fill_rect(&graphics.footerrect, G2D_RGBA(0, 0, 0, graphics.translucentroomname ? 127 : 255));
 
             font::print(PR_CEN | PR_BOR | PR_FONT_LEVEL | PR_CJK_LOW, -1, graphics.footerrect.y + 1 + ed.roomnamehide, room->roomname, 196, 196, 255 - help.glow);
-            font::print(PR_BOR | PR_CJK_HIGH, 4, 232 - graphics.footerrect.h, loc::gettext("SPACE ^  SHIFT ^"), 196, 196, 255 - help.glow);
+            font::print(PR_BOR | PR_CJK_HIGH, 4, 232 - graphics.footerrect.h, spaceshifttext, 196, 196, 255 - help.glow);
             font::print(PR_BOR | PR_CJK_HIGH | PR_RIGHT, 316, 232 - graphics.footerrect.h, coords, 196, 196, 255 - help.glow);
         }
         else
         {
-            font::print(PR_BOR | PR_CJK_HIGH, 4, 232, loc::gettext("SPACE ^  SHIFT ^"), 196, 196, 255 - help.glow);
+            font::print(PR_BOR | PR_CJK_HIGH, 4, 232, spaceshifttext, 196, 196, 255 - help.glow);
             font::print(PR_BOR | PR_CJK_HIGH | PR_RIGHT, 316, 232, coords, 196, 196, 255 - help.glow);
         }
     }
@@ -3662,7 +3669,7 @@ void editorinput(void)
         case EditorSubState_MAIN:
         {
 
-            if (escape_pressed)
+            if (controls_pressed(PSP_CTRL_CIRCLE))
             {
                 music.playef(Sound_VIRIDIAN);
                 ed.state = EditorState_MENU;
@@ -3742,7 +3749,7 @@ void editorinput(void)
         case EditorSubState_SCRIPTS_EDIT:
         {
             // Script editor!
-            if (escape_pressed)
+            if (controls_pressed(PSP_CTRL_CIRCLE))
             {
                 music.playef(Sound_VIRIDIAN);
                 ed.substate = EditorSubState_MAIN;
