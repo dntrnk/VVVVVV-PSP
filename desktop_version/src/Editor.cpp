@@ -31,6 +31,34 @@
 
 #define SCRIPT_LINE_PADDING 6
 
+static const char* press_esc_to_return_strings[] = {
+    [loc::AR] = "اضغط [O] للعودة للقائمة",
+    [loc::CA] = "PREM [O] PER A TORNAR AL MENÚ",
+    [loc::CY] = "[O] I DDYCHWELYD I'R DDEWISLEN",
+    [loc::DE] = "DRÜCKE [O] UM ZUM MENÜ ZU BEENDEN",
+    [loc::EN] = "PRESS [O] TO RETURN TO MENU",
+    [loc::EO] = "PREMU [O] POR REVENI AL MENUO",
+    [loc::ES] = "PULSA [O] PARA VOLVER AL MENÚ",
+    [loc::ES_419] = "PULSA [O] PARA VOLVER AL MENÚ",
+    [loc::FA] = "برای برگشت به منو [O] را بزنید",
+    [loc::FR] = "[O] POUR RETOURNER AU MENU",
+    [loc::GA] = "BRÚIGH [O] CHUN FILLEADH",
+    [loc::IT] = "PREMI [O] PER TORNARE AL MENU",
+    [loc::JA] = "[O]キーを押して終了",
+    [loc::KO] = "[O]를 눌러 메뉴로 복귀",
+    [loc::NL] = "DRUK OP [O] OM TERUG TE GAAN",
+    [loc::PL] = "WCIŚNIJ [O] BY WRÓCIĆ DO MENU",
+    [loc::RU] = "НАЖМИТЕ [O] ЧТОБЫ ВЕРНУТЬСЯ В МЕНЮ",
+    [loc::SZL] = "TYKNIJ [O] COBY IŚ NAZŎD DO MENU",
+    [loc::TR] = "MENÜYE DÖNMEK İÇİN [O] TUŞUNA BAS",
+    [loc::UK] = "ПОВЕРНУТИСЬ У МЕНЮ: НАТИСНІТЬ [O]",
+    [loc::ZH] = "按[O]返回菜单",
+    [loc::ES_AR] = "APRETÁ [O] PARA VOLVER AL MENÚ",
+    [loc::PT_BR] = "APERTE [O] PARA VOLTAR AO MENU",
+    [loc::PT_PT] = "PRIME [O] PARA VOLTAR AO MENU",
+    [loc::ZH_TW] = "按[O]返回菜單"
+};
+
 editorclass::editorclass(void)
 {
     reset();
@@ -1626,7 +1654,7 @@ static void draw_main_ui(void)
     {
         char spaceshifttext[SCREEN_WIDTH_CHARS + 1];
         vformat_buf(spaceshifttext, sizeof(spaceshifttext),
-            (loc::lang == "JA") ? "{button1} ↑  SELECT ↑" : "{button1} ^  SELECT ^",
+            (loc::lang_code == loc::JA) ? "{button1} ↑  SELECT ↑" : "{button1} ^  SELECT ^",
             "button1:but",
             vformat_button(ActionSet_InGame, Action_InGame_Square)
         );
@@ -1869,7 +1897,7 @@ void editorrender(void)
         {
         case EditorSubState_MAIN:
             font::print(PR_CEN, -1, 28, loc::gettext("**** VVVVVV SCRIPT EDITOR ****"), 123, 111, 218);
-            font::print(PR_CEN, -1, 44, loc::gettext("PRESS ESC TO RETURN TO MENU"), 123, 111, 218);
+            font::print(PR_CEN, -1, 44, press_esc_to_return_strings[loc::lang_code], 123, 111, 218);
 
             if (script.customscripts.empty())
             {
