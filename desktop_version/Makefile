@@ -99,7 +99,6 @@ OBJS = \
   ../third_party/SheenBidi/Source/SheenBidi.o \
   ../third_party/SheenBidi/Source/StatusStack.o \
 
-LIBDIR = lib
 CFLAGS = -G0 -O3 -fomit-frame-pointer -fsingle-precision-constant -fno-math-errno -ffast-math -Wall -Wno-trigraphs -ffunction-sections -fdata-sections
 # CFLAGS = -g3 -Wl,-Map,EBOOT.map
 CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions -fvisibility=hidden -fvisibility-inlines-hidden
