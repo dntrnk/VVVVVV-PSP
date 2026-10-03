@@ -951,6 +951,33 @@ G2D_RGBA((int)(luminance)*G2D_GET_R(color)/255, \
 
     g2dColor get_pixel(g2dImage *tex, int x, int y);
 
+    #define PAL_HASH_SIZE  512
+    #define PAL_MAX_COLORS 256
+
+    typedef struct {
+        g2dColor color;
+        int      index;
+        bool     used;
+    } PalEntry;
+
+    typedef struct {
+        PalEntry slots[PAL_HASH_SIZE];
+        g2dColor palette[512];
+        int      count;
+        int      max_colors;
+    } PalMap;
+
+    unsigned _pal_hash(g2dColor c);
+    void     _pal_init(PalMap *m, int max_colors);
+    int      _pal_find_or_add(PalMap *m, g2dColor c);
+    int      _pal_find(PalMap *m, g2dColor c);
+
+    void _g2dApplyFormat(g2dImage *tex, g2dColor *rgba_buffer, int target_hw_format);
+    void _g2dSwizzle(g2dImage *tex);
+    int  _g2dPaletteLookup(g2dColor c, PalMap *m, int max_colors);
+    int  _g2dBuildGlobalPalette(g2dColor *rgba, int total_pixels,
+                                int max_colors, g2dColor *palette);
+
 #ifdef __cplusplus
 }
 #endif

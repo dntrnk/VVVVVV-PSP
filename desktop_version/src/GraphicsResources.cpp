@@ -40,11 +40,6 @@ void sprites_collision_surface_clear_bit(uint32_t (*collision_surface)[16], int 
     collision_surface[y][x >> 5] &= ~(1u << (x & 31));
 }
 
-static int _get_or_add_palette_color(g2dColor color, g2dColor *palette, int *pal_count, int max_colors);
-static void _g2dApplyFormat(g2dImage *tex, g2dColor *rgba_buffer, int target_hw_format);
-static void _g2dSwizzle(g2dImage *tex);
-static int _g2dPaletteLookup(g2dColor c, g2dColor *palette, int count, int max_colors);
-
 // Used to load PNG data
 extern "C"
 {
@@ -130,8 +125,10 @@ static g2dImage* _G2DLoadTiledFromPNG(const unsigned char* fileData, size_t file
     }
     memset(palette, 0, 512 * sizeof(g2dColor));
 
-    int pal_count = 0;
+    PalMap pal_map;
+    _pal_init(&pal_map, max_colors);
     bool overflow = false;
+    int pal_count = 0;
 
     size_t rowbytes = width * 4;
     unsigned char* row = (unsigned char*)malloc(rowbytes);
@@ -158,14 +155,7 @@ static g2dImage* _G2DLoadTiledFromPNG(const unsigned char* fileData, size_t file
                 c = G2D_RGBA(gray, gray, gray, G2D_GET_A(c));
             }
 
-            int found = -1;
-            for (int j = 0; j < pal_count; j++) {
-                if (palette[j] == c) { found = j; break; }
-            }
-            if (found >= 0) continue;
-            if (pal_count < max_colors) {
-                palette[pal_count++] = c;
-            } else {
+            if (_pal_find_or_add(&pal_map, c) < 0) {
                 overflow = true;
                 goto pass1_done;
             }
@@ -175,6 +165,11 @@ static g2dImage* _G2DLoadTiledFromPNG(const unsigned char* fileData, size_t file
 pass1_done:
     free(row);
     png_destroy_read_struct(&png, &info, NULL);
+
+    pal_count = pal_map.count;
+    if (pal_count > 0) {
+        memcpy(palette, pal_map.palette, 512 * sizeof(g2dColor));
+    }
 
     if (overflow) {
         int shift = 1;
@@ -202,8 +197,7 @@ pass1_done:
 
             png_read_update_info(png, info);
 
-            pal_count = 0;
-            memset(palette, 0, 512 * sizeof(g2dColor));
+            _pal_init(&pal_map, max_colors);
             bool still_overflow = false;
 
             row = (unsigned char*)malloc(rowbytes);
@@ -230,14 +224,7 @@ pass1_done:
                         G2D_GET_B(c) & mask,
                         G2D_GET_A(c) & mask);
 
-                    int found = -1;
-                    for (int j = 0; j < pal_count; j++) {
-                        if (palette[j] == q) { found = j; break; }
-                    }
-                    if (found >= 0) continue;
-                    if (pal_count < max_colors) {
-                        palette[pal_count++] = q;
-                    } else {
+                    if (_pal_find_or_add(&pal_map, q) < 0) {
                         still_overflow = true;
                         break;
                     }
@@ -247,8 +234,17 @@ pass1_done:
             free(row);
             png_destroy_read_struct(&png, &info, NULL);
 
-            if (!still_overflow) break;
+            if (!still_overflow) {
+                pal_count = pal_map.count;
+                memcpy(palette, pal_map.palette, 512 * sizeof(g2dColor));
+                break;
+            }
         }
+    }
+
+    _pal_init(&pal_map, max_colors);
+    for (int i = 0; i < pal_count; i++) {
+        _pal_find_or_add(&pal_map, palette[i]);
     }
 
     if (pal_count == 0) {
@@ -437,7 +433,7 @@ pass1_done:
                             G2D_GET_B(col) & quant_mask,
                             G2D_GET_A(col) & quant_mask);
                     }
-                    dst[x - x_start] = (unsigned char)_g2dPaletteLookup(col, palette, pal_count, 256);
+                    dst[x - x_start] = (unsigned char)_g2dPaletteLookup(col, &pal_map, 256);
                 }
             } else {
                 // T4
@@ -463,7 +459,7 @@ pass1_done:
                     }
                     int local_x = x - x_start;
                     int i = local_y * t->tw + local_x;
-                    int p = _g2dPaletteLookup(col, palette, pal_count, 16) & 0x0F;
+                    int p = _g2dPaletteLookup(col, &pal_map, 16) & 0x0F;
                     if ((i & 1) == 0) dst[i >> 1] |= p;
                     else              dst[i >> 1] |= (p << 4);
                 }
@@ -1039,133 +1035,4 @@ void GraphicsResources::destroy(void)
     g2dTexFree(&im_image12);
 
     g2dTexFree(&im_sprites_translated);
-}
-
-static int _get_or_add_palette_color(g2dColor color, g2dColor *palette, int *pal_count, int max_colors) {
-    for (int i = 0; i < *pal_count; i++) {
-        if (palette[i] == color) return i;
-    }
-    if (*pal_count < max_colors) {
-        palette[*pal_count] = color;
-        return (*pal_count)++;
-    }
-    return 0; // Возвращаем 0, если палитра переполнена
-}
-
-static void _g2dApplyFormat(g2dImage *tex, g2dColor *rgba_buffer, int target_hw_format) {
-    int total_pixels = tex->tw * tex->th;
-    tex->format = target_hw_format;
-
-    if (tex->data) {
-        free(tex->data);
-        tex->data = NULL;
-    }
-
-    if (target_hw_format == GU_PSM_8888) {
-        tex->data = malloc(total_pixels * 4);
-        if (!tex->data) {
-            free(rgba_buffer);
-            return;
-        }
-        memcpy(tex->data, rgba_buffer, total_pixels * 4);
-        tex->palette = NULL;
-        free(rgba_buffer);
-    }
-    else {
-        tex->palette = (g2dColor *)memalign(16, 512 * sizeof(g2dColor));
-        if (!tex->palette) {
-            free(rgba_buffer);
-            return;
-        }
-        memset(tex->palette, 0, 512 * sizeof(g2dColor));
-
-        int pal_count = 0;
-        if (target_hw_format == GU_PSM_T8) {
-            unsigned char *indices = (unsigned char *)malloc(total_pixels);
-            if (!indices) {
-                free(tex->palette);
-                tex->palette = NULL;
-                free(rgba_buffer);
-                return;
-            }
-            for (int i = 0; i < total_pixels; i++) {
-                indices[i] = (unsigned char)_get_or_add_palette_color(rgba_buffer[i], tex->palette, &pal_count, 256);
-            }
-            tex->data = (void *)indices;
-        }
-        else if (target_hw_format == GU_PSM_T4) {
-            unsigned char *indices = (unsigned char *)malloc(total_pixels / 2);
-            if (!indices) {
-                free(tex->palette);
-                tex->palette = NULL;
-                free(rgba_buffer);
-                return;
-            }
-            memset(indices, 0, total_pixels / 2);
-            for (int i = 0; i < total_pixels; i++) {
-                int idx = _get_or_add_palette_color(rgba_buffer[i], tex->palette, &pal_count, 16);
-                if (i % 2 == 0) indices[i/2] |= (idx & 0x0F);
-                else            indices[i/2] |= (idx << 4);
-            }
-            tex->data = (void *)indices;
-        }
-
-        free(rgba_buffer);
-    }
-
-    sceKernelDcacheWritebackAll();
-}
-
-static void _g2dSwizzle(g2dImage *tex) {
-    int width_in_bytes = 0;
-    if (tex->format == GU_PSM_8888) {
-        width_in_bytes = tex->tw * 4;
-    } else if (tex->format == GU_PSM_T8) {
-        width_in_bytes = tex->tw;
-    } else if (tex->format == GU_PSM_T4) {
-        width_in_bytes = tex->tw / 2;
-    } else {
-        return;
-    }
-
-    if (width_in_bytes < 16) return;
-
-    unsigned char *tmp = (unsigned char *)malloc(width_in_bytes * tex->th);
-    if (!tmp) return;
-
-    unsigned char *in = (unsigned char *)tex->data;
-    int row_blocks = width_in_bytes / 16;
-
-    for (int j = 0; j < tex->th; j++) {
-        for (int i = 0; i < row_blocks; i++) {
-            int blockx = i;
-            int blocky = j / 8;
-            int y = j % 8;
-            unsigned char *dest = tmp + (blocky * row_blocks * 128) + (blockx * 128) + (y * 16);
-            memcpy(dest, in + (j * width_in_bytes) + (i * 16), 16);
-        }
-    }
-
-    free(tex->data);
-    tex->data = (g2dColor *)tmp;
-    tex->swizzled = true;
-}
-
-static int _g2dPaletteLookup(g2dColor c, g2dColor *palette, int count,
-                             int max_colors) {
-    for (int j = 0; j < count; j++) {
-        if (palette[j] == c) return j;
-    }
-    for (int shift = 1; shift <= 4; shift++) {
-        int mask = 0xFF & ~((1 << shift) - 1);
-        g2dColor q = G2D_RGBA(
-            G2D_GET_R(c) & mask,
-            G2D_GET_G(c) & mask,
-            G2D_GET_B(c) & mask,
-            G2D_GET_A(c) & mask);
-        for (int j = 0; j < count; j++) {
-            if (palette[j] == q) return j;
-        }
-    }
-    return 0;
 }
