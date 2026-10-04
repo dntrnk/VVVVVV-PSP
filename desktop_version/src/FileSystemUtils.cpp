@@ -267,12 +267,10 @@ int FILESYSTEM_init(char *argvZero, char* baseDir, char *assetsPath, char* langD
     {
         vlog_error("Error: data.zip missing!");
         vlog_error("You do not have data.zip!");
-        vlog_error("Grab it from your purchased copy of the game,");
-        vlog_error("or get it from the free Make and Play Edition.");
 
         VVV_ShowSimpleMessageBox(
             "Error",
-            "data.zip missing!\nYou do not have data.zip!\n\nGrab it from your purchased copy of the game,\nor get it from the free Make and Play Edition."
+            "data.zip missing!\nYou do not have data.zip!"
         );
         VVV_exit(1);
         return 0;
