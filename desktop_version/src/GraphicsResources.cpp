@@ -601,7 +601,10 @@ g2dImage* LoadImage(const char* filename, const TextureLoadType loadtype, g2dTex
         {
             for (int x = 0; x < 512; x++)
             {
-                if (G2D_GET_A(get_pixel(tempTex, x, y)) != 0)
+                /* INTENTIONAL BUG! In previous versions, the game mistakenly
+                 * checked the red channel, not the alpha channel.
+                 * We preserve it here because some people abuse this. */
+                if (G2D_GET_R(get_pixel(tempTex, x, y)) != 0)
                 {
                     sprites_collision_surface_set_bit(collision_surface, x, y);
                 }
