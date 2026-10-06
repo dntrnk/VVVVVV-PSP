@@ -1,14 +1,16 @@
 ![logo](logo.gif "VVVVVV")
 
-This is the source code to VVVVVV, the 2010 indie game by [Terry Cavanagh](http://distractionware.com/), with music by [Magnus Pålsson](http://souleye.madtracker.net/). You can read the [announcement](http://distractionware.com/blog/2020/01/vvvvvv-is-now-open-source/) of the source code release on Terry's blog!
+VVVVVV is a commercial game! The author has given special permission to make this port available for free. If you enjoy the game, please consider purchasing a copy at [thelettervsixtim.es](https://thelettervsixtim.es/).
 
-The source code for the desktop version is in [this folder](desktop_version).
+This is the PSP port of VVVVVV, the 2010 indie game by [Terry Cavanagh](http://distractionware.com/), with music by [Magnus Pålsson](http://souleye.madtracker.net/). You can read the [announcement](http://distractionware.com/blog/2020/01/vvvvvv-is-now-open-source/) of the original source code release on Terry's blog!
 
-VVVVVV is still commerically available at [thelettervsixtim.es](https://thelettervsixtim.es/) if you'd like to support it, but you are completely free to compile the game for your own personal use. If you're interested in distributing a compiled version of the game, see [LICENSE.md](LICENSE.md) for more information.
+The source code of the original game is in [this repo](https://github.com/TerryCavanagh/VVVVVV).
+
+VVVVVV is still commercially available at [thelettervsixtim.es](https://thelettervsixtim.es/) if you'd like to support it, but you are completely free to compile the game for your own personal use. If you're interested in distributing a compiled version of the game, see [LICENSE.md](LICENSE.md) for more information.
 
 Discussion about VVVVVV updates mainly happens on the "unofficial" [VVVVVV discord](https://discord.gg/Zf7Nzea), in the `vvvvvv-code` channel.
 
-Credits
+Original Game Credits
 -------
 - Created by [Terry Cavanagh](http://distractionware.com/)
 - Room Names by [Bennett Foddy](http://www.foddy.net)
@@ -21,3 +23,7 @@ Credits
 - Ending Picture by Pauli Kohberger
 - Localisations by [our localisation teams](desktop_version/TRANSLATORS.txt)
 - With additional contributions by [many others here on github](desktop_version/CONTRIBUTORS.txt) <3
+
+PSP Port
+-------
+- Ported by [dntrnk](https://github.com/dntrnk)
