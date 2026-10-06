@@ -112,8 +112,8 @@ LIBS = -Wl,--gc-sections -lpspgu -lpspge -lpspdisplay -lpsppower -lpspctrl -lpsp
 
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = VVVVVV
-# PSP_EBOOT_ICON = res/ICON0.PNG
-# PSP_EBOOT_PIC1 = res/PIC1.PNG
-# PSP_EBOOT_SND0 = res/SND0.AT3
+PSP_EBOOT_ICON = res/ICON0.PNG
+PSP_EBOOT_PIC0 = res/PIC0.PNG
+PSP_EBOOT_PIC1 = res/PIC1.PNG
 
 include $(PSPSDK)/lib/build.mak
