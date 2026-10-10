@@ -167,30 +167,12 @@ typedef struct
     float right;
 } AalibVolume;
 
-typedef struct
-{
-    char title[256];
-    char artist[256];
-    char album[256];
-    char year[16];
-    char genre[128];
-    char comment[512];
-    int has_cover;
-    g2dImage *cover;
-} AalibMetadata;
-
-#define PSPAALIB_METADATA_NONE 0
-#define PSPAALIB_METADATA_LOADED 1
-#define PSPAALIB_METADATA_ERROR -1
-
 #define PSPAALIB_ENCODING_UTF8       0
 #define PSPAALIB_ENCODING_UTF16LE    1
 #define PSPAALIB_ENCODING_UTF16BE    2
 #define PSPAALIB_ENCODING_ISO8859_1  3
 #define PSPAALIB_ENCODING_CP1251     4
 #define PSPAALIB_ENCODING_KOI8R      5
-
-#define PSSPAALIB_MAX_COVER_SIZE 128
 
 int ConvertStringToUTF8(char *str, int max_length);
 

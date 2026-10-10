@@ -33,7 +33,6 @@ typedef struct
     bool initialized;
     bool fromMemory;      /* NEW: true if loaded from memory */
     char *memData;        /* NEW: original memory buffer (if fromMemory) */
-    AalibMetadata metadata;
 } WavFileInfo;
 
 WavFileInfo streamsWav[32];
@@ -207,64 +206,6 @@ int GetBufferWav(short *buf, int length, float amp, int channel) {
     return PSPAALIB_SUCCESS;
 }
 
-static void ParseListChunk(WavFileInfo *wav, char *data, int size) {
-    if (size < 4) return;
-
-    char type[5];
-    memcpy(type, data, 4);
-    type[4] = '\0';
-
-    if (!strcmp(type, "INFO")) {
-        int pos = 4;
-        while (pos < size) {
-            char id[5];
-            memcpy(id, data + pos, 4);
-            id[4] = '\0';
-            pos += 4;
-
-            int chunkSize = *(int *)(data + pos);
-            pos += 4;
-
-            if (chunkSize <= 0 || pos + chunkSize > size) break;
-
-            char value[256];
-            int copySize = chunkSize < 255 ? chunkSize : 254;
-            memcpy(value, data + pos, copySize);
-            value[copySize] = '\0';
-
-            ConvertStringToUTF8(value, sizeof(value));
-
-            while (copySize > 0 && (value[copySize - 1] == ' ' || value[copySize - 1] == '\n' || value[copySize - 1] == '\r')) {
-                value[copySize - 1] = '\0';
-                copySize--;
-            }
-
-            if (strcmp(id, "INAM") == 0) {
-                strncpy(wav->metadata.title, value, 255);
-                wav->metadata.title[255] = '\0';
-            } else if (strcmp(id, "IART") == 0) {
-                strncpy(wav->metadata.artist, value, 255);
-                wav->metadata.artist[255] = '\0';
-            } else if (strcmp(id, "IPRD") == 0) {
-                strncpy(wav->metadata.album, value, 255);
-                wav->metadata.album[255] = '\0';
-            } else if (strcmp(id, "ICRD") == 0) {
-                strncpy(wav->metadata.year, value, 15);
-                wav->metadata.year[15] = '\0';
-            } else if (strcmp(id, "IGNR") == 0) {
-                strncpy(wav->metadata.genre, value, 127);
-                wav->metadata.genre[127] = '\0';
-            } else if (strcmp(id, "ICMT") == 0) {
-                strncpy(wav->metadata.comment, value, 511);
-                wav->metadata.comment[511] = '\0';
-            }
-
-            pos += chunkSize;
-            if (chunkSize % 2 != 0) pos++;
-        }
-    }
-}
-
 static int FindWavChunk(SceUID file, const char *chunkId, int *chunkSize, int *chunkPos) {
     char temp[4];
     int size;
@@ -305,111 +246,6 @@ static int FindWavChunkMem(const unsigned char *data, int dataSize, int startPos
     return 0;
 }
 
-int GetMetadataWav(int channel, AalibMetadata *metadata) {
-    if ((channel < 0) || (channel > 31)) {
-        return PSPAALIB_ERROR_OGG_INVALID_CHANNEL;
-    }
-    if (!streamsWav[channel].initialized) {
-        return PSPAALIB_ERROR_OGG_UNINITIALIZED_CHANNEL;
-    }
-
-    *metadata = streamsWav[channel].metadata;
-    return PSPAALIB_SUCCESS;
-}
-
-#define COVER_SEARCH_SIZE (2*1024*1024)
-#define READ_BUFFER_SIZE 4096
-
-static void ParseWavCover(SceUID file, WavFileInfo *wav) {
-    int currentPos = sceIoLseek(file, 0, PSP_SEEK_CUR);
-    int fileSize = sceIoLseek(file, 0, PSP_SEEK_END);
-    int searchStart = (fileSize > COVER_SEARCH_SIZE) ? fileSize - COVER_SEARCH_SIZE : 0;
-
-    unsigned char *buffer = malloc(READ_BUFFER_SIZE);
-    if (!buffer) return;
-
-    int foundPos = -1;
-    const char *target = "image/";
-    int targetLen = 6;
-
-    for (int pos = searchStart; pos < fileSize - targetLen; pos += READ_BUFFER_SIZE - targetLen) {
-        int readSize = (fileSize - pos) < READ_BUFFER_SIZE ? (fileSize - pos) : READ_BUFFER_SIZE;
-        sceIoLseek(file, pos, PSP_SEEK_SET);
-        sceIoRead(file, buffer, readSize);
-
-        for (int i = 0; i < readSize - targetLen; i++) {
-            if (memcmp(buffer + i, target, targetLen) == 0) {
-                foundPos = pos + i;
-                goto found_marker;
-            }
-        }
-    }
-
-found_marker:
-    free(buffer);
-
-    if (foundPos == -1) {
-        sceIoLseek(file, currentPos, PSP_SEEK_SET);
-        return;
-    }
-
-    sceIoLseek(file, foundPos, PSP_SEEK_SET);
-
-    unsigned char header[24];
-    sceIoRead(file, header, sizeof(header));
-
-    enum { UNKNOWN, PNG, JPEG, BMP } imgType = UNKNOWN;
-    int sigOffset = 0;
-
-    if (memcmp(header, "\x89PNG\r\n\x1a\n", 8) == 0) {
-        imgType = PNG;
-    } else if (header[0] == 0xFF && header[1] == 0xD8) {
-        imgType = JPEG;
-    } else if (memcmp(header, "BM", 2) == 0) {
-        imgType = BMP;
-    } else {
-        for (sigOffset = 1; sigOffset < 64; sigOffset++) {
-            if (memcmp(header + sigOffset, "\x89PNG\r\n\x1a\n", 8) == 0) {
-                imgType = PNG;
-                break;
-            }
-            if (header[sigOffset] == 0xFF && header[sigOffset + 1] == 0xD8) {
-                imgType = JPEG;
-                break;
-            }
-            if (memcmp(header + sigOffset, "BM", 2) == 0) {
-                imgType = BMP;
-                break;
-            }
-        }
-    }
-
-    if (imgType == UNKNOWN) {
-        sceIoLseek(file, currentPos, PSP_SEEK_SET);
-        return;
-    }
-
-    int imageStart = foundPos + sigOffset;
-    int imageSize = fileSize - imageStart;
-
-    unsigned char *imageData = malloc(imageSize);
-    if (!imageData) {
-        sceIoLseek(file, currentPos, PSP_SEEK_SET);
-        return;
-    }
-
-    sceIoLseek(file, imageStart, PSP_SEEK_SET);
-    sceIoRead(file, imageData, imageSize);
-
-    wav->metadata.cover = g2dTexLoad(NULL, imageData, imageSize, G2D_VOID);
-    if (wav->metadata.cover) {
-        wav->metadata.has_cover = 1;
-    }
-
-    free(imageData);
-    sceIoLseek(file, currentPos, PSP_SEEK_SET);
-}
-
 int LoadWav(char *filename, int channel, bool loadToRam) {
     if ((channel < 0) || (channel > 31)) {
         return PSPAALIB_ERROR_WAV_INVALID_CHANNEL;
@@ -418,8 +254,6 @@ int LoadWav(char *filename, int channel, bool loadToRam) {
         UnloadWav(channel);
     }
 
-    memset(&streamsWav[channel].metadata, 0, sizeof(AalibMetadata));
-    streamsWav[channel].metadata.has_cover = 0;
     streamsWav[channel].fromMemory = FALSE;
     streamsWav[channel].memData = NULL;
 
@@ -473,8 +307,6 @@ int LoadWav(char *filename, int channel, bool loadToRam) {
     streamsWav[channel].dataLocation = dataPos;
     streamsWav[channel].dataPos = 0;
 
-    ParseWavCover(streamsWav[channel].file, &streamsWav[channel]);
-
     if (loadToRam) {
         streamsWav[channel].data = (char *)malloc(dataSize);
         if (!streamsWav[channel].data) {
@@ -521,8 +353,6 @@ int LoadWavFromMemory(const unsigned char *data, int dataSize, int channel, bool
         UnloadWav(channel);
     }
 
-    memset(&streamsWav[channel].metadata, 0, sizeof(AalibMetadata));
-    streamsWav[channel].metadata.has_cover = 0;
     streamsWav[channel].file = -1;
     streamsWav[channel].fromMemory = TRUE;
     streamsWav[channel].memData = (char *)data;   /* cast away const; we only read */

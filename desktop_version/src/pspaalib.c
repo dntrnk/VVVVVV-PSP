@@ -172,7 +172,10 @@ Release:
     return 0;
 }
 
+static bool aalibInitialized = false;
+
 int AalibInit() {
+    if (aalibInitialized) return PSPAALIB_SUCCESS;
     InitAt3();
     char c[11];
     int i;
@@ -183,6 +186,7 @@ int AalibInit() {
             return PSPAALIB_WARNING_CREATE_THREAD;
         }
     }
+    aalibInitialized = true;
     return PSPAALIB_SUCCESS;
 }
 

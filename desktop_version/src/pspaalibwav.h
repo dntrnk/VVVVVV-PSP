@@ -30,7 +30,6 @@ int GetBufferWav(short *buf, int length, float amp, int channel);
 int LoadWav(char *filename, int channel, bool loadToRam);
 int LoadWavFromMemory(const unsigned char *data, int dataSize, int channel, bool loadToRam);
 int UnloadWav(int channel);
-int GetMetadataWav(int channel, AalibMetadata *metadata);
 
 #endif
 
