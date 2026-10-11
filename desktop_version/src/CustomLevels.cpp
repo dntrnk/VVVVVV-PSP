@@ -1,6 +1,9 @@
 #define CL_DEFINITION
 #include "CustomLevels.h"
 
+#include <algorithm>
+#include <cstring>
+
 #include <physfs.h>
 #include <stdio.h>
 #include <string>
@@ -62,11 +65,12 @@ RoomProperty::RoomProperty(void)
 
 customlevelclass::customlevelclass(void)
 {
+    // ListOfMetaData.reserve(256);
     reset();
 }
 
 // comparison, not case sensitive.
-static bool compare_nocase (std::string first, std::string second)
+static bool compare_nocase (const std::string& first, const std::string& second)
 {
     unsigned int i=0;
     while ( (i<first.length()) && (i<second.length()) )
@@ -131,27 +135,26 @@ static void replace_all(std::string& str, const std::string& from, const std::st
     }
 }
 
-static std::string find_tag(const std::string& buf, const std::string& start, const std::string& end)
+static std::string find_tag(const char* buf, const char* start, const char* end)
 {
-    size_t tag = buf.find(start);
-
-    if (tag == std::string::npos)
+    const char* tag = strstr(buf, start);
+    if (tag == NULL)
     {
         //No start tag
         return "";
     }
 
-    size_t tag_start = tag + start.size();
-    size_t tag_close = buf.find(end, tag_start);
+    const char* tag_start = tag + strlen(start);
+    const char* tag_close = strstr(tag_start, end);
 
-    if (tag_close == std::string::npos)
+    if (tag_close == NULL)
     {
         //No close tag
         return "";
     }
 
     size_t tag_len = tag_close - tag_start;
-    std::string value(buf.substr(tag_start, tag_len));
+    std::string value(tag_start, tag_len);
 
     //Encode special XML entities
     replace_all(value, "&quot;", "\"");
@@ -201,7 +204,7 @@ static std::string find_tag(const std::string& buf, const std::string& start, co
 }
 
 #define TAG_FINDER(NAME, TAG) \
-static std::string NAME(const std::string& buf) \
+static std::string NAME(const char* buf) \
 { \
     return find_tag(buf, "<" TAG ">", "</" TAG ">"); \
 }
@@ -232,7 +235,6 @@ static void levelMetaDataCallback(const char* filename)
 {
     extern customlevelclass cl;
     LevelMetaData temp;
-    std::string filename_ = filename;
 
     if (!endsWith(filename, ".vvvvvv")
     || !FILESYSTEM_isFile(filename)
@@ -241,13 +243,13 @@ static void levelMetaDataCallback(const char* filename)
         return;
     }
 
-    if (cl.getLevelMetaData(filename_, temp))
+    if (cl.getLevelMetaData(std::string(filename), temp))
     {
-        cl.ListOfMetaData.push_back(temp);
+        cl.ListOfMetaData.push_back(std::move(temp));
     }
     else
     {
-        vlog_warn("Level %s not found :(", filename_.c_str());
+        vlog_warn("Level %s not found :(", filename);
     }
 }
 
@@ -270,9 +272,12 @@ static void unloadZips(void)
 
 void customlevelclass::getDirectoryData(void)
 {
-
     ListOfMetaData.clear();
-    std::vector<LevelMetaData>().swap(ListOfMetaData);
+
+    // if (ListOfMetaData.capacity() < 256)
+    // {
+    //     ListOfMetaData.reserve(256);
+    // }
 
     FILESYSTEM_clearLevelDirError();
 
@@ -282,16 +287,13 @@ void customlevelclass::getDirectoryData(void)
 
     FILESYSTEM_enumerateLevelDirFileNames(levelMetaDataCallback);
 
-    for(size_t i = 0; i < ListOfMetaData.size(); i++)
-    {
-        for(size_t k = 0; k < ListOfMetaData.size(); k++)
-        {
-            if(compare_nocase(ListOfMetaData[i].title, ListOfMetaData[k].title ))
-            {
-                std::swap(ListOfMetaData[i] , ListOfMetaData[k]);
-            }
+    std::sort(
+        ListOfMetaData.begin(),
+        ListOfMetaData.end(),
+        [](const LevelMetaData& a, const LevelMetaData& b) {
+            return compare_nocase(a.title, b.title);
         }
-    }
+    );
 
 }
 bool customlevelclass::getLevelMetaDataAndPlaytestArgs(const std::string& _path, LevelMetaData& _data, CliPlaytestArgs* pt_args)
@@ -304,13 +306,12 @@ bool customlevelclass::getLevelMetaDataAndPlaytestArgs(const std::string& _path,
         return false;
     }
 
-    std::string buf((char*) uMem);
-
-    VVV_free(uMem);
+    const char* buf = (const char*) uMem;
 
     if (find_metadata(buf) == "")
     {
         vlog_warn("Couldn't load metadata for %s", _path.c_str());
+        VVV_free(uMem);
         return false;
     }
 
@@ -339,16 +340,17 @@ bool customlevelclass::getLevelMetaDataAndPlaytestArgs(const std::string& _path,
         else
         {
             pt_args->valid = true;
-            pt_args->x = help.Int(find_playx(playtest).c_str());
-            pt_args->y = help.Int(find_playy(playtest).c_str());
-            pt_args->rx = help.Int(find_playrx(playtest).c_str());
-            pt_args->ry = help.Int(find_playry(playtest).c_str());
-            pt_args->gc = help.Int(find_playgc(playtest).c_str());
-            pt_args->music = help.Int(find_playmusic(playtest).c_str());
+            pt_args->x = help.Int(find_playx(playtest.c_str()).c_str());
+            pt_args->y = help.Int(find_playy(playtest.c_str()).c_str());
+            pt_args->rx = help.Int(find_playrx(playtest.c_str()).c_str());
+            pt_args->ry = help.Int(find_playry(playtest.c_str()).c_str());
+            pt_args->gc = help.Int(find_playgc(playtest.c_str()).c_str());
+            pt_args->music = help.Int(find_playmusic(playtest.c_str()).c_str());
         }
     }
 
     _data.filename = _path;
+    VVV_free(uMem);
     return true;
 }
 

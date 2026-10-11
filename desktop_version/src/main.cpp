@@ -612,13 +612,11 @@ int main(int argc, char *argv[])
         CliPlaytestArgs pt_args;
         if (cl.getLevelMetaDataAndPlaytestArgs(playtestname, meta, &pt_args)) {
             cl.ListOfMetaData.clear();
-            std::vector<LevelMetaData>().swap(cl.ListOfMetaData);
             cl.ListOfMetaData.push_back(meta);
         } else {
             cl.loadZips();
             if (cl.getLevelMetaDataAndPlaytestArgs(playtestname, meta, &pt_args)) {
                 cl.ListOfMetaData.clear();
-                std::vector<LevelMetaData>().swap(cl.ListOfMetaData);
                 cl.ListOfMetaData.push_back(meta);
             } else {
                 vlog_error("Level not found");
