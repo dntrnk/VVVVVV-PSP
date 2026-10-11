@@ -10,6 +10,12 @@ VVVVVV is still commercially available at [thelettervsixtim.es](https://thelette
 
 Discussion about VVVVVV updates mainly happens on the "unofficial" [VVVVVV discord](https://discord.gg/Zf7Nzea), in the `vvvvvv-code` channel.
 
+## Custom levels with custom music
+
+To play a custom level that ships its own `vvvvvvmusic.vvv`, use 
+[VVVVVV-MUSIC-TO-PSP](https://github.com/dntrnk/VVVVVV-MUSIC-TO-PSP)
+to convert the custom music to a folder of `.at3` tracks for the PSP port.
+
 Original Game Credits
 -------
 - Created by [Terry Cavanagh](http://distractionware.com/)
