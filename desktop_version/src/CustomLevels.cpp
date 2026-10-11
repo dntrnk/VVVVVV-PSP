@@ -272,6 +272,7 @@ void customlevelclass::getDirectoryData(void)
 {
 
     ListOfMetaData.clear();
+    std::vector<LevelMetaData>().swap(ListOfMetaData);
 
     FILESYSTEM_clearLevelDirError();
 
