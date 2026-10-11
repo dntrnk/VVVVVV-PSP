@@ -108,12 +108,14 @@ BUILD_PRX = 1
 PSP_FW_VERSION = 660
 
 LIBS = -Wl,--gc-sections -lpspgu -lpspge -lpspdisplay -lpsppower -lpspctrl -lpspaudio -lpspvram \
-  -lz -lpng -lphysfs -lpspatrac3 -lstdc++ -lpspvfpu -ltinyxml2
+  -lz -lpng -lphysfs -lpspatrac3 -lstdc++ -ltinyxml2
 
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_TITLE = VVVVVV
 PSP_EBOOT_ICON = res/ICON0.PNG
 PSP_EBOOT_PIC0 = res/PIC0.PNG
 PSP_EBOOT_PIC1 = res/PIC1.PNG
+
+SFOFLAGS = -d MEMSIZE=1
 
 include $(PSPSDK)/lib/build.mak

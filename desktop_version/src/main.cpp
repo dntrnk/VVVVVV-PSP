@@ -39,9 +39,7 @@
 #include "controls.h"
 
 PSP_MODULE_INFO("VVVVVV", 0, 1, 0);
-PSP_MAIN_THREAD_ATTR(THREAD_ATTR_VFPU | THREAD_ATTR_USER);
-
-char list[0x20000] __attribute__((aligned(64)));
+PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER);
 
 int exit_callback(int arg1, int arg2, void *common) {
     sceKernelExitGame();
