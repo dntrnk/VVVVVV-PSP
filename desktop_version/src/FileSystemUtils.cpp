@@ -575,9 +575,20 @@ void FILESYSTEM_unmountAssets(void)
 {
     if (assetDir[0] != '\0')
     {
-        vlog_info("Unmounting %s", assetDir);
-        PHYSFS_unmount(assetDir);
+        vlog_info("Unmounting %s (mount point: %s)", assetDir, virtualMountPath);
+
+        if (!PHYSFS_unmount(assetDir))
+        {
+            vlog_error(
+                "Could not unmount %s: %s",
+                assetDir,
+                PHYSFS_getErrorByCode(PHYSFS_getLastErrorCode())
+            );
+        }
+
         assetDir[0] = '\0';
+        virtualMountPath[0] = '\0';
+
         graphics.reloadresources();
     }
     else
