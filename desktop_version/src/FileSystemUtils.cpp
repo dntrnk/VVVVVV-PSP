@@ -1376,3 +1376,29 @@ bool FILESYSTEM_getAssetFilePath(const char* filename, char* out, size_t out_siz
     strlcpy(out, filename, out_size);
     return true;
 }
+
+bool FILESYSTEM_isAssetDirMounted(const char* dirname)
+{
+    if (assetDir[0] == '\0')
+    {
+        return false;
+    }
+
+    char mounted_path[MAX_PATH];
+    snprintf(mounted_path, sizeof(mounted_path), "%s%s", virtualMountPath, dirname);
+
+    return PHYSFS_exists(mounted_path);
+}
+
+bool FILESYSTEM_customAssetExists(const char* filename)
+{
+    if (assetDir[0] == '\0')
+    {
+        return false;
+    }
+
+    char mounted_path[MAX_PATH];
+    snprintf(mounted_path, sizeof(mounted_path), "%s%s", virtualMountPath, filename);
+
+    return PHYSFS_exists(mounted_path);
+}

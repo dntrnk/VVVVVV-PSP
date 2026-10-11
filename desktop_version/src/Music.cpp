@@ -163,54 +163,7 @@ static const char *soundNames[] = {
     "sounds/rescue.wav"
 };
 
-static void loadAllSounds(void)
-{
-    if (soundLoaded) return;
-
-    for (int i = 0; i < 28; i++) {
-        soundTracks[i].valid = false;
-        soundTracks[i].channel = -1;
-        soundTracks[i].mem = NULL;
-        soundTracks[i].memLen = 0;
-    }
-
-    for (int i = 0; i < 28; i++) {
-        unsigned char *mem = NULL;
-        size_t len = 0;
-        FILESYSTEM_loadAssetToMemory(soundNames[i], &mem, &len);
-        if (mem == NULL) {
-            vlog_warn("Sound file not found: %s", soundNames[i]);
-            continue;
-        }
-
-        /* PSPAALIB channel: WAV channels start at 17 (PSPAALIB_CHANNEL_WAV_1) */
-        int ch = PSPAALIB_CHANNEL_WAV_1 + i;
-        int ret = AalibLoadFromMemory(mem, (int)len, ch, TRUE);
-        if (ret != PSPAALIB_SUCCESS) {
-            vlog_error("Failed to load sound %s (channel %d): error %d", soundNames[i], ch, ret);
-            free(mem);
-            continue;
-        }
-
-        /* Enable manual volume control so AalibSetVolume actually works */
-        AalibEnable(ch, PSPAALIB_EFFECT_VOLUME_MANUAL);
-        AalibSetVolume(ch, (AalibVolume){0.0f, 0.0f}); /* start muted until updatemutestate */
-
-        /* Keep a copy so we can free it later. LoadWavFromMemory copied the
-         * audio data, but it still references fmt info etc. Actually with
-         * loadToRam=TRUE it copies everything it needs. So we can free mem. */
-        free(mem);
-
-        soundTracks[i].valid = true;
-        soundTracks[i].channel = ch;
-        soundTracks[i].mem = NULL;
-        soundTracks[i].memLen = 0;
-
-        vlog_info("Loaded sound %s on channel %d", soundNames[i], ch);
-    }
-
-    soundLoaded = true;
-}
+static bool sounds_is_custom = false;
 
 static void unloadAllSounds(void)
 {
@@ -223,6 +176,60 @@ static void unloadAllSounds(void)
     }
     soundLoaded = false;
 }
+
+static void loadAllSounds(void)
+{
+    if (!soundLoaded || sounds_is_custom != FILESYSTEM_isAssetDirMounted("sounds/")) {
+        sounds_is_custom = FILESYSTEM_isAssetDirMounted("sounds/");
+
+        unloadAllSounds();
+
+        for (int i = 0; i < 28; i++) {
+            soundTracks[i].valid = false;
+            soundTracks[i].channel = -1;
+            soundTracks[i].mem = NULL;
+            soundTracks[i].memLen = 0;
+        }
+
+        for (int i = 0; i < 28; i++) {
+            unsigned char *mem = NULL;
+            size_t len = 0;
+            FILESYSTEM_loadAssetToMemory(soundNames[i], &mem, &len);
+            if (mem == NULL) {
+                vlog_warn("Sound file not found: %s", soundNames[i]);
+                continue;
+            }
+
+            /* PSPAALIB channel: WAV channels start at 17 (PSPAALIB_CHANNEL_WAV_1) */
+            int ch = PSPAALIB_CHANNEL_WAV_1 + i;
+            int ret = AalibLoadFromMemory(mem, (int)len, ch, TRUE);
+            if (ret != PSPAALIB_SUCCESS) {
+                vlog_error("Failed to load sound %s (channel %d): error %d", soundNames[i], ch, ret);
+                free(mem);
+                continue;
+            }
+
+            /* Enable manual volume control so AalibSetVolume actually works */
+            AalibEnable(ch, PSPAALIB_EFFECT_VOLUME_MANUAL);
+            AalibSetVolume(ch, (AalibVolume){0.0f, 0.0f}); /* start muted until updatemutestate */
+
+            /* Keep a copy so we can free it later. LoadWavFromMemory copied the
+            * audio data, but it still references fmt info etc. Actually with
+            * loadToRam=TRUE it copies everything it needs. So we can free mem. */
+            free(mem);
+
+            soundTracks[i].valid = true;
+            soundTracks[i].channel = ch;
+            soundTracks[i].mem = NULL;
+            soundTracks[i].memLen = 0;
+
+            vlog_info("Loaded sound %s on channel %d", soundNames[i], ch);
+        }
+
+        soundLoaded = true;
+    }
+}
+
 
 static bool musicPaused = true;
 static int musicVolume = VVV_MAX_VOLUME;

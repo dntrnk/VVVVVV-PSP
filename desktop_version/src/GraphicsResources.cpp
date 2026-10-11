@@ -984,35 +984,138 @@ void GraphicsResources::init_translations(void)
     }
 }
 
+static bool graphics_loaded = false;
+
+static bool im_tiles_is_custom = false;
+static bool im_tiles2_is_custom = false;
+static bool im_entcolours_is_custom = false;
+static bool im_sprites_is_custom = false;
+static bool im_flipsprites_is_custom = false;
+static bool im_tiles3_is_custom = false;
+static bool im_teleporter_is_custom = false;
+static bool im_image1_is_custom = false;
+static bool im_image2_is_custom = false;
+static bool im_image3_is_custom = false;
+static bool im_image7_is_custom = false;
+static bool im_image8_is_custom = false;
+static bool im_image9_is_custom = false;
+static bool im_image10_is_custom = false;
+
 void GraphicsResources::init(void)
 {
 
-    LoadVariants("graphics/tiles.png", G2D_CLUT8, &im_tiles, &im_tiles_white, &im_tiles_tint);
-    LoadVariants("graphics/tiles2.png", G2D_CLUT8, &im_tiles2, NULL, &im_tiles2_tint);
-    LoadVariants("graphics/entcolours.png", G2D_CLUT8, &im_entcolours, NULL, &im_entcolours_tint);
+    if (!graphics_loaded || im_tiles_is_custom != FILESYSTEM_customAssetExists("graphics/tiles.png"))
+    {
+        im_tiles_is_custom = FILESYSTEM_customAssetExists("graphics/tiles.png");
+        g2dTexFree(&im_tiles);
+        g2dTexFree(&im_tiles_white);
+        g2dTexFree(&im_tiles_tint);
+        LoadVariants("graphics/tiles.png", G2D_CLUT8, &im_tiles, &im_tiles_white, &im_tiles_tint);
+    }
 
-    im_sprites = LoadImage("graphics/sprites.png", TEX_WHITE, G2D_CLUT4, sprites_collision_surface_normal);
-    im_flipsprites = LoadImage("graphics/flipsprites.png", TEX_WHITE, G2D_CLUT4, sprites_collision_surface_flipped);
-    g2dTexFree(&im_flipsprites);
+    if (!graphics_loaded || im_tiles2_is_custom != FILESYSTEM_customAssetExists("graphics/tiles2.png"))
+    {
+        im_tiles2_is_custom = FILESYSTEM_customAssetExists("graphics/tiles2.png");
+        g2dTexFree(&im_tiles2);
+        g2dTexFree(&im_tiles2_tint);
+        LoadVariants("graphics/tiles2.png", G2D_CLUT8, &im_tiles2, NULL, &im_tiles2_tint);
+    }
 
-    im_tiles3 = LoadImage("graphics/tiles3.png", G2D_CLUT8);
-    im_teleporter = LoadImage("graphics/teleporter.png", TEX_WHITE, G2D_CLUT4);
+    if (!graphics_loaded || im_entcolours_is_custom != FILESYSTEM_customAssetExists("graphics/entcolours.png"))
+    {
+        im_entcolours_is_custom = FILESYSTEM_customAssetExists("graphics/entcolours.png");
+        g2dTexFree(&im_entcolours);
+        g2dTexFree(&im_entcolours_tint);
+        LoadVariants("graphics/entcolours.png", G2D_CLUT8, &im_entcolours, NULL, &im_entcolours_tint);
+    }
 
-    im_image1 = LoadImage("graphics/minimap.png", G2D_CLUT8);
-    im_image2 = LoadImage("graphics/covered.png", G2D_CLUT8);
-    im_image3 = LoadImage("graphics/elephant.png", TEX_WHITE, G2D_CLUT4);
-    im_image7 = LoadImage("graphics/site.png", TEX_WHITE, G2D_CLUT4);
-    im_image8 = LoadImage("graphics/site2.png", TEX_WHITE, G2D_CLUT4);
-    im_image9 = LoadImage("graphics/site3.png", TEX_WHITE, G2D_CLUT4);
-    im_image10 = LoadImage("graphics/ending.png", G2D_CLUT4);
+    if (!graphics_loaded || im_sprites_is_custom != FILESYSTEM_customAssetExists("graphics/sprites.png"))
+    {
+        im_sprites_is_custom = FILESYSTEM_customAssetExists("graphics/sprites.png");
+        g2dTexFree(&im_sprites);
+        im_sprites = LoadImage("graphics/sprites.png", TEX_WHITE, G2D_CLUT4, sprites_collision_surface_normal);
+    }
 
-    im_sprites_translated = NULL;
+    if (!graphics_loaded || im_flipsprites_is_custom != FILESYSTEM_customAssetExists("graphics/flipsprites.png"))
+    {
+        im_flipsprites_is_custom = FILESYSTEM_customAssetExists("graphics/flipsprites.png");
+        g2dTexFree(&im_flipsprites);
+        im_flipsprites = LoadImage("graphics/flipsprites.png", TEX_WHITE, G2D_CLUT4, sprites_collision_surface_flipped);
+        g2dTexFree(&im_flipsprites);
+    }
+
+    if (!graphics_loaded || im_tiles3_is_custom != FILESYSTEM_customAssetExists("graphics/tiles3.png"))
+    {
+        im_tiles3_is_custom = FILESYSTEM_customAssetExists("graphics/tiles3.png");
+        g2dTexFree(&im_tiles3);
+        im_tiles3 = LoadImage("graphics/tiles3.png", G2D_CLUT8);
+    }
+
+    if (!graphics_loaded || im_teleporter_is_custom != FILESYSTEM_customAssetExists("graphics/teleporter.png"))
+    {
+        im_teleporter_is_custom = FILESYSTEM_customAssetExists("graphics/teleporter.png");
+        g2dTexFree(&im_teleporter);
+        im_teleporter = LoadImage("graphics/teleporter.png", TEX_WHITE, G2D_CLUT4);
+    }
+
+    if (!graphics_loaded || im_image1_is_custom != FILESYSTEM_customAssetExists("graphics/minimap.png"))
+    {
+        im_image1_is_custom = FILESYSTEM_customAssetExists("graphics/minimap.png");
+        g2dTexFree(&im_image1);
+        im_image1 = LoadImage("graphics/minimap.png", G2D_CLUT8);
+    }
+
+    if (!graphics_loaded || im_image2_is_custom != FILESYSTEM_customAssetExists("graphics/covered.png"))
+    {
+        im_image2_is_custom = FILESYSTEM_customAssetExists("graphics/covered.png");
+        g2dTexFree(&im_image2);
+        im_image2 = LoadImage("graphics/covered.png", G2D_CLUT8);
+    }
+
+    if (!graphics_loaded || im_image3_is_custom != FILESYSTEM_customAssetExists("graphics/elephant.png"))
+    {
+        im_image3_is_custom = FILESYSTEM_customAssetExists("graphics/elephant.png");
+        g2dTexFree(&im_image3);
+        im_image3 = LoadImage("graphics/elephant.png", TEX_WHITE, G2D_CLUT4);
+    }
+
+    if (!graphics_loaded || im_image7_is_custom != FILESYSTEM_customAssetExists("graphics/site.png"))
+    {
+        im_image7_is_custom = FILESYSTEM_customAssetExists("graphics/site.png");
+        g2dTexFree(&im_image7);
+        im_image7 = LoadImage("graphics/site.png", TEX_WHITE, G2D_CLUT4);
+    }
+
+    if (!graphics_loaded || im_image8_is_custom != FILESYSTEM_customAssetExists("graphics/site2.png"))
+    {
+        im_image8_is_custom = FILESYSTEM_customAssetExists("graphics/site2.png");
+        g2dTexFree(&im_image8);
+        im_image8 = LoadImage("graphics/site2.png", TEX_WHITE, G2D_CLUT4);
+    }
+
+    if (!graphics_loaded || im_image9_is_custom != FILESYSTEM_customAssetExists("graphics/site3.png"))
+    {
+        im_image9_is_custom = FILESYSTEM_customAssetExists("graphics/site3.png");
+        g2dTexFree(&im_image9);
+        im_image9 = LoadImage("graphics/site3.png", TEX_WHITE, G2D_CLUT4);
+    }
+
+    if (!graphics_loaded || im_image10_is_custom != FILESYSTEM_customAssetExists("graphics/ending.png"))
+    {
+        im_image10_is_custom = FILESYSTEM_customAssetExists("graphics/ending.png");
+        g2dTexFree(&im_image10);
+        im_image10 = LoadImage("graphics/ending.png", G2D_CLUT4);
+    }
 
     init_translations();
 
-    im_image12 = _g2dTexCreate(240, 180, false);
-}
+    if (!graphics_loaded)
+    {
+        im_image12 = _g2dTexCreate(240, 180, false);
+    }
 
+    graphics_loaded = true;
+}
 
 void GraphicsResources::destroy(void)
 {

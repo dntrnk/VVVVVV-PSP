@@ -81,4 +81,8 @@ void FILESYSTEM_deleteLevelSaves(void);
 
 bool FILESYSTEM_getAssetFilePath(const char* filename, char* out, size_t out_size);
 
+bool FILESYSTEM_isAssetDirMounted(const char* dirname);
+
+bool FILESYSTEM_customAssetExists(const char* filename);
+
 #endif /* FILESYSTEMUTILS_H */
