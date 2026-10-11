@@ -79,4 +79,6 @@ bool FILESYSTEM_openDirectory(const char *dname);
 bool FILESYSTEM_delete(const char *name);
 void FILESYSTEM_deleteLevelSaves(void);
 
+bool FILESYSTEM_getAssetFilePath(const char* filename, char* out, size_t out_size);
+
 #endif /* FILESYSTEMUTILS_H */

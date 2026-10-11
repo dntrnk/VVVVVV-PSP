@@ -1351,3 +1351,28 @@ void FILESYSTEM_deleteLevelSaves(void)
         );
     }
 }
+
+bool FILESYSTEM_getAssetFilePath(const char* filename, char* out, size_t out_size)
+{
+    if (out == NULL || out_size == 0) {
+        return false;
+    }
+    out[0] = '\0';
+
+    const bool assets_mounted = assetDir[0] != '\0';
+    char mounted_path[MAX_PATH];
+
+    if (assets_mounted) {
+        snprintf(mounted_path, sizeof(mounted_path), "%s%s", virtualMountPath, filename);
+
+        if (PHYSFS_exists(mounted_path)) {
+            // Custom asset. assetDir is the real directory path (e.g. "levels/abc/")
+            snprintf(out, out_size, "%s%s", assetDir, filename);
+            return true;
+        }
+    }
+
+    // Fall back to global path
+    strlcpy(out, filename, out_size);
+    return true;
+}

@@ -39,9 +39,16 @@ struct MusicChannel {
     static bool LoadAndPlay(const char *trackName, bool loop) {
         Stop();
 
+        char realPath[PATH_MAX];
+        if (!FILESYSTEM_getAssetFilePath(trackName, realPath, sizeof(realPath)))
+        {
+            vlog_error("Could not locate track %s", trackName);
+            return false;
+        }
+
         channel = PSPAALIB_CHANNEL_AT3_1;
 
-        int ret = AalibLoad((char*)trackName, channel, TRUE);
+        int ret = AalibLoad(realPath, channel, TRUE);
         if (ret != PSPAALIB_SUCCESS) {
             vlog_error("Failed to load AT3 track %s: error %d", trackName, ret);
             channel = -1;
