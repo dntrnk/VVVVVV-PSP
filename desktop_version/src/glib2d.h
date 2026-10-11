@@ -946,10 +946,11 @@ G2D_RGBA((int)(luminance)*G2D_GET_R(color)/255, \
     void g2dSetScissor(int x, int y, int w, int h);
 
     void set_pixel(g2dImage *tex, int x, int y, g2dColor color);
+    g2dColor get_pixel(g2dImage *tex, int x, int y);
+
+    void set_pixel_clut4(g2dImage *tex, int x, int y, uint8_t index);
 
     void draw_circle(g2dImage *tex, int x, int y, int w, int h, g2dColor color);
-
-    g2dColor get_pixel(g2dImage *tex, int x, int y);
 
     #define PAL_HASH_SIZE  512
     #define PAL_MAX_COLORS 256

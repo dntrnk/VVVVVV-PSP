@@ -1112,6 +1112,23 @@ void GraphicsResources::init(void)
     if (!graphics_loaded)
     {
         im_image12 = _g2dTexCreate(240, 180, false);
+
+        free(im_image12->data);
+        im_image12->data = NULL;
+
+        im_image12->format = GU_PSM_T4;
+        im_image12->swizzled = false;
+
+        im_image12->palette = (g2dColor *)memalign(16, 16 * sizeof(g2dColor));
+        memset(im_image12->palette, 0, 16 * sizeof(g2dColor));
+        im_image12->palette[0] = G2D_RGBA(0, 0, 0, 0);
+        im_image12->palette[1] = G2D_RGB(96, 96, 96);
+        im_image12->palette[2] = G2D_RGB(196, 196, 196);
+
+        int total_pixels = im_image12->tw * im_image12->th;
+        im_image12->data = calloc(1, total_pixels / 2);
+
+        sceKernelDcacheWritebackAll();
     }
 
     graphics_loaded = true;

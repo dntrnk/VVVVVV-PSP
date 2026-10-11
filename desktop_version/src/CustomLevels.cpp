@@ -1717,14 +1717,14 @@ void customlevelclass::generatecustomminimap(void)
     map.custommmysize = 180 - (map.custommmyoff * 2);
 
     // Start drawing the minimap
-    memset(graphics.grphx.im_image12->data, 0, graphics.grphx.im_image12->tw * graphics.grphx.im_image12->th * sizeof(uint32_t));
+    memset(graphics.grphx.im_image12->data, 0, graphics.grphx.im_image12->tw * graphics.grphx.im_image12->th / 2);
 
     // Scan over the map size
     for (int j2 = 0; j2 < mapheight; j2++)
     {
         for (int i2 = 0; i2 < mapwidth; i2++)
         {
-            bool dark = getroomprop(i2, j2)->tileset == 1;
+            uint8_t fill = getroomprop(i2, j2)->tileset == 1 ? 1 : 2;
 
             // Ok, now scan over each square
             for (int j = 0; j < 9 * map.customzoom; j++)
@@ -1759,14 +1759,7 @@ void customlevelclass::generatecustomminimap(void)
                         // Draw this pixel
                         int px = (i2 * 12 * map.customzoom) + i;
                         int py = (j2 * 9 * map.customzoom) + j;
-                        if (dark)
-                        {
-                            set_pixel(graphics.grphx.im_image12, px, py, G2D_RGB(96, 96, 96));
-                        }
-                        else
-                        {
-                            set_pixel(graphics.grphx.im_image12, px, py, G2D_RGB(196, 196, 196));
-                        }
+                        set_pixel_clut4(graphics.grphx.im_image12, px, py, fill);
                     }
                 }
             }

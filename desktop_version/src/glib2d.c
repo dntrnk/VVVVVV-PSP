@@ -2043,6 +2043,21 @@ g2dColor get_pixel(g2dImage *tex, int x, int y) {
     return 0;
 }
 
+void set_pixel_clut4(g2dImage *tex, int x, int y, uint8_t index) {
+    if (!tex || tex->tiled || tex->format != GU_PSM_T4) return;
+    if (x < 0 || x >= tex->w || y < 0 || y >= tex->h) return;
+
+    uint8_t *data = (uint8_t *)tex->data;
+    int i = y * tex->tw + x;
+    uint8_t *byte = &data[i >> 1];
+
+    if ((i & 1) == 0) {
+        *byte = (*byte & 0xF0) | (index & 0x0F);
+    } else {
+        *byte = (*byte & 0x0F) | ((index & 0x0F) << 4);
+    }
+}
+
 void draw_circle(g2dImage *tex, int x, int y, int w, int h, g2dColor color) {
     if (!tex || tex->tiled) return;
     for (int i = 0; i < w; i++) {
