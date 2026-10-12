@@ -1133,7 +1133,7 @@ void GraphicsResources::init(void)
 
         im_image12->palette = (g2dColor *)memalign(16, 16 * sizeof(g2dColor));
         memset(im_image12->palette, 0, 16 * sizeof(g2dColor));
-        im_image12->palette[0] = G2D_RGBA(0, 0, 0, 0);
+        im_image12->palette[0] = G2D_RGBA(0, 0, 0, 255);
         im_image12->palette[1] = G2D_RGB(96, 96, 96);
         im_image12->palette[2] = G2D_RGB(196, 196, 196);
 
