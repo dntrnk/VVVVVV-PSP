@@ -166,7 +166,6 @@ public:
     void draw_grid_tile(g2dImage* texture, int t, int x, int y, int width, int height, int r, int g, int b, int scalex, int scaley);
     void draw_grid_tile(g2dImage* texture, int t, int x, int y, int width, int height, g2dColor color, int scalex, int scaley);
     void draw_grid_tile(g2dImage* texture, int t, int x, int y, int width, int height, g2dColor color);
-    void draw_grid_tile_flipaware(g2dImage* texture, int t, int x, int y, int width, int height, g2dColor color);
 
     void updatetextboxes(void);
     const char* textbox_line(char* buffer, size_t buffer_len, size_t textbox_i, size_t line_i);

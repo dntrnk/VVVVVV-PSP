@@ -39,6 +39,7 @@ public:
     g2dImage* im_image12;
 
     g2dImage* im_sprites_translated;
+    g2dImage* im_flipsprites_translated;
 };
 
 extern uint32_t sprites_collision_surface_normal[512][16];

@@ -447,7 +447,7 @@ void Graphics::draw_sprite(const int x, const int y, const int t, const g2dColor
 
 void Graphics::draw_flipsprite(const int x, const int y, const int t, const g2dColor color)
 {
-    draw_grid_tile(grphx.im_sprites, t, x, y, sprites_rect.w, sprites_rect.h, color, 1, -1);
+    draw_grid_tile(grphx.im_flipsprites, t, x, y, sprites_rect.w, sprites_rect.h, color);
 }
 
 bool Graphics::shouldrecoloroneway(const int tilenum, const bool mounted)
@@ -871,185 +871,6 @@ void Graphics::draw_grid_tile(
     const g2dColor color
 ) {
     draw_grid_tile(texture, t, x, y, width, height, color, 1, 1);
-}
-
-void Graphics::draw_grid_tile_flipaware(
-    g2dImage* texture, const int t,
-    const int x, int y, const int width, const int height,
-    const g2dColor color
-) {
-    int scale_y = 1;
-
-    if (flipmode)
-    {
-        switch (t)
-        {
-            case 28:
-            case 29:
-            case 30:
-            case 31:
-                // Stop Sign
-                scale_y = -1;
-                break;
-            case 40:
-            case 41:
-            case 42:
-            case 43:
-                // Yes Man
-                scale_y = -1;
-                y -= 12;
-                break;
-            case 50:
-                // Clock
-                scale_y = -1;
-                y -= 15;
-                break;
-            case 51:
-                // Obey
-                scale_y = -1;
-                y -= 18;
-                break;
-            case 52:
-            case 53:
-                // Soldier
-                scale_y = -1;
-                y -= 7;
-                break;
-            case 56:
-            case 57:
-            case 58:
-            case 59:
-                // Skeleton
-                scale_y = -1;
-                y -= 8;
-                break;
-            case 60:
-            case 61:
-                // Megaphone
-                scale_y = -1;
-                break;
-            case 62:
-            {
-                // Special case: Lies Receiver!
-                int tex_width = texture->w;
-
-                const int x2 = (t % (tex_width / 32)) * 32;
-                const int y2 = (t / (tex_width / 32)) * 32;
-
-                draw_texture_part(texture, x, y, x2, y2, 12, 32, 1, 1, color); // Left
-                draw_texture_part(texture, x + 30, y, x2 + 30, y2, 2, 32, 1, 1, color); // Right
-                draw_texture_part(texture, x + 12, y, x2 + 12, y2, 18, 9, 1, 1, color); // Up
-                draw_texture_part(texture, x + 12, y + 26, x2 + 12, y2 + 26, 18, 6, 1, 1, color); // Down
-                draw_texture_part(texture, x + 11, y + 9, x2 + 11, y2 + 9, 19, 17, 1, -1, color); // Center
-                return;
-                break;
-            }
-            case 63:
-                // Lies
-                scale_y = -1;
-                y -= 20;
-                break;
-            case 64:
-            case 65:
-                // Truth
-                scale_y = -1;
-                y -= 22;
-                break;
-            case 76:
-                // Cloud
-                scale_y = -1;
-                y -= 10;
-                break;
-            case 78:
-            case 79:
-            case 80:
-            case 81:
-                // Empty Square
-                scale_y = -1;
-                y -= 16;
-                break;
-            case 82:
-            case 83:
-                // Musketeer
-                scale_y = -1;
-                break;
-            case 92:
-            case 93:
-            case 94:
-            case 95:
-                // Hourglass???
-                scale_y = -1;
-                y -= 16;
-                break;
-            case 100:
-            case 101:
-            case 102:
-            case 103:
-                // Digits
-                scale_y = -1;
-                y -= 18;
-                break;
-            case 106:
-            case 107:
-                // Ghost
-                scale_y = -1;
-                y -= 7;
-                break;
-            case 112:
-            case 113:
-            case 114:
-            case 115:
-                // Heart
-                scale_y = -1;
-                y -= 16;
-                break;
-            case 116:
-            case 117:
-            case 118:
-            case 119:
-                // idk how to name it
-                scale_y = -1;
-                break;
-            case 156:
-            case 157:
-            case 158:
-            case 159:
-            case 160:
-            case 161:
-            case 162:
-            case 163: // Pac-man???
-            case 164:
-            case 165:
-            case 166:
-            case 167: // Glitch
-            case 168:
-            case 169:
-            case 170:
-            case 171:
-                // Striped Block
-                scale_y = -1;
-                y -= 16;
-                break;
-            case 176:
-            case 177:
-            case 178:
-            case 179:
-                // Triangle
-                scale_y = -1;
-                y -= 16;
-                break;
-            case 182:
-            case 183:
-                // Trophy
-                scale_y = -1;
-                y -= 16;
-                break;
-            default:
-                break;
-        }
-    }
-
-    draw_grid_tile(texture, t, x, y, width, height, color, 1, scale_y);
 }
 
 void Graphics::cutscenebars(void)
@@ -1836,6 +1657,7 @@ void Graphics::drawentity(const int i, const int yoff)
         custom_gray = false;
     }
 
+    g2dImage* sprites = flipmode ? grphx.im_flipsprites : grphx.im_sprites;
     g2dImage* tiles = (map.custommode && !map.finalmode) ? grphx.im_entcolours : grphx.im_tiles;
     g2dImage* tiles_tint = (map.custommode && !map.finalmode) ? grphx.im_entcolours_tint : grphx.im_tiles_tint;
 
@@ -1855,7 +1677,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct); 
+        draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct); 
 
         // screenwrapping!
         VVV_Point wrappedPoint;
@@ -1892,21 +1714,21 @@ void Graphics::drawentity(const int i, const int yoff)
             drawRect = sprites_rect;
             drawRect.x += wrappedPoint.x;
             drawRect.y += tpoint.y;
-            draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+            draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
         }
         if (wrapY && map.warpy)
         {
             drawRect = sprites_rect;
             drawRect.x += tpoint.x;
             drawRect.y += wrappedPoint.y;
-            draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+            draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
         }
         if (wrapX && wrapY && map.warpx && map.warpy)
         {
             drawRect = sprites_rect;
             drawRect.x += wrappedPoint.x;
             drawRect.y += wrappedPoint.y;
-            draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+            draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
         }
         break;
     }
@@ -1989,7 +1811,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+        draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
 
         tpoint.x = xp + 32;
         tpoint.y = yp - yoff;
@@ -1998,7 +1820,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe + 1, drawRect.x, drawRect.y, 32, 32, ct);
+        draw_grid_tile(sprites, obj.entities[i].drawframe + 1, drawRect.x, drawRect.y, 32, 32, ct);
 
         tpoint.x = xp;
         tpoint.y = yp + 32 - yoff;
@@ -2007,7 +1829,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe + 12, drawRect.x, drawRect.y, 32, 32, ct);
+        draw_grid_tile(sprites, obj.entities[i].drawframe + 12, drawRect.x, drawRect.y, 32, 32, ct);
 
         tpoint.x = xp + 32;
         tpoint.y = yp + 32 - yoff;
@@ -2016,7 +1838,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe + 13, drawRect.x, drawRect.y, 32, 32, ct);
+        draw_grid_tile(sprites, obj.entities[i].drawframe + 13, drawRect.x, drawRect.y, 32, 32, ct);
         break;
     }
     case 10: // 2x1 Sprite
@@ -2030,7 +1852,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+        draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
 
         tpoint.x = xp + 32;
         tpoint.y = yp - yoff;
@@ -2039,7 +1861,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe + 1, drawRect.x, drawRect.y, 32, 32, ct);
+        draw_grid_tile(sprites, obj.entities[i].drawframe + 1, drawRect.x, drawRect.y, 32, 32, ct);
         break;
     }
     case 11: // The fucking elephant
@@ -2055,7 +1877,7 @@ void Graphics::drawentity(const int i, const int yoff)
         drawRect.x += tpoint.x;
         drawRect.y += tpoint.y;
 
-        draw_grid_tile_flipaware(grphx.im_sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
+        draw_grid_tile(sprites, obj.entities[i].drawframe, drawRect.x, drawRect.y, 32, 32, ct);
 
         // if we're outside the screen, we need to draw indicators
 

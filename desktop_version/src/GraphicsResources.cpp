@@ -941,6 +941,7 @@ static void LoadSpritesTranslation(
 void GraphicsResources::init_translations(void)
 {
     g2dTexFree(&im_sprites_translated);
+    g2dTexFree(&im_flipsprites_translated);
 
     if (loc::english_sprites)
     {
@@ -980,6 +981,15 @@ void GraphicsResources::init_translations(void)
             &doc_mask,
             "graphics/sprites.png",
             &im_sprites_translated
+        );
+    }
+    if (FILESYSTEM_areAssetsInSameRealDir(path_xml, path_sprites))
+    {
+        LoadSpritesTranslation(
+            path_sprites,
+            &doc_mask,
+            "graphics/flipsprites.png",
+            &im_flipsprites_translated
         );
     }
 }
@@ -1041,7 +1051,6 @@ void GraphicsResources::init(void)
         im_flipsprites_is_custom = FILESYSTEM_customAssetExists("graphics/flipsprites.png");
         g2dTexFree(&im_flipsprites);
         im_flipsprites = LoadImage("graphics/flipsprites.png", TEX_WHITE, G2D_CLUT4, sprites_collision_surface_flipped);
-        g2dTexFree(&im_flipsprites);
     }
 
     if (!graphics_loaded || im_tiles3_is_custom != FILESYSTEM_customAssetExists("graphics/tiles3.png"))
@@ -1106,6 +1115,9 @@ void GraphicsResources::init(void)
         g2dTexFree(&im_image10);
         im_image10 = LoadImage("graphics/ending.png", G2D_CLUT4);
     }
+
+    im_sprites_translated = NULL;
+    im_flipsprites_translated = NULL;
 
     init_translations();
 
