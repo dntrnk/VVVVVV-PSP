@@ -3031,6 +3031,7 @@ bool Graphics::checktexturesize(
 
 bool Graphics::reloadresources(void)
 {
+    grphx.destroy();
     grphx.init();
 
     MAYBE_FAIL(checktexturesize("tiles.png", grphx.im_tiles, 8, 8));
@@ -3050,6 +3051,7 @@ bool Graphics::reloadresources(void)
     images[IMAGE_ENDING] = grphx.im_image10;
     images[IMAGE_CUSTOMMINIMAP] = grphx.im_image12;
 
+    music.destroy();
     music.init();
 
     tiles1_mounted = FILESYSTEM_isAssetMounted("graphics/tiles.png");
