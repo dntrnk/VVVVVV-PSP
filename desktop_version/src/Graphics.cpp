@@ -3035,7 +3035,6 @@ bool Graphics::checktexturesize(
 
 bool Graphics::reloadresources(void)
 {
-    grphx.destroy();
     grphx.init();
 
     MAYBE_FAIL(checktexturesize("tiles.png", grphx.im_tiles, 8, 8));

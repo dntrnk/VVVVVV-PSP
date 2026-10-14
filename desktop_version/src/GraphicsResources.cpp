@@ -457,8 +457,8 @@ static g2dImage* ReserveImageMemory(const char* filename, g2dTexFormat format)
             {
                 free(tex);
                 return NULL;
-                }
-            memset(tex->data, 0, (size_t)tex->tw * tex->th * 4);
+            }
+            memset(tex->data, 0, (size_t) tex->tw * tex->th * 4);
         }
         else
         {
@@ -471,8 +471,8 @@ static g2dImage* ReserveImageMemory(const char* filename, g2dTexFormat format)
             memset(tex->palette, 0, 512 * sizeof(g2dColor));
 
             size_t data_size;
-            if (hw_format == GU_PSM_T8) data_size = (size_t)tex->tw * tex->th;
-            else data_size = (size_t)tex->tw * tex->th / 2;
+            if (hw_format == GU_PSM_T8) data_size = (size_t) tex->tw * tex->th;
+            else data_size = (size_t) tex->tw * tex->th / 2;
 
             tex->data = malloc(data_size);
             if (!tex->data)
@@ -1331,31 +1331,6 @@ void GraphicsResources::preserve(void) {
     flipsprites_translated_valid = false;
 }
 
-void GraphicsResources::init(void)
-{
-
-    LoadVariantsInto("graphics/tiles.png", im_tiles, im_tiles_white, im_tiles_tint);
-    LoadVariantsInto("graphics/tiles2.png", im_tiles2, NULL, im_tiles2_tint);
-    LoadVariantsInto("graphics/entcolours.png", im_entcolours, NULL, im_entcolours_tint);
-
-    LoadImageInto(im_sprites, "graphics/sprites.png", TEX_WHITE, sprites_collision_surface_normal);
-    LoadImageInto(im_flipsprites, "graphics/flipsprites.png", TEX_WHITE, sprites_collision_surface_flipped);
-
-    LoadImageInto(im_tiles3, "graphics/tiles3.png", TEX_COLOR, NULL);
-    LoadImageInto(im_teleporter, "graphics/teleporter.png", TEX_WHITE, NULL);
-
-    LoadImageInto(im_image1, "graphics/minimap.png", TEX_COLOR, NULL);
-    LoadImageInto(im_image2, "graphics/covered.png", TEX_COLOR, NULL);
-    LoadImageInto(im_image3, "graphics/elephant.png", TEX_WHITE, NULL);
-    LoadImageInto(im_image7, "graphics/site.png", TEX_WHITE, NULL);
-    LoadImageInto(im_image8, "graphics/site2.png", TEX_WHITE, NULL);
-    LoadImageInto(im_image9, "graphics/site3.png", TEX_WHITE, NULL);
-    LoadImageInto(im_image10, "graphics/ending.png", TEX_COLOR, NULL);
-
-    init_translations();
-
-}
-
 static void g2dImageZero(g2dImage* tex)
 {
     if (tex == NULL) return;
@@ -1400,6 +1375,132 @@ static void g2dImageZero(g2dImage* tex)
     }
 }
 
+static bool graphics_loaded = false;
+
+static bool im_tiles_is_custom = false;
+static bool im_tiles2_is_custom = false;
+static bool im_entcolours_is_custom = false;
+static bool im_sprites_is_custom = false;
+static bool im_flipsprites_is_custom = false;
+static bool im_tiles3_is_custom = false;
+static bool im_teleporter_is_custom = false;
+static bool im_image1_is_custom = false;
+static bool im_image2_is_custom = false;
+static bool im_image3_is_custom = false;
+static bool im_image7_is_custom = false;
+static bool im_image8_is_custom = false;
+static bool im_image9_is_custom = false;
+static bool im_image10_is_custom = false;
+
+void GraphicsResources::init(void)
+{
+    if (!graphics_loaded || im_tiles_is_custom != FILESYSTEM_customAssetExists("graphics/tiles.png"))
+    {
+        im_tiles_is_custom = FILESYSTEM_customAssetExists("graphics/tiles.png");
+        g2dImageZero(im_tiles);
+        g2dImageZero(im_tiles_white);
+        g2dImageZero(im_tiles_tint);
+        LoadVariantsInto("graphics/tiles.png", im_tiles, im_tiles_white, im_tiles_tint);
+    }
+
+    if (!graphics_loaded || im_tiles2_is_custom != FILESYSTEM_customAssetExists("graphics/tiles2.png"))
+    {
+        im_tiles2_is_custom = FILESYSTEM_customAssetExists("graphics/tiles2.png");
+        g2dImageZero(im_tiles2);
+        g2dImageZero(im_tiles2_tint);
+        LoadVariantsInto("graphics/tiles2.png", im_tiles2, NULL, im_tiles2_tint);
+    }
+
+    if (!graphics_loaded || im_entcolours_is_custom != FILESYSTEM_customAssetExists("graphics/entcolours.png"))
+    {
+        im_entcolours_is_custom = FILESYSTEM_customAssetExists("graphics/entcolours.png");
+        g2dImageZero(im_entcolours);
+        g2dImageZero(im_entcolours_tint);
+        LoadVariantsInto("graphics/entcolours.png", im_entcolours, NULL, im_entcolours_tint);
+    }
+
+    if (!graphics_loaded || im_sprites_is_custom != FILESYSTEM_customAssetExists("graphics/sprites.png"))
+    {
+        im_sprites_is_custom = FILESYSTEM_customAssetExists("graphics/sprites.png");
+        g2dImageZero(im_sprites);
+        LoadImageInto(im_sprites, "graphics/sprites.png", TEX_WHITE, sprites_collision_surface_normal);
+    }
+
+    if (!graphics_loaded || im_flipsprites_is_custom != FILESYSTEM_customAssetExists("graphics/flipsprites.png"))
+    {
+        im_flipsprites_is_custom = FILESYSTEM_customAssetExists("graphics/flipsprites.png");
+        g2dImageZero(im_flipsprites);
+        LoadImageInto(im_flipsprites, "graphics/flipsprites.png", TEX_WHITE, sprites_collision_surface_flipped);
+    }
+
+    if (!graphics_loaded || im_tiles3_is_custom != FILESYSTEM_customAssetExists("graphics/tiles3.png"))
+    {
+        im_tiles3_is_custom = FILESYSTEM_customAssetExists("graphics/tiles3.png");
+        g2dImageZero(im_tiles3);
+        LoadImageInto(im_tiles3, "graphics/tiles3.png", TEX_COLOR, NULL);
+    }
+
+    if (!graphics_loaded || im_teleporter_is_custom != FILESYSTEM_customAssetExists("graphics/teleporter.png"))
+    {
+        im_teleporter_is_custom = FILESYSTEM_customAssetExists("graphics/teleporter.png");
+        g2dImageZero(im_teleporter);
+        LoadImageInto(im_teleporter, "graphics/teleporter.png", TEX_WHITE, NULL);
+    }
+
+    if (!graphics_loaded || im_image1_is_custom != FILESYSTEM_customAssetExists("graphics/minimap.png"))
+    {
+        im_image1_is_custom = FILESYSTEM_customAssetExists("graphics/minimap.png");
+        g2dImageZero(im_image1);
+        LoadImageInto(im_image1, "graphics/minimap.png", TEX_COLOR, NULL);
+    }
+
+    if (!graphics_loaded || im_image2_is_custom != FILESYSTEM_customAssetExists("graphics/covered.png"))
+    {
+        im_image2_is_custom = FILESYSTEM_customAssetExists("graphics/covered.png");
+        g2dImageZero(im_image2);
+        LoadImageInto(im_image2, "graphics/covered.png", TEX_COLOR, NULL);
+    }
+
+    if (!graphics_loaded || im_image3_is_custom != FILESYSTEM_customAssetExists("graphics/elephant.png"))
+    {
+        im_image3_is_custom = FILESYSTEM_customAssetExists("graphics/elephant.png");
+        g2dImageZero(im_image3);
+        LoadImageInto(im_image3, "graphics/elephant.png", TEX_WHITE, NULL);
+    }
+
+    if (!graphics_loaded || im_image7_is_custom != FILESYSTEM_customAssetExists("graphics/site.png"))
+    {
+        im_image7_is_custom = FILESYSTEM_customAssetExists("graphics/site.png");
+        g2dImageZero(im_image7);
+        LoadImageInto(im_image7, "graphics/site.png", TEX_WHITE, NULL);
+    }
+
+    if (!graphics_loaded || im_image8_is_custom != FILESYSTEM_customAssetExists("graphics/site2.png"))
+    {
+        im_image8_is_custom = FILESYSTEM_customAssetExists("graphics/site2.png");
+        g2dImageZero(im_image8);
+        LoadImageInto(im_image8, "graphics/site2.png", TEX_WHITE, NULL);
+    }
+
+    if (!graphics_loaded || im_image9_is_custom != FILESYSTEM_customAssetExists("graphics/site3.png"))
+    {
+        im_image9_is_custom = FILESYSTEM_customAssetExists("graphics/site3.png");
+        g2dImageZero(im_image9);
+        LoadImageInto(im_image9, "graphics/site3.png", TEX_WHITE, NULL);
+    }
+
+    if (!graphics_loaded || im_image10_is_custom != FILESYSTEM_customAssetExists("graphics/ending.png"))
+    {
+        im_image10_is_custom = FILESYSTEM_customAssetExists("graphics/ending.png");
+        g2dImageZero(im_image10);
+        LoadImageInto(im_image10, "graphics/ending.png", TEX_COLOR, NULL);
+    }
+
+    init_translations();
+
+    graphics_loaded = true;
+}
+
 void GraphicsResources::destroy(void)
 {
     g2dImageZero(im_flipsprites_translated);
@@ -1427,4 +1528,6 @@ void GraphicsResources::destroy(void)
 
     sprites_translated_valid = false;
     flipsprites_translated_valid = false;
+
+    graphics_loaded = false;
 }
