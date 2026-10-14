@@ -468,7 +468,8 @@ static void menurender(void)
         font::print(PR_CEN, -1, 18, loc::gettext("VVVVVV is a game by"), tr, tg, tb);
         font::print(PR_2X | PR_CEN | PR_FONT_8X8, -1, 33, "Terry Cavanagh", tr, tg, tb);
 
-        graphics.drawpartimagecol(IMAGE_SITE, 99, 54, G2D_RGB(tr, tg, tb), 128, 8);
+        g2dHelperDrawImage(graphics.images[IMAGE_SITE], 99, 54, 108, 5, G2D_RGB(tr, tg, tb), 0, 0, 108, 5);
+        g2dHelperDrawImage(graphics.images[IMAGE_SITE], 207, 54, 13, 5, G2D_RGB(tr, tg, tb), 108, 0, 13, 5);
 
         font::print(PR_CEN, -1, 78, loc::gettext("and features music by"), tr, tg, tb);
         font::print(PR_2X | PR_CEN | PR_FONT_8X8, -1, 93, "Magnus Pålsson", tr, tg, tb);
