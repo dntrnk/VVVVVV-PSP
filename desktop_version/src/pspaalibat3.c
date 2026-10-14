@@ -121,7 +121,6 @@ int GetBufferAt3(short *buf, int length, float amp, int channel) {
         return PSPAALIB_WARNING_PAUSED_BUFFER_REQUESTED;
     }
     int num, end, remain;
-    int decodedSomething = 0;
     while (streamsAt3[channel].bufSize < byteLength) {
         int ret = sceAtracDecodeData(streamsAt3[channel].id, (void *)streamsAt3[channel].tempBuf, &num, &end, &remain);
 
@@ -147,7 +146,6 @@ int GetBufferAt3(short *buf, int length, float amp, int channel) {
             streamsAt3[channel].buf = newBuf;
             memcpy((void *)((char *)streamsAt3[channel].buf + streamsAt3[channel].bufSize), streamsAt3[channel].tempBuf, 4 * num);
             streamsAt3[channel].bufSize += 4 * num;
-            decodedSomething = 1;
         }
     }
     int bytesAvailable = streamsAt3[channel].bufSize;

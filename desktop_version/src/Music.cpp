@@ -231,12 +231,6 @@ static void loadAllSounds(void)
     }
 }
 
-
-static bool musicPaused = true;
-static int musicVolume = VVV_MAX_VOLUME;
-static int currentMusicTrack = -1;
-static bool musicValid = false;
-
 musicclass::musicclass(void)
 {
     safeToProcessMusic = false;
@@ -282,7 +276,6 @@ void musicclass::destroy(void)
 {
     MusicChannel::Stop();
     unloadAllSounds();
-    musicValid = false;
 }
 
 void musicclass::play(int t)
