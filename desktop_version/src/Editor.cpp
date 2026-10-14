@@ -394,6 +394,8 @@ void editorclass::reset(void)
     backspace_held = false;
     current_text_mode = TEXT_NONE;
 
+    can_use_lmb = false;
+
     warp_token_entity = -1;
 
     text_entity = 0;
@@ -3245,6 +3247,11 @@ void editorinput(void)
     //     graphics.reloadresources();
     // }
 
+    if (!key.leftbutton && !controls_held(PSP_CTRL_CROSS))
+    {
+        ed.can_use_lmb = true;
+    }
+
     // Was escape just pressed?
     bool escape_pressed = false;
     if ((controls_held(PSP_CTRL_START)) && !ed.settingskey)
@@ -3381,7 +3388,7 @@ void editorinput(void)
             }
 
             // Mouse input
-            if ((key.leftbutton || controls_held(PSP_CTRL_CROSS)) && ed.lclickdelay == 0)
+            if ((key.leftbutton || controls_held(PSP_CTRL_CROSS)) && ed.lclickdelay == 0 && ed.can_use_lmb)
             {
                 ed.tool_place();
             }
@@ -3414,7 +3421,7 @@ void editorinput(void)
                 ed.substate = EditorSubState_MAIN;
             }
 
-            if ((key.leftbutton || controls_held(PSP_CTRL_CROSS)) && ed.lclickdelay == 0)
+            if ((key.leftbutton || controls_held(PSP_CTRL_CROSS)) && ed.lclickdelay == 0 && ed.can_use_lmb)
             {
                 if (ed.box_corner == BoxCorner_FIRST)
                 {
@@ -3507,7 +3514,7 @@ void editorinput(void)
             }
 
             // Left click means place!
-            if (key.leftbutton || controls_held(PSP_CTRL_CROSS))
+            if ((key.leftbutton || controls_held(PSP_CTRL_CROSS)) && ed.can_use_lmb)
             {
                 if (ed.lclickdelay == 0)
                 {

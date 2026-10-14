@@ -7458,6 +7458,8 @@ void Game::returntoeditor(void)
     ed.note_timer = 0;
     ed.roomnamehide = 0;
 
+    ed.can_use_lmb = false;
+
     // Might've been changed in a script
     font::set_level_font(cl.level_font_name.c_str());
 

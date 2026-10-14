@@ -252,6 +252,8 @@ public:
     bool updatetiles, changeroom;
     bool backspace_held;
 
+    bool can_use_lmb;
+
     //Script editor stuff
     void remove_line(int t);
     void insert_line(int t);
