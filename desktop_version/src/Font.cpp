@@ -334,7 +334,7 @@ static uint8_t load_font(FontContainer* container, const char* name)
 
     // We use TEX_GRAYSCALE instead of TEX_COLOR so button glyphs are
     // black & white to fit the PSP style
-    f->image = LoadImage(name_png, white_teeth ? TEX_GRAYSCALE : TEX_WHITE, G2D_CLUT4);
+    f->image = LoadFont(name_png, white_teeth ? TEX_GRAYSCALE : TEX_WHITE);
     memset(f->glyph_page, 0, sizeof(f->glyph_page));
 
     if (f->image == NULL)

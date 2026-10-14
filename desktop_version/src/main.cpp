@@ -422,6 +422,8 @@ int main(int argc, char *argv[])
         VVV_exit(1);
     }
 
+    graphics.grphx.preserve();
+
     VVV_TicksInit();
 
     controls_init();

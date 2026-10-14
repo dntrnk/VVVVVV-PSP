@@ -389,9 +389,13 @@ bool Graphics::substitute(g2dImage** texture)
 
     g2dImage* subst = NULL;
 
-    if (*texture == grphx.im_sprites)
+    if (*texture == grphx.im_sprites && grphx.sprites_translated_valid)
     {
         subst = grphx.im_sprites_translated;
+    }
+    else if (*texture == grphx.im_flipsprites && grphx.flipsprites_translated_valid)
+    {
+        subst = grphx.im_flipsprites_translated;
     }
 
     if (subst == NULL)

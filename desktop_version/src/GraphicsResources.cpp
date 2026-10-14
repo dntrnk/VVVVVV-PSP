@@ -65,6 +65,13 @@ extern "C"
     extern const char* lodepng_error_text(unsigned code);
 }
 
+static int _getNextPower2(int n)
+{
+    int p = 1;
+    while ((p <<= 1) < n);
+    return p;
+}
+
 typedef struct {
     const unsigned char* data;
     size_t size;
@@ -85,21 +92,43 @@ static void _png_mem_read(png_structp png, png_bytep out, png_size_t len)
 static void _png_error_dummy(png_structp, png_const_charp) {}
 static void _png_warn_dummy(png_structp, png_const_charp) {}
 
+
 #define GR_MAX_TEX_SIZE 512
 
-static g2dImage* _G2DLoadTiledFromPNG(const unsigned char* fileData, size_t fileSize, const char* filename, TextureLoadType loadtype, int hw_format)
+static inline g2dColor _apply_loadtype(g2dColor c, TextureLoadType loadtype)
+{
+    if (loadtype == TEX_WHITE)
+    {
+        return G2D_RGBA(255, 255, 255, G2D_GET_A(c));
+    }
+    else if (loadtype == TEX_GRAYSCALE)
+    {
+        uint8_t r = G2D_GET_R(c) * 0.299;
+        uint8_t g = G2D_GET_G(c) * 0.587;
+        uint8_t b = G2D_GET_B(c) * 0.114;
+        const double gray = floor(r + g + b + 0.5);
+        return G2D_RGBA(gray, gray, gray, G2D_GET_A(c));
+    }
+    return c;
+}
+
+static png_structp _png_open_rgba(const unsigned char* data, size_t size, PNGMemReader* reader)
 {
     png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, _png_error_dummy, _png_warn_dummy);
     if (!png) return NULL;
     png_infop info = png_create_info_struct(png);
-    if (!info) { png_destroy_read_struct(&png, NULL, NULL); return NULL; }
+    if (!info)
+    {
+        png_destroy_read_struct(&png, NULL, NULL);
+        return NULL;
+    }
 
-    PNGMemReader reader1 = { fileData, fileSize, 0 };
-    png_set_read_fn(png, &reader1, _png_mem_read);
+    reader->data = data;
+    reader->size = size;
+    reader->pos  = 0;
+    png_set_read_fn(png, reader, _png_mem_read);
     png_read_info(png, info);
 
-    png_uint_32 width = png_get_image_width(png, info);
-    png_uint_32 height = png_get_image_height(png, info);
     int bit_depth = png_get_bit_depth(png, info);
     int color_type = png_get_color_type(png, info);
 
@@ -115,412 +144,17 @@ static g2dImage* _G2DLoadTiledFromPNG(const unsigned char* fileData, size_t file
         png_set_gray_to_rgb(png);
 
     png_read_update_info(png, info);
-
-    int max_colors = (hw_format == GU_PSM_T8) ? 256 : 16;
-
-    g2dColor* palette = (g2dColor*)memalign(16, 512 * sizeof(g2dColor));
-    if (!palette) {
-        png_destroy_read_struct(&png, &info, NULL);
-        return NULL;
-    }
-    memset(palette, 0, 512 * sizeof(g2dColor));
-
-    PalMap pal_map;
-    _pal_init(&pal_map, max_colors);
-    bool overflow = false;
-    int pal_count = 0;
-
-    size_t rowbytes = width * 4;
-    unsigned char* row = (unsigned char*)malloc(rowbytes);
-    if (!row) {
-        free(palette);
-        png_destroy_read_struct(&png, &info, NULL);
-        return NULL;
-    }
-
-    for (png_uint_32 y = 0; y < height; y++) {
-        png_read_row(png, row, NULL);
-        g2dColor* pixels = (g2dColor*)row;
-
-        for (png_uint_32 x = 0; x < width; x++) {
-            g2dColor c = pixels[x];
-
-            if (loadtype == TEX_WHITE) {
-                c = G2D_RGBA(255, 255, 255, G2D_GET_A(c));
-            } else if (loadtype == TEX_GRAYSCALE) {
-                uint8_t r = G2D_GET_R(c) * 0.299;
-                uint8_t g = G2D_GET_G(c) * 0.587;
-                uint8_t b = G2D_GET_B(c) * 0.114;
-                const double gray = floor(r + g + b + 0.5);
-                c = G2D_RGBA(gray, gray, gray, G2D_GET_A(c));
-            }
-
-            if (_pal_find_or_add(&pal_map, c) < 0) {
-                overflow = true;
-                goto pass1_done;
-            }
-        }
-    }
-
-pass1_done:
-    free(row);
-    png_destroy_read_struct(&png, &info, NULL);
-
-    pal_count = pal_map.count;
-    if (pal_count > 0) {
-        memcpy(palette, pal_map.palette, 512 * sizeof(g2dColor));
-    }
-
-    if (overflow) {
-        int shift = 1;
-        for (; shift <= 4; shift++) {
-            int mask = 0xFF & ~((1 << shift) - 1);
-
-            png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, _png_error_dummy, _png_warn_dummy);
-            info = png_create_info_struct(png);
-            PNGMemReader r2 = { fileData, fileSize, 0 };
-            png_set_read_fn(png, &r2, _png_mem_read);
-            png_read_info(png, info);
-
-            bit_depth = png_get_bit_depth(png, info);
-            color_type = png_get_color_type(png, info);
-            if (bit_depth == 16) png_set_strip_16(png);
-            if (color_type == PNG_COLOR_TYPE_PALETTE) png_set_palette_to_rgb(png);
-            if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) png_set_expand_gray_1_2_4_to_8(png);
-            if (png_get_valid(png, info, PNG_INFO_tRNS)) png_set_tRNS_to_alpha(png);
-            if (color_type == PNG_COLOR_TYPE_RGB ||
-                color_type == PNG_COLOR_TYPE_GRAY ||
-                color_type == PNG_COLOR_TYPE_PALETTE)
-                png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
-            if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
-                png_set_gray_to_rgb(png);
-
-            png_read_update_info(png, info);
-
-            _pal_init(&pal_map, max_colors);
-            bool still_overflow = false;
-
-            row = (unsigned char*)malloc(rowbytes);
-            if (!row) { png_destroy_read_struct(&png, &info, NULL); break; }
-
-            for (png_uint_32 y = 0; y < height && !still_overflow; y++) {
-                png_read_row(png, row, NULL);
-                g2dColor* pixels = (g2dColor*)row;
-
-                for (png_uint_32 x = 0; x < width; x++) {
-                    g2dColor c = pixels[x];
-                    if (loadtype == TEX_WHITE) {
-                        c = G2D_RGBA(255, 255, 255, G2D_GET_A(c));
-                    } else if (loadtype == TEX_GRAYSCALE) {
-                        uint8_t r = G2D_GET_R(c) * 0.299;
-                        uint8_t g = G2D_GET_G(c) * 0.587;
-                        uint8_t b = G2D_GET_B(c) * 0.114;
-                        const double gray = floor(r + g + b + 0.5);
-                        c = G2D_RGBA(gray, gray, gray, G2D_GET_A(c));
-                    }
-                    g2dColor q = G2D_RGBA(
-                        G2D_GET_R(c) & mask,
-                        G2D_GET_G(c) & mask,
-                        G2D_GET_B(c) & mask,
-                        G2D_GET_A(c) & mask);
-
-                    if (_pal_find_or_add(&pal_map, q) < 0) {
-                        still_overflow = true;
-                        break;
-                    }
-                }
-            }
-
-            free(row);
-            png_destroy_read_struct(&png, &info, NULL);
-
-            if (!still_overflow) {
-                pal_count = pal_map.count;
-                memcpy(palette, pal_map.palette, 512 * sizeof(g2dColor));
-                break;
-            }
-        }
-    }
-
-    _pal_init(&pal_map, max_colors);
-    for (int i = 0; i < pal_count; i++) {
-        _pal_find_or_add(&pal_map, palette[i]);
-    }
-
-    if (pal_count == 0) {
-        free(palette);
-        return NULL;
-    }
-
-    int cols = (width + GR_MAX_TEX_SIZE - 1) / GR_MAX_TEX_SIZE;
-    int rows = (height + GR_MAX_TEX_SIZE - 1) / GR_MAX_TEX_SIZE;
-    int tile_count = cols * rows;
-
-    g2dImage* tiled = (g2dImage*)calloc(1, sizeof(g2dImage));
-    if (!tiled) { free(palette); return NULL; }
-
-    tiled->tiled = true;
-    tiled->cols = cols;
-    tiled->rows = rows;
-    tiled->w = width;
-    tiled->h = height;
-    tiled->tw = width;
-    tiled->th = height;
-    tiled->ratio = (float)width / (float)height;
-    tiled->can_blend = true;
-    tiled->format = hw_format;
-    tiled->swizzled = false;
-    tiled->data = NULL;
-    tiled->palette = palette;
-
-    tiled->tiles = (g2dImage**)malloc(tile_count * sizeof(g2dImage*));
-    if (!tiled->tiles) { free(tiled); free(palette); return NULL; }
-    memset(tiled->tiles, 0, tile_count * sizeof(g2dImage*));
-
-    png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, _png_error_dummy, _png_warn_dummy);
-    if (!png) { /* cleanup */ }
-    info = png_create_info_struct(png);
-    PNGMemReader reader2 = { fileData, fileSize, 0 };
-    png_set_read_fn(png, &reader2, _png_mem_read);
-    png_read_info(png, info);
-
-    bit_depth = png_get_bit_depth(png, info);
-    color_type = png_get_color_type(png, info);
-    if (bit_depth == 16) png_set_strip_16(png);
-    if (color_type == PNG_COLOR_TYPE_PALETTE) png_set_palette_to_rgb(png);
-    if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) png_set_expand_gray_1_2_4_to_8(png);
-    if (png_get_valid(png, info, PNG_INFO_tRNS)) png_set_tRNS_to_alpha(png);
-    if (color_type == PNG_COLOR_TYPE_RGB ||
-        color_type == PNG_COLOR_TYPE_GRAY ||
-        color_type == PNG_COLOR_TYPE_PALETTE)
-        png_set_filler(png, 0xFF, PNG_FILLER_AFTER);
-    if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA)
-        png_set_gray_to_rgb(png);
-
-    png_read_update_info(png, info);
-
-    int quant_mask = 0xFF;
-    if (overflow) {
-        for (int sh = 1; sh <= 4; sh++) {
-            int test_mask = 0xFF & ~((1 << sh) - 1);
-            bool all_quantized = true;
-            for (int j = 0; j < pal_count; j++) {
-                g2dColor p = palette[j];
-                if ((G2D_GET_R(p) & ~test_mask) ||
-                    (G2D_GET_G(p) & ~test_mask) ||
-                    (G2D_GET_B(p) & ~test_mask) ||
-                    (G2D_GET_A(p) & ~test_mask)) {
-                    all_quantized = false;
-                    break;
-                }
-            }
-            if (all_quantized) { quant_mask = test_mask; break; }
-        }
-    }
-
-    row = (unsigned char*)malloc(rowbytes);
-    if (!row) {
-        png_destroy_read_struct(&png, &info, NULL);
-        // cleanup
-        for (int i = 0; i < tile_count; i++) if (tiled->tiles[i]) g2dTexFree(&tiled->tiles[i]);
-        free(tiled->tiles);
-        free(palette);
-        free(tiled);
-        return NULL;
-    }
-
-    typedef struct {
-        unsigned char* idx;
-        int tw, th;
-        int w, h;
-        int y_written;
-        int x0, y0;
-        int ti;
-    } TileBuild;
-
-    TileBuild* tb = (TileBuild*)calloc(tile_count, sizeof(TileBuild));
-    if (!tb) {
-        free(row);
-        png_destroy_read_struct(&png, &info, NULL);
-        // cleanup
-        for (int i = 0; i < tile_count; i++) if (tiled->tiles[i]) g2dTexFree(&tiled->tiles[i]);
-        free(tiled->tiles);
-        free(palette);
-        free(tiled);
-        return NULL;
-    }
-
-    bool alloc_failed = false;
-    for (int r = 0; r < rows; r++) {
-        for (int c = 0; c < cols; c++) {
-            int ti = r * cols + c;
-            int x0 = c * GR_MAX_TEX_SIZE;
-            int y0 = r * GR_MAX_TEX_SIZE;
-            int tw = width - x0;  if (tw > GR_MAX_TEX_SIZE) tw = GR_MAX_TEX_SIZE;
-            int th = height - y0; if (th > GR_MAX_TEX_SIZE) th = GR_MAX_TEX_SIZE;
-
-            // power-of-2
-            int tw2 = 1; while (tw2 < tw) tw2 <<= 1;
-            int th2 = 1; while (th2 < th) th2 <<= 1;
-
-            tb[ti].tw = tw2;
-            tb[ti].th = th2;
-            tb[ti].w = tw;
-            tb[ti].h = th;
-            tb[ti].x0 = x0;
-            tb[ti].y0 = y0;
-            tb[ti].ti = ti;
-            tb[ti].y_written = 0;
-
-            size_t idx_size;
-            if (hw_format == GU_PSM_T8) idx_size = (size_t)tw2 * th2;
-            else                        idx_size = (size_t)tw2 * th2 / 2;
-
-            tb[ti].idx = (unsigned char*)calloc(1, idx_size);
-            if (!tb[ti].idx) { alloc_failed = true; break; }
-        }
-        if (alloc_failed) break;
-    }
-
-    if (alloc_failed) {
-        for (int i = 0; i < tile_count; i++) if (tb[i].idx) free(tb[i].idx);
-        free(tb);
-        free(row);
-        png_destroy_read_struct(&png, &info, NULL);
-        for (int i = 0; i < tile_count; i++) if (tiled->tiles[i]) g2dTexFree(&tiled->tiles[i]);
-        free(tiled->tiles);
-        free(palette);
-        free(tiled);
-        return NULL;
-    }
-
-    for (png_uint_32 y = 0; y < height; y++) {
-        png_read_row(png, row, NULL);
-        g2dColor* pixels = (g2dColor*)row;
-
-        int r = y / GR_MAX_TEX_SIZE;
-
-        for (int c = 0; c < cols; c++) {
-            int ti = r * cols + c;
-            TileBuild* t = &tb[ti];
-            if (t->y_written >= t->h) continue;
-
-            int x_start = t->x0;
-            int x_end = x_start + t->w;
-            if (x_end > (int)width) x_end = width;
-
-            int local_y = (int)y - t->y0;
-            if (local_y < 0 || local_y >= t->h) continue;
-
-            if (hw_format == GU_PSM_T8) {
-                unsigned char* dst = t->idx + (size_t)local_y * t->tw;
-
-                for (int x = x_start; x < x_end; x++) {
-                    g2dColor col = pixels[x];
-                    if (loadtype == TEX_WHITE) {
-                        col = G2D_RGBA(255, 255, 255, G2D_GET_A(col));
-                    } else if (loadtype == TEX_GRAYSCALE) {
-                        uint8_t rr = G2D_GET_R(col) * 0.299;
-                        uint8_t gg = G2D_GET_G(col) * 0.587;
-                        uint8_t bb = G2D_GET_B(col) * 0.114;
-                        const double gray = floor(rr + gg + bb + 0.5);
-                        col = G2D_RGBA(gray, gray, gray, G2D_GET_A(col));
-                    }
-                    if (overflow) {
-                        col = G2D_RGBA(
-                            G2D_GET_R(col) & quant_mask,
-                            G2D_GET_G(col) & quant_mask,
-                            G2D_GET_B(col) & quant_mask,
-                            G2D_GET_A(col) & quant_mask);
-                    }
-                    dst[x - x_start] = (unsigned char)_g2dPaletteLookup(col, &pal_map, 256);
-                }
-            } else {
-                // T4
-                unsigned char* dst = t->idx;
-
-                for (int x = x_start; x < x_end; x++) {
-                    g2dColor col = pixels[x];
-                    if (loadtype == TEX_WHITE) {
-                        col = G2D_RGBA(255, 255, 255, G2D_GET_A(col));
-                    } else if (loadtype == TEX_GRAYSCALE) {
-                        uint8_t rr = G2D_GET_R(col) * 0.299;
-                        uint8_t gg = G2D_GET_G(col) * 0.587;
-                        uint8_t bb = G2D_GET_B(col) * 0.114;
-                        const double gray = floor(rr + gg + bb + 0.5);
-                        col = G2D_RGBA(gray, gray, gray, G2D_GET_A(col));
-                    }
-                    if (overflow) {
-                        col = G2D_RGBA(
-                            G2D_GET_R(col) & quant_mask,
-                            G2D_GET_G(col) & quant_mask,
-                            G2D_GET_B(col) & quant_mask,
-                            G2D_GET_A(col) & quant_mask);
-                    }
-                    int local_x = x - x_start;
-                    int i = local_y * t->tw + local_x;
-                    int p = _g2dPaletteLookup(col, &pal_map, 16) & 0x0F;
-                    if ((i & 1) == 0) dst[i >> 1] |= p;
-                    else              dst[i >> 1] |= (p << 4);
-                }
-            }
-        }
-
-        for (int c = 0; c < cols; c++) {
-            int ti = r * cols + c;
-            if (tb[ti].y_written < tb[ti].h) tb[ti].y_written++;
-        }
-    }
-
-    free(row);
-    png_destroy_read_struct(&png, &info, NULL);
-
-    bool tile_failed = false;
-    for (int i = 0; i < tile_count; i++) {
-        TileBuild* t = &tb[i];
-
-        g2dImage* tile = (g2dImage*)calloc(1, sizeof(g2dImage));
-        if (!tile) { tile_failed = true; break; }
-
-        tile->w = t->w;
-        tile->h = t->h;
-        tile->tw = t->tw;
-        tile->th = t->th;
-        tile->ratio = (float)t->w / (float)t->h;
-        tile->can_blend = true;
-        tile->tiled = false;
-        tile->cols = tile->rows = 1;
-        tile->format = hw_format;
-        tile->palette = NULL;
-        tile->data = t->idx;
-        tile->swizzled = false;
-
-        if (tile->tw >= 16) {
-            _g2dSwizzle(tile);
-        }
-
-        tiled->tiles[i] = tile;
-    }
-
-    for (int i = 0; i < tile_count; i++) {
-        if (tile_failed && tb[i].idx) free(tb[i].idx);
-    }
-    free(tb);
-
-    if (tile_failed) {
-        for (int i = 0; i < tile_count; i++) if (tiled->tiles[i]) g2dTexFree(&tiled->tiles[i]);
-        free(tiled->tiles);
-        free(palette);
-        free(tiled);
-        return NULL;
-    }
-
-    sceKernelDcacheWritebackAll();
-    return tiled;
+    return png;
 }
 
-g2dImage* LoadImage(const char* filename, const TextureLoadType loadtype, g2dTexFormat format, uint32_t (*collision_surface)[16] /*= NULL*/)
-{
+g2dImage* LoadImageInto(
+    g2dImage* tex,
+    const char* filename,
+    TextureLoadType loadtype,
+    uint32_t (*collision_surface)[16]
+) {
+    if (tex == NULL) return NULL;
+
     unsigned char* fileIn = NULL;
     size_t length = 0;
     FILESYSTEM_loadAssetToMemory(filename, &fileIn, &length);
@@ -530,48 +164,18 @@ g2dImage* LoadImage(const char* filename, const TextureLoadType loadtype, g2dTex
         return NULL;
     }
 
-    unsigned int width = 0, height = 0;
+    const int width  = tex->w;
+    const int height = tex->h;
+    const int hw_format = tex->format;
 
-    {
-        png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, _png_error_dummy, _png_warn_dummy);
-        if (!png) { VVV_free(fileIn); return NULL; }
-        png_infop info = png_create_info_struct(png);
-        if (!info) { png_destroy_read_struct(&png, NULL, NULL); VVV_free(fileIn); return NULL; }
-        PNGMemReader r = { fileIn, length, 0 };
-        png_set_read_fn(png, &r, _png_mem_read);
-        png_read_info(png, info);
-        width = png_get_image_width(png, info);
-        height = png_get_image_height(png, info);
-        png_destroy_read_struct(&png, &info, NULL);
-    }
-
-    if (width == 0 || height == 0) {
-        VVV_free(fileIn);
-        return NULL;
-    }
-
-    if (loadtype == TEX_WHITE) {
-        format = G2D_CLUT4;
-    }
-
-    int hw_format = GU_PSM_8888;
-    if (format == G2D_CLUT8)      hw_format = GU_PSM_T8;
-    else if (format == G2D_CLUT4) hw_format = GU_PSM_T4;
-
-    if (width > 512 || height > 512)
-    {
-        g2dImage* tiled = _G2DLoadTiledFromPNG(fileIn, length, filename, loadtype, hw_format);
-        VVV_free(fileIn);
-
-        if (!tiled) {
-            vlog_error("Failed to tile image: %s", filename);
-            return NULL;
-        }
-        return tiled;
-    }
+    const bool is_clut = (hw_format == GU_PSM_T8 || hw_format == GU_PSM_T4);
+    const int max_colors = (hw_format == GU_PSM_T8) ? 256
+                         : (hw_format == GU_PSM_T4) ? 16
+                         : 0;
 
     unsigned char* rgbaData = NULL;
-    unsigned int error = lodepng_decode32(&rgbaData, &width, &height, fileIn, length);
+    unsigned int w = 0, h = 0;
+    unsigned int error = lodepng_decode32(&rgbaData, &w, &h, fileIn, length);
     VVV_free(fileIn);
 
     if (error != 0)
@@ -580,146 +184,440 @@ g2dImage* LoadImage(const char* filename, const TextureLoadType loadtype, g2dTex
         return NULL;
     }
 
-    g2dImage* tempTex = _g2dTexCreate(width, height, true);
-    if (tempTex == NULL)
+    int w_use = (int) w;
+    int h_use = (int) h;
+    if (w_use != width || h_use != height)
     {
-        free(rgbaData);
-        return NULL;
+        vlog_warn("LoadImageInto: size mismatch for %s (tex %dx%d, png %dx%d)", filename, width, height, w_use, h_use);
+        w_use = (width  < w_use) ? width  : w_use;
+        h_use = (height < h_use) ? height : h_use;
     }
 
-    int bytesPerPixel = 4;
-    int srcRowSize = width * bytesPerPixel;
-    int dstRowSize = tempTex->tw * bytesPerPixel;
-
-    for (unsigned int y = 0; y < height; y++)
+    if (collision_surface != NULL)
     {
-        memcpy((char*) tempTex->data + y * dstRowSize, rgbaData + y * srcRowSize, srcRowSize);
-    }
-
-    if (collision_surface != NULL) {
-        for (int y = 0; y < 512; y++)
+        memset(collision_surface, 0, 512 * 16 * sizeof(uint32_t));
+        for (int y = 0; y < h_use; y++)
         {
-            for (int x = 0; x < 512; x++)
+            for (int x = 0; x < w_use; x++)
             {
-                /* INTENTIONAL BUG! In previous versions, the game mistakenly
-                 * checked the red channel, not the alpha channel.
-                 * We preserve it here because some people abuse this. */
-                if (G2D_GET_R(get_pixel(tempTex, x, y)) != 0)
+                g2dColor raw_c = 0;
+                if (x < w_use && y < h_use)
                 {
+                    raw_c = ((const g2dColor*) rgbaData)[y * w_use + x];
+                }
+                if (G2D_GET_R(raw_c) != 0 && G2D_GET_A(raw_c) != 0)
                     sprites_collision_surface_set_bit(collision_surface, x, y);
-                }
                 else
-                {
                     sprites_collision_surface_clear_bit(collision_surface, x, y);
+            }
+        }
+    }
+
+    PalMap pal_map;
+    int pal_count = 0;
+    bool overflow = false;
+    int quant_mask = 0xFF;
+
+    if (is_clut)
+    {
+        _pal_init(&pal_map, max_colors);
+
+        for (int y = 0; y < h_use; y++)
+        {
+            const g2dColor* pixels = (const g2dColor*)rgbaData + y * w_use;
+            for (int x = 0; x < w_use; x++)
+            {
+                g2dColor c = _apply_loadtype(pixels[x], loadtype);
+                if (_pal_find_or_add(&pal_map, c) < 0)
+                {
+                    overflow = true;
+                    goto pass1_done;
                 }
             }
         }
-    }
 
-    // Apply Format
-    int curwidth = tempTex->w;
-    int curheight = tempTex->h;
+    pass1_done:
+        pal_count = pal_map.count;
 
-    switch (loadtype)
-    {
-    case TEX_WHITE:
-        for (int y = 0; y < curheight; y++)
+        if (overflow)
         {
-            for (int x = 0; x < curwidth; x++)
+            for (int shift = 1; shift <= 4; shift++)
             {
-                g2dColor color = get_pixel(tempTex, x, y);
-                set_pixel(tempTex, x, y, G2D_RGBA(255, 255, 255, G2D_GET_A(color)));
+                int mask = 0xFF & ~((1 << shift) - 1);
+                _pal_init(&pal_map, max_colors);
+                bool still_overflow = false;
+
+                for (int y = 0; y < h_use && !still_overflow; y++)
+                {
+                    const g2dColor* pixels = (const g2dColor*) rgbaData + y * w_use;
+                    for (int x = 0; x < w_use; x++) {
+                        g2dColor c = _apply_loadtype(pixels[x], loadtype);
+                        g2dColor q = G2D_RGBA(
+                            G2D_GET_R(c) & mask,
+                            G2D_GET_G(c) & mask,
+                            G2D_GET_B(c) & mask,
+                            G2D_GET_A(c) & mask);
+                        if (_pal_find_or_add(&pal_map, q) < 0)
+                        {
+                            still_overflow = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!still_overflow)
+                {
+                    pal_count = pal_map.count;
+                    quant_mask = mask;
+                    break;
+                }
             }
         }
-        break;
-    case TEX_GRAYSCALE:
-        for (int y = 0; y < curheight; y++)
+
+        if (pal_count == 0)
         {
-            for (int x = 0; x < curwidth; x++)
-            {
-                g2dColor color = get_pixel(tempTex, x, y);
-
-                // Magic numbers used for grayscaling (eyes perceive certain colors brighter than others)
-                uint8_t r = G2D_GET_R(color) * 0.299;
-                uint8_t g = G2D_GET_G(color) * 0.587;
-                uint8_t b = G2D_GET_B(color) * 0.114;
-
-                const double gray = floor(r + g + b + 0.5);
-
-                set_pixel(tempTex, x, y, G2D_RGBA(gray, gray, gray, G2D_GET_A(color)));
-            }
-        }
-        break;
-    default:
-        break;
-    }
-
-    // Pallete Apply
-    g2dImage* resultTex = NULL;
-
-    if (loadtype == TEX_WHITE)
-    {
-        format = G2D_CLUT4;
-    }
-
-    if (format == G2D_RGBA8888)
-    {
-        resultTex = tempTex;
-        free(rgbaData);
-    }
-    else
-    {
-        resultTex = (g2dImage*)calloc(1, sizeof(g2dImage));
-        if (resultTex == NULL)
-        {
-            g2dTexFree(&tempTex);
             free(rgbaData);
             return NULL;
         }
 
-        resultTex->w = tempTex->w;
-        resultTex->h = tempTex->h;
-        resultTex->tw = tempTex->tw;
-        resultTex->th = tempTex->th;
-        resultTex->ratio = tempTex->ratio;
-        resultTex->can_blend = tempTex->can_blend;
-        resultTex->swizzled = false;
+        memset(tex->palette, 0, 512 * sizeof(g2dColor));
+        int copy_n = pal_count;
+        if (copy_n > max_colors) copy_n = max_colors;
+        memcpy(tex->palette, pal_map.palette, copy_n * sizeof(g2dColor));
 
-        int hw_format = (format == G2D_CLUT8) ? GU_PSM_T8 : GU_PSM_T4;
-        _g2dApplyFormat(resultTex, (g2dColor*) tempTex->data, hw_format);
-        tempTex->data = NULL;
-
-        g2dTexFree(&tempTex);
-
-        free(rgbaData);
+        _pal_init(&pal_map, max_colors);
+        for (int i = 0; i < copy_n; i++)
+        {
+            _pal_find_or_add(&pal_map, tex->palette[i]);
+        }
     }
 
-    _g2dSwizzle(resultTex);
+    for (int y = 0; y < h_use; y++)
+    {
+        const g2dColor* pixels = (const g2dColor*) rgbaData + y * w_use;
+
+        int local_y0 = 0;
+        int tile_cols = 1;
+        if (tex->tiled)
+        {
+            int r = y / GR_MAX_TEX_SIZE;
+            local_y0 = r * GR_MAX_TEX_SIZE;
+            tile_cols = tex->cols;
+        }
+
+        for (int x = 0; x < w_use; x++)
+        {
+            g2dColor raw = pixels[x];
+            g2dColor c = _apply_loadtype(raw, loadtype);
+
+            g2dImage* dst_tex;
+            int local_x0;
+            if (!tex->tiled)
+            {
+                dst_tex = tex;
+                local_x0 = 0;
+            }
+            else
+            {
+                int c_idx = x / GR_MAX_TEX_SIZE;
+                local_x0 = c_idx * GR_MAX_TEX_SIZE;
+                dst_tex = tex->tiles[(y / GR_MAX_TEX_SIZE) * tile_cols + c_idx];
+            }
+
+            int lx = x - local_x0;
+            int ly = y - local_y0;
+
+            if (hw_format == GU_PSM_8888)
+            {
+                ((g2dColor*) dst_tex->data)[ly * dst_tex->tw + lx] = c;
+            }
+            else if (hw_format == GU_PSM_T8)
+            {
+                if (overflow)
+                {
+                    c = G2D_RGBA(
+                        G2D_GET_R(c) & quant_mask,
+                        G2D_GET_G(c) & quant_mask,
+                        G2D_GET_B(c) & quant_mask,
+                        G2D_GET_A(c) & quant_mask);
+                }
+                int idx = _g2dPaletteLookup(c, &pal_map, 256);
+                ((u8*)dst_tex->data)[ly * dst_tex->tw + lx] = (u8)idx;
+            }
+            else if (hw_format == GU_PSM_T4)
+            {
+                if (overflow)
+                {
+                    c = G2D_RGBA(
+                        G2D_GET_R(c) & quant_mask,
+                        G2D_GET_G(c) & quant_mask,
+                        G2D_GET_B(c) & quant_mask,
+                        G2D_GET_A(c) & quant_mask);
+                }
+                int idx = _g2dPaletteLookup(c, &pal_map, 16) & 0x0F;
+                int i = ly * dst_tex->tw + lx;
+                u8* data = (u8*)dst_tex->data;
+                if ((i & 1) == 0) data[i >> 1] |= idx;
+                else data[i >> 1] |= (idx << 4);
+            }
+        }
+    }
+
+    free(rgbaData);
+
+    if (!tex->tiled)
+    {
+        if (tex->tw >= 16) _g2dSwizzle(tex);
+    }
+    else
+    {
+        for (int i = 0; i < tex->cols * tex->rows; i++)
+        {
+            g2dImage* tile = tex->tiles[i];
+            if (tile && tile->tw >= 16) _g2dSwizzle(tile);
+        }
+    }
 
     sceKernelDcacheWritebackAll();
-
-    return resultTex;
+    return tex;
 }
 
-g2dImage* LoadImage(const char* filename, g2dTexFormat format)
+static g2dImage* ReserveImageMemory(const char* filename, g2dTexFormat format)
 {
-    return LoadImage(filename, TEX_COLOR, format);
+    unsigned char* fileIn = NULL;
+    size_t length = 0;
+    FILESYSTEM_loadAssetToMemory(filename, &fileIn, &length);
+    if (fileIn == NULL)
+    {
+        return NULL;
+    }
+
+    unsigned int width = 0, height = 0;
+    {
+        png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, _png_error_dummy, _png_warn_dummy);
+        if (!png)
+        {
+            VVV_free(fileIn);
+            return NULL;
+        }
+        png_infop info = png_create_info_struct(png);
+        if (!info)
+        {
+            png_destroy_read_struct(&png, NULL, NULL);
+            VVV_free(fileIn);
+            return NULL;
+        }
+        PNGMemReader r = { fileIn, length, 0 };
+        png_set_read_fn(png, &r, _png_mem_read);
+        png_read_info(png, info);
+        width  = png_get_image_width(png, info);
+        height = png_get_image_height(png, info);
+        png_destroy_read_struct(&png, &info, NULL);
+    }
+
+    VVV_free(fileIn);
+
+    if (width == 0 || height == 0)
+    {
+        return NULL;
+    }
+
+    g2dImage* tex = (g2dImage*) calloc(1, sizeof(g2dImage));
+    if (tex == NULL) return NULL;
+
+    tex->w = width;
+    tex->h = height;
+    tex->tw = _getNextPower2(width);
+    tex->th = _getNextPower2(height);
+    tex->ratio = (float) width / (float) height;
+    tex->can_blend = true;
+    tex->swizzled = false;
+    tex->palette = NULL;
+    tex->data = NULL;
+
+    int hw_format = GU_PSM_8888;
+    switch (format)
+    {
+        case G2D_RGBA8888: hw_format = GU_PSM_8888; break;
+        case G2D_CLUT8:    hw_format = GU_PSM_T8;   break;
+        case G2D_CLUT4:    hw_format = GU_PSM_T4;   break;
+        default: free(tex); return NULL;
+    }
+    tex->format = hw_format;
+
+    if (width <= GR_MAX_TEX_SIZE && height <= GR_MAX_TEX_SIZE)
+    {
+        tex->tiled = false;
+        tex->cols = tex->rows = 1;
+
+        if (hw_format == GU_PSM_8888)
+        {
+            tex->data = malloc((size_t) tex->tw * tex->th * 4);
+            if (!tex->data)
+            {
+                free(tex);
+                return NULL;
+                }
+            memset(tex->data, 0, (size_t)tex->tw * tex->th * 4);
+        }
+        else
+        {
+            tex->palette = (g2dColor*) memalign(16, 512 * sizeof(g2dColor));
+            if (!tex->palette)
+            {
+                free(tex);
+                return NULL;
+            }
+            memset(tex->palette, 0, 512 * sizeof(g2dColor));
+
+            size_t data_size;
+            if (hw_format == GU_PSM_T8) data_size = (size_t)tex->tw * tex->th;
+            else data_size = (size_t)tex->tw * tex->th / 2;
+
+            tex->data = malloc(data_size);
+            if (!tex->data)
+            {
+                free(tex->palette);
+                free(tex);
+                return NULL;
+            }
+            memset(tex->data, 0, data_size);
+        }
+
+        return tex;
+    }
+
+    int cols = (width  + GR_MAX_TEX_SIZE - 1) / GR_MAX_TEX_SIZE;
+    int rows = (height + GR_MAX_TEX_SIZE - 1) / GR_MAX_TEX_SIZE;
+    int tile_count = cols * rows;
+
+    tex->tiled = true;
+    tex->cols = cols;
+    tex->rows = rows;
+
+    if (hw_format == GU_PSM_T8 || hw_format == GU_PSM_T4)
+    {
+        tex->palette = (g2dColor*) memalign(16, 512 * sizeof(g2dColor));
+        if (!tex->palette)
+        {
+            free(tex);
+            return NULL;
+        }
+        memset(tex->palette, 0, 512 * sizeof(g2dColor));
+    }
+
+    tex->tiles = (g2dImage**) malloc(tile_count * sizeof(g2dImage*));
+    if (!tex->tiles)
+    {
+        if (tex->palette) free(tex->palette);
+        free(tex);
+        return NULL;
+    }
+    memset(tex->tiles, 0, tile_count * sizeof(g2dImage*));
+
+    for (int r = 0; r < rows; r++)
+    {
+        for (int c = 0; c < cols; c++)
+        {
+            int ti = r * cols + c;
+            int tw = width  - c * GR_MAX_TEX_SIZE; if (tw > GR_MAX_TEX_SIZE) tw = GR_MAX_TEX_SIZE;
+            int th = height - r * GR_MAX_TEX_SIZE; if (th > GR_MAX_TEX_SIZE) th = GR_MAX_TEX_SIZE;
+
+            int tw2 = _getNextPower2(tw);
+            int th2 = _getNextPower2(th);
+
+            g2dImage* tile = (g2dImage*) calloc(1, sizeof(g2dImage));
+            if (!tile)
+            {
+                for (int k = 0; k < ti; k++)
+                {
+                    if (tex->tiles[k]) g2dTexFree(&tex->tiles[k]);
+                }
+                free(tex->tiles);
+                if (tex->palette) free(tex->palette);
+                free(tex);
+                return NULL;
+            }
+
+            tile->w = tw;
+            tile->h = th;
+            tile->tw = tw2;
+            tile->th = th2;
+            tile->ratio = (float) tw / (float) th;
+            tile->can_blend = true;
+            tile->tiled = false;
+            tile->cols = tile->rows = 1;
+            tile->format = hw_format;
+            tile->palette = NULL;
+            tile->swizzled = false;
+
+            if (hw_format == GU_PSM_8888)
+            {
+                tile->data = malloc((size_t) tw2 * th2 * 4);
+                if (!tile->data)
+                {
+                    free(tile);
+                    return NULL;
+                }
+                memset(tile->data, 0, (size_t) tw2 * th2 * 4);
+            }
+            else if (hw_format == GU_PSM_T8)
+            {
+                tile->data = malloc((size_t) tw2 * th2);
+                if (!tile->data)
+                {
+                    free(tile);
+                    return NULL;
+                }
+                memset(tile->data, 0, (size_t) tw2 * th2);
+            }
+            else
+            {
+                tile->data = malloc((size_t) tw2 * th2 / 2);
+                if (!tile->data)
+                {
+                    free(tile);
+                    return NULL;
+                }
+                memset(tile->data, 0, (size_t) tw2 * th2 / 2);
+            }
+
+            tex->tiles[ti] = tile;
+        }
+    }
+
+    return tex;
 }
 
-/* Any unneeded variants can be NULL */
-static void LoadVariants(const char* filename, g2dTexFormat format, g2dImage** colored, g2dImage** white, g2dImage** grayscale)
+g2dImage* LoadImage(const char* filename, const TextureLoadType loadtype, g2dTexFormat format, uint32_t (*collision_surface)[16])
 {
-    if (colored != NULL) *colored = LoadImage(filename, TEX_COLOR, format);
-    if (white != NULL) *white = LoadImage(filename, TEX_WHITE, G2D_CLUT4);
-    if (grayscale != NULL) *grayscale = LoadImage(filename, TEX_GRAYSCALE, format);
+    g2dImage* tex = ReserveImageMemory(filename, format);
+    if (tex == NULL) return NULL;
+
+    LoadImageInto(tex, filename, loadtype, collision_surface);
+
+    return tex;
 }
 
-static void LoadSpritesTranslation(
+void LoadVariantsInto(
+    const char* filename,
+    g2dImage* colored,
+    g2dImage* white,
+    g2dImage* grayscale
+) {
+    if (colored   != NULL) LoadImageInto(colored,   filename, TEX_COLOR, NULL);
+    if (white     != NULL) LoadImageInto(white,     filename, TEX_WHITE, NULL);
+    if (grayscale != NULL) LoadImageInto(grayscale, filename, TEX_GRAYSCALE, NULL);
+}
+
+static void LoadSpritesTranslationInto(
+    g2dImage* tex,
     const char* filename,
     tinyxml2::XMLDocument* mask,
-    const char* english_sprites_filename,
-    g2dImage** texture
+    const char* english_sprites_filename
 ) {
+    if (tex == NULL) return;
+
     /* Create a sprites texture for display in another language.
      * texture_english is used as a base. Parts of the translation (filename)
      * will replace parts of the base, as instructed in the mask XML. */
@@ -737,7 +635,6 @@ static void LoadSpritesTranslation(
         }
 
         unsigned int width = 0, height = 0;
-
         {
             png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, _png_error_dummy, _png_warn_dummy);
             if (!png) { VVV_free(fileIn); return; }
@@ -746,15 +643,12 @@ static void LoadSpritesTranslation(
             PNGMemReader r = { fileIn, length, 0 };
             png_set_read_fn(png, &r, _png_mem_read);
             png_read_info(png, info);
-            width = png_get_image_width(png, info);
+            width  = png_get_image_width(png, info);
             height = png_get_image_height(png, info);
             png_destroy_read_struct(&png, &info, NULL);
         }
 
-        if (width == 0 || height == 0) {
-            VVV_free(fileIn);
-            return;
-        }
+        if (width == 0 || height == 0){ VVV_free(fileIn); return; }
 
         unsigned char* rgbaData = NULL;
         unsigned int error = lodepng_decode32(&rgbaData, &width, &height, fileIn, length);
@@ -767,31 +661,21 @@ static void LoadSpritesTranslation(
         }
 
         original = _g2dTexCreate(width, height, true);
-        if (original == NULL)
-        {
-            free(rgbaData);
-            return;
-        }
+        if (original == NULL) { free(rgbaData); return; }
 
         int bytesPerPixel = 4;
         int srcRowSize = width * bytesPerPixel;
-        int dstRowSize = (original)->tw * bytesPerPixel;
-
+        int dstRowSize = original->tw * bytesPerPixel;
         for (unsigned int y = 0; y < height; y++)
         {
-            memcpy((char*) original->data + y * dstRowSize, rgbaData + y * srcRowSize, srcRowSize);
+            memcpy((char*)original->data + y * dstRowSize, rgbaData + y * srcRowSize, srcRowSize);
         }
         free(rgbaData);
 
-        int curwidth = original->w;
-        int curheight = original->h;
-
-        for (int y = 0; y < curheight; y++)
-        {
-            for (int x = 0; x < curwidth; x++)
-            {
-                g2dColor color = get_pixel(original, x, y);
-                set_pixel(original, x, y, G2D_RGBA(255, 255, 255, G2D_GET_A(color)));
+        for (int y = 0; y < original->h; y++) {
+            for (int x = 0; x < original->w; x++) {
+                g2dColor c = get_pixel(original, x, y);
+                set_pixel(original, x, y, G2D_RGBA(255, 255, 255, G2D_GET_A(c)));
             }
         }
     }
@@ -804,28 +688,25 @@ static void LoadSpritesTranslation(
         if (fileIn == NULL)
         {
             assert(0 && "Image file missing!");
+            g2dTexFree(&original);
             return;
         }
 
         unsigned int width = 0, height = 0;
-
         {
             png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, _png_error_dummy, _png_warn_dummy);
-            if (!png) { VVV_free(fileIn); return; }
+            if (!png) { VVV_free(fileIn); g2dTexFree(&original); return; }
             png_infop info = png_create_info_struct(png);
-            if (!info) { png_destroy_read_struct(&png, NULL, NULL); VVV_free(fileIn); return; }
+            if (!info) { png_destroy_read_struct(&png, NULL, NULL); VVV_free(fileIn); g2dTexFree(&original); return; }
             PNGMemReader r = { fileIn, length, 0 };
             png_set_read_fn(png, &r, _png_mem_read);
             png_read_info(png, info);
-            width = png_get_image_width(png, info);
+            width  = png_get_image_width(png, info);
             height = png_get_image_height(png, info);
             png_destroy_read_struct(&png, &info, NULL);
         }
 
-        if (width == 0 || height == 0) {
-            VVV_free(fileIn);
-            return;
-        }
+        if (width == 0 || height == 0) { VVV_free(fileIn); g2dTexFree(&original); return; }
 
         unsigned char* rgbaData = NULL;
         unsigned int error = lodepng_decode32(&rgbaData, &width, &height, fileIn, length);
@@ -834,36 +715,28 @@ static void LoadSpritesTranslation(
         if (error != 0)
         {
             vlog_error("Could not load %s: %s", filename, lodepng_error_text(error));
+            g2dTexFree(&original);
             return;
         }
 
         translated = _g2dTexCreate(width, height, true);
-        if (translated == NULL)
-        {
-            free(rgbaData);
-            free(original);
-            return;
-        }
+        if (translated == NULL) { free(rgbaData); g2dTexFree(&original); return; }
 
         int bytesPerPixel = 4;
         int srcRowSize = width * bytesPerPixel;
         int dstRowSize = translated->tw * bytesPerPixel;
-
         for (unsigned int y = 0; y < height; y++)
         {
-            memcpy((char*) translated->data + y * dstRowSize, rgbaData + y * srcRowSize, srcRowSize);
+            memcpy((char*)translated->data + y * dstRowSize, rgbaData + y * srcRowSize, srcRowSize);
         }
         free(rgbaData);
 
-        int curwidth = translated->w;
-        int curheight = translated->h;
-
-        for (int y = 0; y < curheight; y++)
+        for (int y = 0; y < translated->h; y++)
         {
-            for (int x = 0; x < curwidth; x++)
+            for (int x = 0; x < translated->w; x++)
             {
-                g2dColor color = get_pixel(translated, x, y);
-                set_pixel(translated, x, y, G2D_RGBA(255, 255, 255, G2D_GET_A(color)));
+                g2dColor c = get_pixel(translated, x, y);
+                set_pixel(translated, x, y, G2D_RGBA(255, 255, 255, G2D_GET_A(c)));
             }
         }
     }
@@ -894,56 +767,443 @@ static void LoadSpritesTranslation(
         dst.x = pElem->IntAttribute("dx", x) * sprite_w;
         dst.y = pElem->IntAttribute("dy", y) * sprite_h;
 
+        g2dColor* wdata = (g2dColor*) original->data;
+        g2dColor* tdata = (g2dColor*) translated->data;
+        for (int j = 0; j < src.h; j++)
         {
-            g2dColor* wdata = (g2dColor*)original->data;
-            g2dColor* tdata = (g2dColor*)translated->data;
-
-            for (int j = 0; j < src.h; j++) {
-                g2dColor* wrow = wdata + (dst.y + j) * original->tw + dst.x;
-                g2dColor* trow = tdata + (src.y + j) * translated->tw + src.x;
-
-                for (int i = 0; i < src.w; i++) {
-                    uint8_t a = G2D_GET_A(trow[i]);
-                    wrow[i] = G2D_RGBA(255, 255, 255, a);
-                }
+            g2dColor* wrow = wdata + (dst.y + j) * original->tw + dst.x;
+            g2dColor* trow = tdata + (src.y + j) * translated->tw + src.x;
+            for (int i = 0; i < src.w; i++)
+            {
+                uint8_t a = G2D_GET_A(trow[i]);
+                wrow[i] = G2D_RGBA(255, 255, 255, a);
             }
         }
     }
 
-    *texture = (g2dImage*)calloc(1, sizeof(g2dImage));
-    if (*texture == NULL)
     {
-        g2dTexFree(texture);
-        g2dTexFree(&original);
-        g2dTexFree(&translated);
-        return;
+        int max_colors = 16;
+
+        PalMap pal_map;
+        _pal_init(&pal_map, max_colors);
+
+        bool overflow = false;
+        for (int y = 0; y < tex->h; y++)
+        {
+            for (int x = 0; x < tex->w; x++)
+            {
+                g2dColor c = get_pixel(original, x, y);
+                if (_pal_find_or_add(&pal_map, c) < 0)
+                {
+                    overflow = true;
+                    break;
+                }
+            }
+            if (overflow) break;
+        }
+
+        int quant_mask = 0xFF;
+        if (overflow)
+        {
+            for (int shift = 1; shift <= 4; shift++)
+            {
+                int mask = 0xFF & ~((1 << shift) - 1);
+                _pal_init(&pal_map, max_colors);
+                overflow = false;
+                for (int y = 0; y < tex->h; y++)
+                {
+                    for (int x = 0; x < tex->w; x++)
+                    {
+                        g2dColor c = get_pixel(original, x, y);
+                        g2dColor q = G2D_RGBA(
+                            G2D_GET_R(c) & mask,
+                            G2D_GET_G(c) & mask,
+                            G2D_GET_B(c) & mask,
+                            G2D_GET_A(c) & mask);
+                        if (_pal_find_or_add(&pal_map, q) < 0)
+                        {
+                            overflow = true;
+                            break;
+                        }
+                    }
+                    if (overflow) break;
+                }
+                if (!overflow)
+                {
+                    quant_mask = mask;
+                    break;
+                }
+            }
+        }
+
+        memset(tex->palette, 0, 512 * sizeof(g2dColor));
+        int copy_n = pal_map.count;
+        if (copy_n > max_colors) copy_n = max_colors;
+        memcpy(tex->palette, pal_map.palette, copy_n * sizeof(g2dColor));
+
+        _pal_init(&pal_map, max_colors);
+        for (int i = 0; i < max_colors; i++)
+        {
+            _pal_find_or_add(&pal_map, tex->palette[i]);
+        }
+
+        memset(tex->data, 0, (size_t) tex->tw * tex->th / 2);
+
+        for (int y = 0; y < tex->h; y++)
+        {
+            for (int x = 0; x < tex->w; x++)
+            {
+                g2dColor c = get_pixel(original, x, y);
+                if (overflow)
+                {
+                    c = G2D_RGBA(
+                        G2D_GET_R(c) & quant_mask,
+                        G2D_GET_G(c) & quant_mask,
+                        G2D_GET_B(c) & quant_mask,
+                        G2D_GET_A(c) & quant_mask);
+                }
+                int idx = _g2dPaletteLookup(c, &pal_map, 16) & 0x0F;
+                int i = y * tex->tw + x;
+                u8* data = (u8*)tex->data;
+                if ((i & 1) == 0) data[i >> 1] |= idx;
+                else data[i >> 1] |= (idx << 4);
+            }
+        }
     }
-
-    (*texture)->w = translated->w;
-    (*texture)->h = translated->h;
-    (*texture)->tw = translated->tw;
-    (*texture)->th = translated->th;
-    (*texture)->ratio = translated->ratio;
-    (*texture)->can_blend = translated->can_blend;
-    (*texture)->swizzled = false;
-
-    _g2dApplyFormat(*texture, (g2dColor*) original->data, GU_PSM_T4);
-    original->data = NULL;
 
     g2dTexFree(&original);
     g2dTexFree(&translated);
 
-    _g2dSwizzle(*texture);
+    if (tex->tw >= 16) _g2dSwizzle(tex);
 
     sceKernelDcacheWritebackAll();
 }
 
+
+g2dImage* LoadFont(const char* filename, const TextureLoadType loadtype)
+{
+    unsigned char* fileData = NULL;
+    size_t fileSize = 0;
+    FILESYSTEM_loadAssetToMemory(filename, &fileData, &fileSize);
+    if (fileData == NULL)
+    {
+        assert(0 && "Font PNG missing!");
+        return NULL;
+    }
+
+    unsigned int width = 0, height = 0;
+    {
+        png_structp png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, _png_error_dummy, _png_warn_dummy);
+        if (!png) { VVV_free(fileData); return NULL; }
+        png_infop info = png_create_info_struct(png);
+        if (!info) { png_destroy_read_struct(&png, NULL, NULL); VVV_free(fileData); return NULL; }
+
+        PNGMemReader r = { fileData, fileSize, 0 };
+        png_set_read_fn(png, &r, _png_mem_read);
+        png_read_info(png, info);
+        width  = png_get_image_width(png, info);
+        height = png_get_image_height(png, info);
+        png_destroy_read_struct(&png, &info, NULL);
+    }
+
+    if (width == 0 || height == 0)
+    {
+        VVV_free(fileData);
+        return NULL;
+    }
+
+    const int hw_format = GU_PSM_T4;
+    const int max_colors = 16;
+
+    g2dImage* tex = (g2dImage*) calloc(1, sizeof(g2dImage));
+    if (tex == NULL) { VVV_free(fileData); return NULL; }
+
+    tex->w = width;
+    tex->h = height;
+    tex->tw = _getNextPower2(width);
+    tex->th = _getNextPower2(height);
+    tex->ratio = (float)width / (float)height;
+    tex->can_blend = true;
+    tex->swizzled = false;
+    tex->palette = NULL;
+    tex->data = NULL;
+    tex->format = hw_format;
+
+    const bool tiled = (width > GR_MAX_TEX_SIZE || height > GR_MAX_TEX_SIZE);
+
+    if (!tiled)
+    {
+        tex->tiled = false;
+        tex->cols = tex->rows = 1;
+
+        tex->palette = (g2dColor*) memalign(16, 512 * sizeof(g2dColor));
+        if (!tex->palette) { free(tex); VVV_free(fileData); return NULL; }
+        memset(tex->palette, 0, 512 * sizeof(g2dColor));
+
+        tex->data = malloc((size_t) tex->tw * tex->th / 2);
+        if (!tex->data) { free(tex->palette); free(tex); VVV_free(fileData); return NULL; }
+        memset(tex->data, 0, (size_t) tex->tw * tex->th / 2);
+    }
+    else
+    {
+        int cols = (width  + GR_MAX_TEX_SIZE - 1) / GR_MAX_TEX_SIZE;
+        int rows = (height + GR_MAX_TEX_SIZE - 1) / GR_MAX_TEX_SIZE;
+        int tile_count = cols * rows;
+
+        tex->tiled = true;
+        tex->cols = cols;
+        tex->rows = rows;
+
+        tex->palette = (g2dColor*) memalign(16, 512 * sizeof(g2dColor));
+        if (!tex->palette) { free(tex); VVV_free(fileData); return NULL; }
+        memset(tex->palette, 0, 512 * sizeof(g2dColor));
+
+        tex->tiles = (g2dImage**)malloc(tile_count * sizeof(g2dImage*));
+        if (!tex->tiles)
+        {
+            free(tex->palette); free(tex); VVV_free(fileData); return NULL;
+        }
+        memset(tex->tiles, 0, tile_count * sizeof(g2dImage*));
+
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                int ti = r * cols + c;
+                int tw = width  - c * GR_MAX_TEX_SIZE; if (tw > GR_MAX_TEX_SIZE) tw = GR_MAX_TEX_SIZE;
+                int th = height - r * GR_MAX_TEX_SIZE; if (th > GR_MAX_TEX_SIZE) th = GR_MAX_TEX_SIZE;
+
+                int tw2 = _getNextPower2(tw);
+                int th2 = _getNextPower2(th);
+
+                g2dImage* tile = (g2dImage*) calloc(1, sizeof(g2dImage));
+                if (!tile) {
+                    for (int k = 0; k < ti; k++)
+                    {
+                        if (tex->tiles[k]) g2dTexFree(&tex->tiles[k]);
+                    }
+                    free(tex->tiles);
+                    free(tex->palette);
+                    free(tex);
+                    VVV_free(fileData);
+                    return NULL;
+                }
+
+                tile->w = tw;
+                tile->h = th;
+                tile->tw = tw2;
+                tile->th = th2;
+                tile->ratio = (float)tw / (float)th;
+                tile->can_blend = true;
+                tile->tiled = false;
+                tile->cols = tile->rows = 1;
+                tile->format = hw_format;
+                tile->palette = NULL;
+                tile->swizzled = false;
+                tile->data = malloc((size_t)tw2 * th2 / 2);
+                if (!tile->data)
+                {
+                    free(tile);
+                    for (int k = 0; k < ti; k++)
+                    {
+                        if (tex->tiles[k]) g2dTexFree(&tex->tiles[k]);
+                    }
+                    free(tex->tiles);
+                    free(tex->palette);
+                    free(tex);
+                    VVV_free(fileData);
+                    return NULL;
+                }
+                memset(tile->data, 0, (size_t) tw2 * th2 / 2);
+
+                tex->tiles[ti] = tile;
+            }
+        }
+    }
+
+    const size_t rowbytes = (size_t) width * 4;
+    unsigned char* row = (unsigned char*) malloc(rowbytes);
+    if (!row)
+    {
+        g2dTexFree(&tex);
+        VVV_free(fileData);
+        return NULL;
+    }
+
+    PalMap pal_map;
+    _pal_init(&pal_map, max_colors);
+    bool overflow = false;
+
+    {
+        PNGMemReader reader;
+        png_structp png = _png_open_rgba(fileData, fileSize, &reader);
+        if (!png) { free(row); g2dTexFree(&tex); VVV_free(fileData); return NULL; }
+
+        for (unsigned int y = 0; y < height; y++)
+        {
+            png_read_row(png, row, NULL);
+            g2dColor* pixels = (g2dColor*) row;
+            for (unsigned int x = 0; x < width; x++)
+            {
+                g2dColor c = _apply_loadtype(pixels[x], loadtype);
+                if (_pal_find_or_add(&pal_map, c) < 0)
+                {
+                    overflow = true;
+                    goto pass1_done;
+                }
+            }
+        }
+
+    pass1_done:
+        png_destroy_read_struct(&png, NULL, NULL);
+    }
+
+    int quant_mask = 0xFF;
+    if (overflow)
+    {
+        for (int shift = 1; shift <= 4; shift++)
+        {
+            int mask = 0xFF & ~((1 << shift) - 1);
+
+            PNGMemReader reader2;
+            png_structp png = _png_open_rgba(fileData, fileSize, &reader2);
+            if (!png) { free(row); g2dTexFree(&tex); VVV_free(fileData); return NULL; }
+
+            _pal_init(&pal_map, max_colors);
+            bool still_overflow = false;
+
+            for (unsigned int y = 0; y < height && !still_overflow; y++)
+            {
+                png_read_row(png, row, NULL);
+                g2dColor* pixels = (g2dColor*) row;
+                for (unsigned int x = 0; x < width; x++)
+                {
+                    g2dColor c = _apply_loadtype(pixels[x], loadtype);
+                    g2dColor q = G2D_RGBA(
+                        G2D_GET_R(c) & mask,
+                        G2D_GET_G(c) & mask,
+                        G2D_GET_B(c) & mask,
+                        G2D_GET_A(c) & mask);
+                    if (_pal_find_or_add(&pal_map, q) < 0)
+                    {
+                        still_overflow = true;
+                        break;
+                    }
+                }
+            }
+            png_destroy_read_struct(&png, NULL, NULL);
+
+            if (!still_overflow)
+            {
+                quant_mask = mask;
+                break;
+            }
+        }
+    }
+
+    memset(tex->palette, 0, 512 * sizeof(g2dColor));
+    int copy_n = pal_map.count;
+    if (copy_n > max_colors) copy_n = max_colors;
+    memcpy(tex->palette, pal_map.palette, copy_n * sizeof(g2dColor));
+
+    _pal_init(&pal_map, max_colors);
+    for (int i = 0; i < max_colors; i++)
+    {
+        _pal_find_or_add(&pal_map, tex->palette[i]);
+    }
+
+    {
+        PNGMemReader reader;
+        png_structp png = _png_open_rgba(fileData, fileSize, &reader);
+        if (!png) { free(row); g2dTexFree(&tex); VVV_free(fileData); return NULL; }
+
+        for (unsigned int y = 0; y < height; y++)
+        {
+            png_read_row(png, row, NULL);
+            g2dColor* pixels = (g2dColor*) row;
+
+            int local_y0 = 0;
+            int tile_cols = 1;
+            if (tiled)
+            {
+                int r = y / GR_MAX_TEX_SIZE;
+                local_y0 = r * GR_MAX_TEX_SIZE;
+                tile_cols = tex->cols;
+            }
+
+            for (unsigned int x = 0; x < width; x++)
+            {
+                g2dColor raw = pixels[x];
+                g2dColor c = _apply_loadtype(raw, loadtype);
+
+                g2dImage* dst_tex;
+                int local_x0;
+                if (!tiled)
+                {
+                    dst_tex = tex;
+                    local_x0 = 0;
+                }
+                else
+                {
+                    int c_idx = x / GR_MAX_TEX_SIZE;
+                    local_x0 = c_idx * GR_MAX_TEX_SIZE;
+                    dst_tex = tex->tiles[(y / GR_MAX_TEX_SIZE) * tile_cols + c_idx];
+                    if (dst_tex == NULL) continue;
+                }
+
+                int lx = x - local_x0;
+                int ly = y - local_y0;
+
+                if (overflow)
+                {
+                    c = G2D_RGBA(
+                        G2D_GET_R(c) & quant_mask,
+                        G2D_GET_G(c) & quant_mask,
+                        G2D_GET_B(c) & quant_mask,
+                        G2D_GET_A(c) & quant_mask);
+                }
+                int idx = _g2dPaletteLookup(c, &pal_map, 16) & 0x0F;
+                int i = ly * dst_tex->tw + lx;
+                u8* data = (u8*)dst_tex->data;
+                if ((i & 1) == 0) data[i >> 1] |= idx;
+                else data[i >> 1] |= (idx << 4);
+            }
+        }
+
+        png_destroy_read_struct(&png, NULL, NULL);
+    }
+
+    free(row);
+    VVV_free(fileData);
+
+    if (!tiled)
+    {
+        if (tex->tw >= 16) _g2dSwizzle(tex);
+    }
+    else
+    {
+        for (int i = 0; i < tex->cols * tex->rows; i++)
+        {
+            g2dImage* tile = tex->tiles[i];
+            if (tile && tile->tw >= 16) _g2dSwizzle(tile);
+        }
+    }
+
+    sceKernelDcacheWritebackAll();
+    return tex;
+}
+
 void GraphicsResources::init_translations(void)
 {
-    g2dTexFree(&im_sprites_translated);
-    g2dTexFree(&im_flipsprites_translated);
+    sprites_translated_valid = false;
+    flipsprites_translated_valid = false;
 
     if (loc::english_sprites)
+    {
+        return;
+    }
+
+    if (im_sprites_translated == NULL && im_flipsprites_translated == NULL)
     {
         return;
     }
@@ -976,94 +1236,195 @@ void GraphicsResources::init_translations(void)
 
     if (FILESYSTEM_areAssetsInSameRealDir(path_xml, path_sprites))
     {
-        LoadSpritesTranslation(
+        LoadSpritesTranslationInto(
+            im_sprites_translated,
             path_sprites,
             &doc_mask,
-            "graphics/sprites.png",
-            &im_sprites_translated
+            "graphics/sprites.png"
         );
+        if (im_sprites_translated != NULL)
+        {
+            sprites_translated_valid = true;
+        }
     }
-    if (FILESYSTEM_areAssetsInSameRealDir(path_xml, path_sprites))
+    if (FILESYSTEM_areAssetsInSameRealDir(path_xml, path_flipsprites))
     {
-        LoadSpritesTranslation(
-            path_sprites,
+        LoadSpritesTranslationInto(
+            im_flipsprites_translated,
+            path_flipsprites,
             &doc_mask,
-            "graphics/flipsprites.png",
-            &im_flipsprites_translated
+            "graphics/flipsprites.png"
         );
+        if (im_flipsprites_translated != NULL)
+        {
+            flipsprites_translated_valid = true;
+        }
     }
+}
+
+void GraphicsResources::preserve(void) {
+    im_tiles = ReserveImageMemory("graphics/tiles.png", G2D_CLUT8);
+    im_tiles_white = ReserveImageMemory("graphics/tiles.png", G2D_CLUT4);
+    im_tiles_tint = ReserveImageMemory("graphics/tiles.png", G2D_CLUT8);
+
+    im_tiles2 = ReserveImageMemory("graphics/tiles2.png", G2D_CLUT8);
+    im_tiles2_tint = ReserveImageMemory("graphics/tiles2.png", G2D_CLUT8);
+
+    im_entcolours = ReserveImageMemory("graphics/entcolours.png", G2D_CLUT8);
+    im_entcolours_tint = ReserveImageMemory("graphics/entcolours.png", G2D_CLUT8);
+
+    im_sprites = ReserveImageMemory("graphics/sprites.png", G2D_CLUT4);
+    im_flipsprites = ReserveImageMemory("graphics/flipsprites.png", G2D_CLUT4);
+
+    im_tiles3 = ReserveImageMemory("graphics/tiles3.png", G2D_CLUT8);
+    im_teleporter = ReserveImageMemory("graphics/teleporter.png", G2D_CLUT4);
+
+    im_image1 = ReserveImageMemory("graphics/minimap.png", G2D_CLUT8);
+    im_image2 = ReserveImageMemory("graphics/covered.png", G2D_CLUT8);
+    im_image3 = ReserveImageMemory("graphics/elephant.png", G2D_CLUT4);
+    im_image7 = ReserveImageMemory("graphics/site.png", G2D_CLUT4);
+    im_image8 = ReserveImageMemory("graphics/site2.png", G2D_CLUT4);
+    im_image9 = ReserveImageMemory("graphics/site3.png", G2D_CLUT4);
+    im_image10 = ReserveImageMemory("graphics/ending.png", G2D_CLUT4);
+
+    im_image12 = (g2dImage*) calloc(1, sizeof(g2dImage));
+    if (im_image12)
+    {
+        im_image12->w = 240;
+        im_image12->h = 180;
+        im_image12->tw = 256;
+        im_image12->th = 256;
+        im_image12->ratio = 240.0f / 180.0f;
+        im_image12->can_blend = false;
+        im_image12->swizzled = false;
+        im_image12->tiled = false;
+        im_image12->cols = im_image12->rows = 1;
+        im_image12->format = GU_PSM_T4;
+
+        im_image12->palette = (g2dColor*) memalign(16, 512 * sizeof(g2dColor));
+        im_image12->data = malloc((size_t) im_image12->tw * im_image12->th / 2);
+
+        if (!im_image12->palette || !im_image12->data)
+        {
+            if (im_image12->palette) free(im_image12->palette);
+            if (im_image12->data) free(im_image12->data);
+            free(im_image12);
+            im_image12 = NULL;
+        }
+        else
+        {
+            memset(im_image12->palette, 0, 512 * sizeof(g2dColor));
+            im_image12->palette[0] = G2D_RGBA(0, 0, 0, 255);
+            im_image12->palette[1] = G2D_RGB(96, 96, 96);
+            im_image12->palette[2] = G2D_RGB(196, 196, 196);
+
+            memset(im_image12->data, 0, (size_t) im_image12->tw * im_image12->th / 2);
+        }
+
+        sceKernelDcacheWritebackAll();
+    }
+
+    im_sprites_translated = ReserveImageMemory("graphics/sprites.png", G2D_CLUT4);
+    im_flipsprites_translated = ReserveImageMemory("graphics/flipsprites.png", G2D_CLUT4);
+
+    sprites_translated_valid = false;
+    flipsprites_translated_valid = false;
 }
 
 void GraphicsResources::init(void)
 {
-    LoadVariants("graphics/tiles.png", G2D_CLUT8, &im_tiles, &im_tiles_white, &im_tiles_tint);
-    LoadVariants("graphics/tiles2.png", G2D_CLUT8, &im_tiles2, NULL, &im_tiles2_tint);
-    LoadVariants("graphics/entcolours.png", G2D_CLUT8, &im_entcolours, NULL, &im_entcolours_tint);
-    
-    im_sprites = LoadImage("graphics/sprites.png", TEX_WHITE, G2D_CLUT4, sprites_collision_surface_normal);
-    im_flipsprites = LoadImage("graphics/flipsprites.png", TEX_WHITE, G2D_CLUT4, sprites_collision_surface_flipped);
-    
-    im_tiles3 = LoadImage("graphics/tiles3.png", G2D_CLUT8);
-    im_teleporter = LoadImage("graphics/teleporter.png", TEX_WHITE, G2D_CLUT4);
 
-    im_image1 = LoadImage("graphics/minimap.png", G2D_CLUT8);
-    im_image2 = LoadImage("graphics/covered.png", G2D_CLUT8);
-    im_image3 = LoadImage("graphics/elephant.png", TEX_WHITE, G2D_CLUT4);
-    im_image7 = LoadImage("graphics/site.png", TEX_WHITE, G2D_CLUT4);
-    im_image8 = LoadImage("graphics/site2.png", TEX_WHITE, G2D_CLUT4);
-    im_image9 = LoadImage("graphics/site3.png", TEX_WHITE, G2D_CLUT4);
-    im_image10 = LoadImage("graphics/ending.png", G2D_CLUT4);
+    LoadVariantsInto("graphics/tiles.png", im_tiles, im_tiles_white, im_tiles_tint);
+    LoadVariantsInto("graphics/tiles2.png", im_tiles2, NULL, im_tiles2_tint);
+    LoadVariantsInto("graphics/entcolours.png", im_entcolours, NULL, im_entcolours_tint);
 
-    im_sprites_translated = NULL;
-    im_flipsprites_translated = NULL;
+    LoadImageInto(im_sprites, "graphics/sprites.png", TEX_WHITE, sprites_collision_surface_normal);
+    LoadImageInto(im_flipsprites, "graphics/flipsprites.png", TEX_WHITE, sprites_collision_surface_flipped);
+
+    LoadImageInto(im_tiles3, "graphics/tiles3.png", TEX_COLOR, NULL);
+    LoadImageInto(im_teleporter, "graphics/teleporter.png", TEX_WHITE, NULL);
+
+    LoadImageInto(im_image1, "graphics/minimap.png", TEX_COLOR, NULL);
+    LoadImageInto(im_image2, "graphics/covered.png", TEX_COLOR, NULL);
+    LoadImageInto(im_image3, "graphics/elephant.png", TEX_WHITE, NULL);
+    LoadImageInto(im_image7, "graphics/site.png", TEX_WHITE, NULL);
+    LoadImageInto(im_image8, "graphics/site2.png", TEX_WHITE, NULL);
+    LoadImageInto(im_image9, "graphics/site3.png", TEX_WHITE, NULL);
+    LoadImageInto(im_image10, "graphics/ending.png", TEX_COLOR, NULL);
 
     init_translations();
 
+}
+
+static void g2dImageZero(g2dImage* tex)
+{
+    if (tex == NULL) return;
+
+    if (tex->tiled && tex->tiles != NULL)
     {
-        im_image12 = _g2dTexCreate(240, 180, false);
+        for (int i = 0; i < tex->cols * tex->rows; i++)
+        {
+            g2dImage* tile = tex->tiles[i];
+            if (tile == NULL) continue;
 
-        free(im_image12->data);
-        im_image12->data = NULL;
-
-        im_image12->format = GU_PSM_T4;
-        im_image12->swizzled = false;
-
-        im_image12->palette = (g2dColor *)memalign(16, 16 * sizeof(g2dColor));
-        memset(im_image12->palette, 0, 16 * sizeof(g2dColor));
-        im_image12->palette[0] = G2D_RGBA(0, 0, 0, 255);
-        im_image12->palette[1] = G2D_RGB(96, 96, 96);
-        im_image12->palette[2] = G2D_RGB(196, 196, 196);
-
-        int total_pixels = im_image12->tw * im_image12->th;
-        im_image12->data = calloc(1, total_pixels / 2);
-
-        sceKernelDcacheWritebackAll();
+            if (tile->data != NULL) 
+            {
+                size_t size;
+                if (tile->format == GU_PSM_T8) size = (size_t)tile->tw * tile->th;
+                else if (tile->format == GU_PSM_T4) size = (size_t)tile->tw * tile->th / 2;
+                else size = (size_t)tile->tw * tile->th * 4;
+                memset(tile->data, 0, size);
+            }
+            tile->swizzled = false;
+        }
+        if (tex->palette != NULL)
+        {
+            memset(tex->palette, 0, 512 * sizeof(g2dColor));
+        }
+    }
+    else
+    {
+        if (tex->data != NULL)
+        {
+            size_t size;
+            if (tex->format == GU_PSM_T8) size = (size_t) tex->tw * tex->th;
+            else if (tex->format == GU_PSM_T4) size = (size_t) tex->tw * tex->th / 2;
+            else size = (size_t) tex->tw * tex->th * 4;
+            memset(tex->data, 0, size);
+        }
+        if (tex->palette != NULL)
+        {
+            memset(tex->palette, 0, 512 * sizeof(g2dColor));
+        }
+        tex->swizzled = false;
     }
 }
 
 void GraphicsResources::destroy(void)
 {
-    g2dTexFree(&im_tiles);
-    g2dTexFree(&im_tiles_white);
-    g2dTexFree(&im_tiles_tint);
-    g2dTexFree(&im_tiles2);
-    g2dTexFree(&im_tiles2_tint);
-    g2dTexFree(&im_tiles3);
-    g2dTexFree(&im_entcolours);
-    g2dTexFree(&im_entcolours_tint);
-    g2dTexFree(&im_sprites);
-    g2dTexFree(&im_flipsprites);
-    g2dTexFree(&im_teleporter);
+    g2dImageZero(im_flipsprites_translated);
+    g2dImageZero(im_sprites_translated);
 
-    g2dTexFree(&im_image1);
-    g2dTexFree(&im_image2);
-    g2dTexFree(&im_image3);
-    g2dTexFree(&im_image7);
-    g2dTexFree(&im_image8);
-    g2dTexFree(&im_image9);
-    g2dTexFree(&im_image10);
-    g2dTexFree(&im_image12);
+    g2dImageZero(im_image10);
+    g2dImageZero(im_image9);
+    g2dImageZero(im_image8);
+    g2dImageZero(im_image7);
+    g2dImageZero(im_image3);
+    g2dImageZero(im_image2);
+    g2dImageZero(im_image1);
 
-    g2dTexFree(&im_sprites_translated);
-    g2dTexFree(&im_flipsprites_translated);
+    g2dImageZero(im_teleporter);
+    g2dImageZero(im_flipsprites);
+    g2dImageZero(im_sprites);
+    g2dImageZero(im_entcolours_tint);
+    g2dImageZero(im_entcolours);
+    g2dImageZero(im_tiles3);
+    g2dImageZero(im_tiles2_tint);
+    g2dImageZero(im_tiles2);
+    g2dImageZero(im_tiles_tint);
+    g2dImageZero(im_tiles_white);
+    g2dImageZero(im_tiles);
+
+    sprites_translated_valid = false;
+    flipsprites_translated_valid = false;
 }
