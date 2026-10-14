@@ -122,6 +122,22 @@ enum TextMode
     LAST_ENTTEXT = TEXT_ROOMTEXT
 };
 
+enum ShiftMenuItems
+{
+    ShiftMenu_ChangeTileset,
+    ShiftMenu_ChangeColour,
+    ShiftMenu_ChangeEnemies,
+    ShiftMenu_EnemyBounds,
+    ShiftMenu_PlatformBounds,
+    ShiftMenu_DirectMode,
+    ShiftMenu_ChangeWarpDir,
+    ShiftMenu_ChangeRoomname,
+    ShiftMenu_SaveMap,
+    ShiftMenu_LoadMap,
+
+    NUM_ShiftMenuItems
+};
+
 struct GhostInfo
 {
     int rx; // game.roomx-100
@@ -253,6 +269,10 @@ public:
     bool backspace_held;
 
     bool can_use_lmb;
+
+    bool shiftmenu_active;
+    int shiftmenu_selected;
+    bool square_held_for_drawer;
 
     //Script editor stuff
     void remove_line(int t);

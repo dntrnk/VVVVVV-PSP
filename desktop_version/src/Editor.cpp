@@ -396,6 +396,11 @@ void editorclass::reset(void)
 
     can_use_lmb = false;
 
+    shiftmenu_active = false;
+    shiftmenu_selected = 0;
+
+    square_held_for_drawer = false;
+
     warp_token_entity = -1;
 
     text_entity = 0;
@@ -1422,6 +1427,19 @@ static void draw_tile_drawer(int tileset)
     extern editorclass ed;
 
     // Tile drawer for direct mode
+    const bool drawer_open = ed.square_held_for_drawer;
+
+    if (drawer_open)
+    {
+        if (ed.direct_mode_drawer < 5)
+            ed.direct_mode_drawer++;
+    }
+    else
+    {
+        if (ed.direct_mode_drawer > 0)
+            ed.direct_mode_drawer--;
+    }
+
     int t2 = 0;
     if (ed.direct_mode_drawer > 0)
     {
@@ -1440,29 +1458,34 @@ static void draw_tile_drawer(int tileset)
 
         if (graphics.grphx.im_tiles != NULL)
         {
-            return;
-        }
+            texturewidth = graphics.grphx.im_tiles->w;
+            textureheight = graphics.grphx.im_tiles->h;
 
-        const int numtiles = (int)(texturewidth / 8) * (textureheight / 8);
+            const int numtiles = (int)(texturewidth / 8) * (textureheight / 8);
 
-        for (int x = 0; x < SCREEN_WIDTH_TILES; x++)
-        {
-            for (int y = 0; y < 5; y++)
+            for (int x = 0; x < SCREEN_WIDTH_TILES; x++)
             {
-                if (tileset == 0)
+                for (int y = 0; y < 5; y++)
                 {
-                    graphics.drawtile(x * 8, (y * 8) - t2, (temp + numtiles + (y * SCREEN_WIDTH_TILES) + x) % numtiles);
-                }
-                else
-                {
-                    graphics.drawtile2(x * 8, (y * 8) - t2, (temp + numtiles + (y * SCREEN_WIDTH_TILES) + x) % numtiles);
+                    if (tileset == 0)
+                    {
+                        graphics.drawtile(x * 8, (y * 8) - t2, (temp + numtiles + (y * SCREEN_WIDTH_TILES) + x) % numtiles);
+                    }
+                    else
+                    {
+                        graphics.drawtile2(x * 8, (y * 8) - t2, (temp + numtiles + (y * SCREEN_WIDTH_TILES) + x) % numtiles);
+                    }
                 }
             }
-        }
 
-        // Highlight our little block
-        graphics.draw_rect(((ed.direct_mode_tile % SCREEN_WIDTH_TILES) * 8) - 2, 16 - t2 - 2, 12, 12, G2D_RGB(255 - help.glow, 196, 196));
-        graphics.draw_rect(((ed.direct_mode_tile % SCREEN_WIDTH_TILES) * 8) - 1, 16 - t2 - 1, 10, 10, G2D_BLACK);
+            // Highlight our little block
+            graphics.draw_rect(((ed.direct_mode_tile % SCREEN_WIDTH_TILES) * 8) - 2, 16 - t2 - 2, 12, 12, G2D_RGB(255 - help.glow, 196, 196));
+            graphics.draw_rect(((ed.direct_mode_tile % SCREEN_WIDTH_TILES) * 8) - 1, 16 - t2 - 1, 10, 10, G2D_BLACK);
+        }
+        else
+        {
+            return;
+        }
     }
 
     if (ed.direct_mode_drawer > 0 && t2 <= 30)
@@ -1687,42 +1710,67 @@ static void draw_main_ui(void)
         }
     }
 
-    if (ed.help_open)
+    if (ed.shiftmenu_active)
     {
-        const char* shiftmenuoptions[] = {
+        auto strip_key = [](const char* s) -> const char* {
+            const char* p = strstr(s, ": ");
+            return p ? p + 2 : s;
+        };
+
+        const char* menu_items_full[NUM_ShiftMenuItems] = {
             loc::gettext("F1: Change Tileset"),
             loc::gettext("F2: Change Colour"),
             loc::gettext("F3: Change Enemies"),
             loc::gettext("F4: Enemy Bounds"),
             loc::gettext("F5: Platform Bounds"),
-            "",
-            loc::gettext("F9: Reload Resources"),
             loc::gettext("F10: Direct Mode"),
-            "",
             loc::gettext("W: Change Warp Dir"),
             loc::gettext("E: Change Roomname"),
+            loc::gettext("S: Save Map"),
+            loc::gettext("L: Load Map"),
         };
+
+        const char* menu_items[NUM_ShiftMenuItems];
+        for (int i = 0; i < NUM_ShiftMenuItems; i++)
+            menu_items[i] = strip_key(menu_items_full[i]);
+
+        int lineheight = font::height(0);
+        lineheight = std::max(10, lineheight);
+
         int menuwidth = 0;
-        for (size_t i = 0; i < std::size(shiftmenuoptions); i++)
+        for (int i = 0; i < NUM_ShiftMenuItems; i++)
         {
-            int len = font::len(0, shiftmenuoptions[i]);
+            int len = font::len(0, menu_items[i]);
             if (len > menuwidth)
                 menuwidth = len;
         }
 
-        int lineheight = font::height(0);
-        lineheight = std::max(10, lineheight);
-        int left_y = 230 - std::size(shiftmenuoptions) * lineheight;
+        const int box_padding_x = 6;
+        const int box_padding_y = 4;
 
-        graphics.draw_rect(0, left_y - 3, menuwidth + 17, 240, G2D_RGB(64, 64, 64));
-        graphics.fill_rect(0, left_y - 2, menuwidth + 16, 240, G2D_BLACK);
-        for (size_t i = 0; i < std::size(shiftmenuoptions); i++)
-            font::print(0, 4, left_y + i * lineheight, shiftmenuoptions[i], 164, 164, 164);
+        int box_w = menuwidth + box_padding_x * 2;
+        int box_h = NUM_ShiftMenuItems * lineheight + box_padding_y * 2;
 
-        graphics.draw_rect(220, 207, 100, 60, G2D_RGB(64, 64, 64));
-        graphics.fill_rect(221, 208, 160, 60, G2D_BLACK);
-        font::print(0, 224, 210, loc::gettext("S: Save Map"), 164, 164, 164);
-        font::print(0, 224, 210 + lineheight, loc::gettext("L: Load Map"), 164, 164, 164);
+        int box_x = 318 - box_w;
+        int box_y = 2;
+
+        graphics.fill_rect(box_x, box_y, box_w, box_h, G2D_RGB(0, 0, 0));
+        graphics.draw_rect(box_x, box_y, box_w, box_h, G2D_RGB(96, 96, 96));
+
+        for (int i = 0; i < NUM_ShiftMenuItems; i++)
+        {
+            int item_y = box_y + box_padding_y + i * lineheight;
+            int item_x = box_x + box_padding_x;
+
+            int col = (i == ed.shiftmenu_selected) ? 255 : 196;
+            font::print(0, item_x, item_y, menu_items[i], col, col, col);
+
+            if (i == ed.shiftmenu_selected)
+            {
+                int text_w = font::len(0, menu_items[i]);
+                graphics.draw_rect(item_x - 2, item_y - 1, text_w + 4, lineheight, G2D_RGB(255 - help.glow, 255, 255));
+            }
+        }
     }
 }
 
@@ -2055,16 +2103,10 @@ void editorrenderfixed(void)
         break;
     }
 
-    if (cl.getroomprop(ed.levx, ed.levy)->directmode == 1)
-    {
-        if (ed.direct_mode_drawer > 0)
-        {
-            ed.direct_mode_drawer--;
-        }
-    }
-    else
+    if (cl.getroomprop(ed.levx, ed.levy)->directmode != 1)
     {
         ed.direct_mode_drawer = 0;
+        ed.square_held_for_drawer = false;
     }
 
     if (cl.getroomprop(ed.levx, ed.levy)->roomname != "")
@@ -3003,17 +3045,155 @@ static void handle_draw_input()
 {
     extern editorclass ed;
 
-    bool shift_down = false;
-    // bool shift_down = key.keymap[SDLK_LSHIFT] || key.keymap[SDLK_RSHIFT]; // EDITOR-LATER
+    bool shift_down = controls_held(PSP_CTRL_SELECT);
 
     if (shift_down && !ed.shiftkey)
     {
         ed.shiftkey = true;
-        ed.help_open = !ed.help_open;
+        ed.shiftmenu_active = !ed.shiftmenu_active;
+        ed.keydelay = 6;
     }
     else if (!shift_down)
     {
         ed.shiftkey = false;
+    }
+
+    if (ed.shiftmenu_active)
+    {
+        if (ed.keydelay > 0)
+        {
+            ed.keydelay--;
+            return;
+        }
+
+        bool up_pressed = key.isDown(PSP_CTRL_UP);
+        bool down_pressed = key.isDown(PSP_CTRL_DOWN);
+        bool left_pressed = key.isDown(PSP_CTRL_LEFT);
+        bool right_pressed = key.isDown(PSP_CTRL_RIGHT);
+
+        if (controls_held(PSP_CTRL_SQUARE))
+        {
+            if (up_pressed || down_pressed || left_pressed || right_pressed)
+            {
+                if (up_pressed) cl.mapheight--;
+                if (down_pressed) cl.mapheight++;
+                if (left_pressed) cl.mapwidth--;
+                if (right_pressed) cl.mapwidth++;
+
+                cl.mapwidth = std::clamp(cl.mapwidth, 1, cl.maxwidth);
+                cl.mapheight = std::clamp(cl.mapheight, 1, cl.maxheight);
+
+                ed.updatetiles = true;
+                ed.changeroom = true;
+                graphics.backgrounddrawn = false;
+                graphics.foregrounddrawn = false;
+
+                ed.levx = POS_MOD(ed.levx, cl.mapwidth);
+                ed.levy = POS_MOD(ed.levy, cl.mapheight);
+
+                char buffer[3 * SCREEN_WIDTH_CHARS + 1];
+                vformat_buf(
+                    buffer, sizeof(buffer),
+                    loc::gettext("Mapsize is now [{width},{height}]"),
+                    "width:int, height:int",
+                    cl.mapwidth, cl.mapheight
+                );
+                ed.show_note(buffer);
+
+                ed.keydelay = 6;
+            }
+        }
+        else
+        {
+            if (up_pressed)
+            {
+                ed.shiftmenu_selected = POS_MOD(ed.shiftmenu_selected - 1, NUM_ShiftMenuItems);
+                ed.keydelay = 4;
+            }
+            else if (down_pressed)
+            {
+                ed.shiftmenu_selected = POS_MOD(ed.shiftmenu_selected + 1, NUM_ShiftMenuItems);
+                ed.keydelay = 4;
+            }
+        }
+
+        if (controls_pressed(PSP_CTRL_CROSS))
+        {
+            ed.keydelay = 6;
+            ed.lclickdelay = 6;
+            switch (ed.shiftmenu_selected)
+            {
+            case ShiftMenu_ChangeTileset:
+                ed.switch_tileset(false);
+                break;
+            case ShiftMenu_ChangeColour:
+                ed.switch_tilecol(false);
+                break;
+            case ShiftMenu_ChangeEnemies:
+                ed.switch_enemy(false);
+                break;
+            case ShiftMenu_EnemyBounds:
+                ed.substate = EditorSubState_DRAW_BOX;
+                ed.box_corner = BoxCorner_FIRST;
+                ed.box_type = BoxType_ENEMY;
+                ed.shiftmenu_active = false;
+                ed.can_use_lmb = false;
+                ed.lclickdelay = 6;
+                break;
+            case ShiftMenu_PlatformBounds:
+                ed.substate = EditorSubState_DRAW_BOX;
+                ed.box_corner = BoxCorner_FIRST;
+                ed.box_type = BoxType_PLATFORM;
+                ed.shiftmenu_active = false;
+                ed.can_use_lmb = false;
+                ed.lclickdelay = 6;
+                break;
+            case ShiftMenu_DirectMode:
+                if (cl.getroomprop(ed.levx, ed.levy)->directmode == 1)
+                {
+                    cl.setroomdirectmode(ed.levx, ed.levy, 0);
+                    ed.show_note(loc::gettext("Direct Mode Disabled"));
+                    ed.clamp_tilecol(ed.levx, ed.levy, true);
+                }
+                else
+                {
+                    cl.setroomdirectmode(ed.levx, ed.levy, 1);
+                    ed.show_note(loc::gettext("Direct Mode Enabled"));
+                    ed.toolbox_open = false;
+                }
+                graphics.backgrounddrawn = false;
+                ed.updatetiles = true;
+                break;
+            case ShiftMenu_ChangeWarpDir:
+                ed.switch_warpdir(false);
+                break;
+            case ShiftMenu_ChangeRoomname:
+                ed.shiftmenu_active = false;
+                ed.get_input_line(
+                    TEXT_ROOMNAME,
+                    "Enter new room name:",
+                    const_cast<std::string*>(&(cl.getroomprop(ed.levx, ed.levy)->roomname))
+                );
+                game.mapheld = true;
+                break;
+            case ShiftMenu_SaveMap:
+                ed.shiftmenu_active = false;
+                ed.keydelay = 6;
+                ed.get_input_line(TEXT_SAVE, "Enter map filename to save as:", &(ed.filename));
+                game.mapheld = true;
+                graphics.backgrounddrawn = false;
+                break;
+            case ShiftMenu_LoadMap:
+                ed.shiftmenu_active = false;
+                ed.keydelay = 6;
+                ed.get_input_line(TEXT_LOAD, "Enter map filename to load:", &(ed.filename));
+                game.mapheld = true;
+                graphics.backgrounddrawn = false;
+                break;
+            }
+        }
+
+        return;
     }
 
     if (ed.keydelay > 0)
@@ -3022,107 +3202,6 @@ static void handle_draw_input()
     }
     else
     {
-        // EDITOR-LATER
-        // if (key.keymap[SDLK_F1])
-        // {
-        //     ed.switch_tileset(shift_down);
-        //     ed.keydelay = 6;
-        // }
-        // if (key.keymap[SDLK_F2])
-        // {
-        //     ed.switch_tilecol(shift_down);
-        //     ed.keydelay = 6;
-        // }
-        // if (key.keymap[SDLK_F3])
-        // {
-        //     ed.switch_enemy(shift_down);
-        //     ed.keydelay = 6;
-        // }
-        // if (key.keymap[SDLK_F4])
-        // {
-        //     ed.keydelay = 6;
-        //     ed.substate = EditorSubState_DRAW_BOX;
-        //     ed.box_corner = BoxCorner_FIRST;
-        //     ed.box_type = BoxType_ENEMY;
-        // }
-        // if (key.keymap[SDLK_F5])
-        // {
-        //     ed.keydelay = 6;
-        //     ed.substate = EditorSubState_DRAW_BOX;
-        //     ed.box_corner = BoxCorner_FIRST;
-        //     ed.box_type = BoxType_PLATFORM;
-        // }
-        // if (key.keymap[SDLK_F10])
-        // {
-        //     if (cl.getroomprop(ed.levx, ed.levy)->directmode == 1)
-        //     {
-        //         cl.setroomdirectmode(ed.levx, ed.levy, 0);
-        //         ed.show_note(loc::gettext("Direct Mode Disabled"));
-        //         ed.clamp_tilecol(ed.levx, ed.levy, true);
-        //     }
-        //     else
-        //     {
-        //         cl.setroomdirectmode(ed.levx, ed.levy, 1);
-        //         ed.show_note(loc::gettext("Direct Mode Enabled"));
-        //     }
-        //     graphics.backgrounddrawn = false;
-
-        //     ed.updatetiles = true;
-        //     ed.keydelay = 6;
-        // }
-
-        for (int i = 0; i < NUM_EditorTools; i++)
-        {
-            if (false && // key.keymap[ed.tool_keys[i]]
-                ((shift_down && ed.tool_requires_shift[i]) ||
-                    (!shift_down && !ed.tool_requires_shift[i])))
-            {
-                ed.current_tool = (EditorTools) i;
-            }
-        }
-
-        // EDITOR-LATER
-        // if (key.keymap[SDLK_w])
-        // {
-        //     ed.switch_warpdir(shift_down);
-        //     ed.keydelay = 6;
-        // }
-        // if (key.keymap[SDLK_e])
-        // {
-        //     ed.keydelay = 6;
-        //     ed.get_input_line(TEXT_ROOMNAME, "Enter new room name:", const_cast<std::string*>(&(cl.getroomprop(ed.levx, ed.levy)->roomname)));
-        //     game.mapheld = true;
-        // }
-        // if (key.keymap[SDLK_g])
-        // {
-        //     ed.keydelay = 6;
-        //     ed.get_input_line(TEXT_GOTOROOM, "Enter room coordinates x,y:", NULL);
-        //     game.mapheld = true;
-        // }
-
-        //Save and load
-        // if (key.keymap[SDLK_s]) // EDITOR-LATER
-        // {
-        //     ed.keydelay = 6;
-        //     ed.get_input_line(TEXT_SAVE, "Enter map filename to save as:", &(ed.filename));
-        //     game.mapheld = true;
-        // }
-
-        // if (key.keymap[SDLK_l])
-        // {
-        //     ed.keydelay = 6;
-        //     ed.get_input_line(TEXT_LOAD, "Enter map filename to load:", &(ed.filename));
-        //     game.mapheld = true;
-        // }
-
-        // ed.f_modifier = key.keymap[SDLK_f];
-        // ed.h_modifier = key.keymap[SDLK_h];
-        // ed.v_modifier = key.keymap[SDLK_v];
-        // ed.b_modifier = key.keymap[SDLK_b];
-        // ed.c_modifier = key.keymap[SDLK_c];
-        // ed.x_modifier = key.keymap[SDLK_x];
-        // ed.z_modifier = key.keymap[SDLK_z];
-        
         ed.f_modifier = false;
         ed.h_modifier = false;
         ed.v_modifier = false;
@@ -3134,29 +3213,20 @@ static void handle_draw_input()
         const int room = ed.levx + ed.levy * cl.maxwidth;
         const int plat_speed = cl.roomproperties[room].platv;
 
-        if (controls_held(PSP_CTRL_LTRIGGER))
+        bool direct_mode = (cl.getroomprop(ed.levx, ed.levy)->directmode == 1);
+
+        if (!direct_mode)
         {
-            // if (key.keymap[SDLK_LCTRL] || key.keymap[SDLK_RCTRL]) // EDITOR-LATER
-            // {
-            //     cl.roomproperties[room].platv = plat_speed - 1;
-            // }
-            // else
+            if (controls_held(PSP_CTRL_LTRIGGER))
             {
                 ed.current_tool = (EditorTools) POS_MOD(ed.current_tool - 1, NUM_EditorTools);
+                ed.keydelay = 6;
             }
-            ed.keydelay = 6;
-        }
-        else if (controls_held(PSP_CTRL_RTRIGGER))
-        {
-            // if (key.keymap[SDLK_LCTRL] || key.keymap[SDLK_RCTRL]) // EDITOR-LATER
-            // {
-            //     cl.roomproperties[room].platv = plat_speed + 1;
-            // }
-            // else
+            else if (controls_held(PSP_CTRL_RTRIGGER))
             {
                 ed.current_tool = (EditorTools) POS_MOD(ed.current_tool + 1, NUM_EditorTools);
+                ed.keydelay = 6;
             }
-            ed.keydelay = 6;
         }
 
         if (plat_speed != cl.roomproperties[room].platv)
@@ -3171,10 +3241,31 @@ static void handle_draw_input()
             ed.show_note(buffer);
         }
 
-        if (controls_held(PSP_CTRL_SQUARE))
+        bool square_held = controls_held(PSP_CTRL_SQUARE);
+
+        if (direct_mode)
         {
-            ed.toolbox_open = !ed.toolbox_open;
-            ed.keydelay = 6;
+            if (square_held && !ed.square_held_for_drawer)
+            {
+                ed.square_held_for_drawer = true;
+                ed.keydelay = 6;
+            }
+            else if (!square_held)
+            {
+                ed.square_held_for_drawer = false;
+            }
+        }
+        else
+        {
+            ed.square_held_for_drawer = false;
+
+            static bool square_was_held = false;
+            if (square_held && !square_was_held)
+            {
+                ed.toolbox_open = !ed.toolbox_open;
+                ed.keydelay = 6;
+            }
+            square_was_held = square_held;
         }
     }
 }
@@ -3290,6 +3381,7 @@ void editorinput(void)
         switch (ed.substate)
         {
         case EditorSubState_MAIN:
+        {
             if (escape_pressed)
             {
                 // We're just in draw mode, so go to the settings menu
@@ -3305,9 +3397,29 @@ void editorinput(void)
                 ed.direct_mode_drawer = 10;
             }
 
+            handle_draw_input();
+
+            if (ed.shiftmenu_active)
+            {
+                break;
+            }
+
+            const bool direct_mode = (cl.getroomprop(ed.levx, ed.levy)->directmode == 1);
+
             if (ed.keydelay > 0)
             {
                 ed.keydelay--;
+            }
+            else if (direct_mode && ed.square_held_for_drawer
+                     && (up_pressed || down_pressed || left_pressed || right_pressed))
+            {
+                ed.keydelay = 3;
+                ed.direct_mode_tile = POS_MOD(ed.direct_mode_tile, 40 * 30);
+
+                if (left_pressed)  ed.direct_mode_tile--;
+                if (right_pressed) ed.direct_mode_tile++;
+                if (up_pressed)    ed.direct_mode_tile -= 40;
+                if (down_pressed)  ed.direct_mode_tile += 40;
             }
             else if (up_pressed || down_pressed || left_pressed || right_pressed)
             {
@@ -3379,12 +3491,13 @@ void editorinput(void)
 
                     ed.levx = POS_MOD(ed.levx, cl.mapwidth);
                     ed.levy = POS_MOD(ed.levy, cl.mapheight);
-
                 }
             }
-            else
+
+            if (direct_mode && (controls_pressed(PSP_CTRL_LTRIGGER) || controls_pressed(PSP_CTRL_RTRIGGER)))
             {
-                handle_draw_input();
+                ed.direct_mode_tile = cl.gettile(ed.levx, ed.levy, ed.tilex, ed.tiley);
+                ed.keydelay = 6;
             }
 
             // Mouse input
@@ -3413,7 +3526,7 @@ void editorinput(void)
             }
 
             break;
-
+        }
         case EditorSubState_DRAW_BOX:
             if (escape_pressed)
             {
