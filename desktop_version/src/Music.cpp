@@ -163,6 +163,8 @@ static const char *soundNames[] = {
     "sounds/rescue.wav"
 };
 
+static bool sounds_is_custom = false;
+
 static void unloadAllSounds(void)
 {
     for (int i = 0; i < 28; i++) {
@@ -177,7 +179,8 @@ static void unloadAllSounds(void)
 
 static void loadAllSounds(void)
 {
-    if (!soundLoaded) {
+    if (!soundLoaded || sounds_is_custom != FILESYSTEM_isAssetDirMounted("sounds/")) {
+        sounds_is_custom = FILESYSTEM_isAssetDirMounted("sounds/");
 
         unloadAllSounds();
 
@@ -368,6 +371,11 @@ void musicclass::fadein(void)
 void musicclass::pause(void)
 {
     MusicChannel::Pause();
+}
+
+void musicclass::stopmusic(void)
+{
+    MusicChannel::Stop();
 }
 
 void musicclass::haltdasmusik(void)

@@ -74,6 +74,7 @@ public:
     void resume(void);
     void resumefade(const int fadein_ms);
     void pause(void);
+    void stopmusic(void);
     void haltdasmusik(void);
     void haltdasmusik(bool from_fade);
     void silencedasmusik(void);

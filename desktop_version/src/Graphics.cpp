@@ -3055,7 +3055,7 @@ bool Graphics::reloadresources(void)
     images[IMAGE_ENDING] = grphx.im_image10;
     images[IMAGE_CUSTOMMINIMAP] = grphx.im_image12;
 
-    music.destroy();
+    music.stopmusic();
     music.init();
 
     tiles1_mounted = FILESYSTEM_isAssetMounted("graphics/tiles.png");
