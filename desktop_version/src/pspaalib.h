@@ -310,6 +310,8 @@ int AalibGetStatus(int channel);
 
 AalibVolume AalibGetVolume(int channel);
 
+void AalibWaitThreadFinished(int channel);
+
 int GetFreeHardwareChannel(int channel);
 int FreeHardwareChannel(int channel);
 

@@ -25,11 +25,15 @@ typedef struct
     float ampValue;
     float audioStrength;
     bool initialized;
+    int hardwareChannel;
 } AalibChannelData;
 
 AalibChannelData channels[49];
 int hardwareChannels[8];
 SceUID threads[8];
+
+static volatile bool thread_finished[8] = {true, true, true, true, true, true, true, true};
+
 ScePspFVector2 observerPosition = { 0,0 }, observerFront = { 0,1 }, observerVelocity = { 0,0 };
 
 int AalibIsFree(int channel) {
@@ -133,6 +137,9 @@ int PlayThread(SceSize argsize, void *args) {
         sceKernelExitThread(0);
     }
     int hardwareChannel = *((int *)args);
+
+    thread_finished[hardwareChannel] = false;
+
     int channel = hardwareChannels[hardwareChannel];
     int stopReason;
     void *mainBuf, *backBuf, *tempBuf;
@@ -168,6 +175,9 @@ Release:
     sceKernelDelayThread(1000);
     free(mainBuf);
     free(backBuf);
+
+    thread_finished[hardwareChannel] = true;
+
     sceKernelExitThread(0);
     return 0;
 }
@@ -185,6 +195,11 @@ int AalibInit() {
         if (threads[i] < 0) {
             return PSPAALIB_WARNING_CREATE_THREAD;
         }
+        hardwareChannels[i] = PSPAALIB_CHANNEL_NONE;
+        thread_finished[i] = true;
+    }
+    for (i = 0;i < 49;i++) {
+        channels[i].hardwareChannel = -1;
     }
     aalibInitialized = true;
     return PSPAALIB_SUCCESS;
@@ -275,6 +290,7 @@ int AalibUnload(int channel) {
         return PSPAALIB_SUCCESS;
     }
     channels[channel].initialized = FALSE;
+    channels[channel].hardwareChannel = -1;
     if ((PSPAALIB_CHANNEL_WAV_1 <= channel) && (channel <= PSPAALIB_CHANNEL_WAV_32)) {
         return UnloadWav(channel - PSPAALIB_CHANNEL_WAV_1);
     }
@@ -302,6 +318,7 @@ int AalibLoad(char *filename, int channel, bool loadToRam) {
     channels[channel].volume = (AalibVolume){ 1.0f,1.0f };
     channels[channel].ampValue = 1.0f;
     channels[channel].initialized = TRUE;
+    channels[channel].hardwareChannel = -1;
     if ((PSPAALIB_CHANNEL_WAV_1 <= channel) && (channel <= PSPAALIB_CHANNEL_WAV_32)) {
         return LoadWav(filename, channel - PSPAALIB_CHANNEL_WAV_1, loadToRam);
     }
@@ -329,6 +346,7 @@ int AalibLoadFromMemory(const unsigned char *data, int dataSize, int channel, bo
     channels[channel].volume = (AalibVolume){ 1.0f,1.0f };
     channels[channel].ampValue = 1.0f;
     channels[channel].initialized = TRUE;
+    channels[channel].hardwareChannel = -1;
     if ((PSPAALIB_CHANNEL_WAV_1 <= channel) && (channel <= PSPAALIB_CHANNEL_WAV_32)) {
         return LoadWavFromMemory(data, dataSize, channel - PSPAALIB_CHANNEL_WAV_1, loadToRam);
     }
@@ -352,21 +370,29 @@ int AalibPlay(int channel) {
     if (hardwareChannel == -1) {
         return PSPAALIB_WARNING_NO_FREE_CHANNELS;
     }
-    sceKernelStartThread(threads[hardwareChannel], sizeof(int), (void *)(&hardwareChannel));
+    channels[channel].hardwareChannel = hardwareChannel;
+
     if ((PSPAALIB_CHANNEL_WAV_1 <= channel) && (channel <= PSPAALIB_CHANNEL_WAV_32)) {
-        return PlayWav(channel - PSPAALIB_CHANNEL_WAV_1);
+        PlayWav(channel - PSPAALIB_CHANNEL_WAV_1);
+    } else if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
+        PlayAt3(channel - PSPAALIB_CHANNEL_AT3_1);
+    } else {
+        return PSPAALIB_ERROR_INVALID_CHANNEL;
     }
-    if ((PSPAALIB_CHANNEL_AT3_1 <= channel) && (channel <= PSPAALIB_CHANNEL_AT3_2)) {
-        return PlayAt3(channel - PSPAALIB_CHANNEL_AT3_1);
+
+    sceKernelStartThread(threads[hardwareChannel], sizeof(int), (void *)(&hardwareChannel));
+    return PSPAALIB_SUCCESS;
+}
+
+void AalibWaitThreadFinished(int channel) {
+    if ((channel < 1) || (channel > 48)) return;
+    int hc = channels[channel].hardwareChannel;
+    if (hc < 0 || hc >= 8) return;
+    int guard = 0;
+    while (!thread_finished[hc]) {
+        sceKernelDelayThread(1000);
+        if (++guard > 5000) break;
     }
-    // if ((PSPAALIB_CHANNEL_OGG_1 <= channel) && (channel <= PSPAALIB_CHANNEL_OGG_10)) {
-    //     return PlayOgg(channel - PSPAALIB_CHANNEL_OGG_1);
-    // }
-    /*if ((PSPAALIB_CHANNEL_FLAC_1 <= channel) && (channel <= PSPAALIB_CHANNEL_FLAC_4))
-    {
-        return PlayFlac(channel - PSPAALIB_CHANNEL_FLAC_1);
-    }*/
-    return PSPAALIB_ERROR_INVALID_CHANNEL;
 }
 
 int AalibStop(int channel) {

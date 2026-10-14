@@ -29,6 +29,7 @@ struct MusicChannel {
     static void Stop(void) {
         if (channel >= 0 && loaded) {
             AalibStop(channel);
+            AalibWaitThreadFinished(channel);
             AalibUnload(channel);
         }
         loaded = false;
