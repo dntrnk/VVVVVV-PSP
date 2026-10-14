@@ -1,6 +1,5 @@
 How to Build
 ------------
-
 Install [PSPSDK](https://pspdev.github.io/installation.html) and make sure `$PSPDEV` is set up in your environment.
 
 Run `git clone https://github.com/dntrnk/VVVVVV-PSP`
@@ -13,10 +12,7 @@ in `MakeAndPlay.h`.
 
 Open `desktop_version` folder in terminal and run `make clean && make`
 
-Including data.zip and music
+Including data.zip, music, fonts and lang
 ------------
-This port uses a modified data.zip and a converted version of the original
-soundtrack (`.at3` files), neither of which is included in this repository.
-They cannot be redistributed without permission from the original authors.
-
-There is no information about data.zip or music yet - stay tuned for updates.
+The data.zip file and the music, fonts and lang folders are all included in the ready-to-use build available on the [Releases](https://github.com/dntrnk/VVVVVV-PSP/releases) page.
+Put them next to EBOOT.PBP and the game should run.
