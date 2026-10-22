@@ -32,4 +32,4 @@ Original Game Credits
 
 PSP Port
 -------
-- Ported by [dntrnk](https://github.com/dntrnk)
+- Ported by [dntrnk](https://dntrnk.ru)
