@@ -652,23 +652,102 @@ static void menurender(void)
         }
         else if ((unsigned)game.currentmenuoption < loc::languagelist.size())
         {
-            font::print_wrap(PR_CEN, -1, 8, loc::languagelist[game.currentmenuoption].credit.c_str(), tr/2, tg/2, tb/2);
-            const char* select_hint;
-            char buffer[SCREEN_WIDTH_CHARS + 1];
-            if (BUTTONGLYPHS_keyboard_is_active())
+            const std::string& langcode = loc::languagelist[game.currentmenuoption].code;
+            const bool is_cjk = (langcode == "JA" || langcode == "KO" || langcode == "ZH" || langcode == "zh_TW");
+
+            if (is_cjk)
             {
-                select_hint = loc::languagelist[game.currentmenuoption].action_hint.c_str();
+                if (langcode == "JA")
+                {
+                    graphics.draw_texture_part(graphics.images[IMAGE_LANGNAMES], 76, 6, 0, 53, 100, 22, 1, 1, G2D_RGB(tr/2, tg/2, tb/2));
+                    graphics.draw_texture_part(graphics.images[IMAGE_LANGNAMES], 176, 6, 100, 53, 66, 22, 1, 1, G2D_RGB(tr/2, tg/2, tb/2));
+                }
+                else if (langcode == "KO")
+                {
+                    graphics.draw_texture_part(graphics.images[IMAGE_LANGNAMES], 30, 7, 0, 76, 226, 9, 1, 1, G2D_RGB(tr/2, tg/2, tb/2));
+                    graphics.draw_texture_part(graphics.images[IMAGE_LANGNAMES], 261, 7, 228, 76, 28, 9, 1, 1, G2D_RGB(tr/2, tg/2, tb/2));
+                }
+                else if (langcode == "ZH")
+                {
+                    graphics.draw_texture_part(graphics.images[IMAGE_LANGNAMES], 88, 6, 0, 85, 143, 11, 1, 1, G2D_RGB(tr/2, tg/2, tb/2));
+                }
+                else if (langcode == "zh_TW")
+                {
+                    graphics.draw_texture_part(graphics.images[IMAGE_LANGNAMES], 16, 6, 0, 96, 96, 11, 1, 1, G2D_RGB(tr/2, tg/2, tb/2));
+                    graphics.draw_texture_part(graphics.images[IMAGE_LANGNAMES], 114, 6, 74, 85, 69, 11, 1, 1, G2D_RGB(tr/2, tg/2, tb/2));
+                    graphics.draw_texture_part(graphics.images[IMAGE_LANGNAMES], 198, 6, 0, 107, 103, 11, 1, 1, G2D_RGB(tr/2, tg/2, tb/2));
+                }
             }
             else
             {
-                vformat_buf(buffer, sizeof(buffer),
-                    loc::languagelist[game.currentmenuoption].gamepad_hint.c_str(),
-                    "button:but",
+                font::print_wrap(PR_CEN, -1, 8, loc::languagelist[game.currentmenuoption].credit.c_str(), tr/2, tg/2, tb/2);
+            }
+
+            if (is_cjk)
+            {
+                const char* btn_font_name = "buttons_8x8";
+                int button_x = 0;
+
+                if (langcode == "JA")
+                {
+                    btn_font_name = "buttons_8x8";
+                    button_x = 128;
+                    graphics.draw_texture_part(graphics.images[IMAGE_LANGNAMES], 144, 228, 0, 42, 45, 11, 1, 1, G2D_RGB(tr/2, tg/2, tb/2));
+                }
+                else if (langcode == "KO")
+                {
+                    btn_font_name = "buttons_10x10";
+                    button_x = 105;
+                    graphics.draw_texture_part(graphics.images[IMAGE_LANGNAMES], 125, 229, 22, 0, 89, 9, 1, 1, G2D_RGB(tr/2, tg/2, tb/2));
+                }
+                else if (langcode == "ZH")
+                {
+                    btn_font_name = "buttons_12x12";
+                    button_x = 148;
+                    graphics.draw_texture_part(graphics.images[IMAGE_LANGNAMES], 136, 228, 111, 0, 47, 11, 1, 1, G2D_RGB(tr/2, tg/2, tb/2));
+                }
+                else if (langcode == "zh_TW")
+                {
+                    btn_font_name = "buttons_12x12";
+                    button_x = 148;
+                    graphics.draw_texture_part(graphics.images[IMAGE_LANGNAMES], 136, 228, 111, 11, 47, 11, 1, 1, G2D_RGB(tr/2, tg/2, tb/2));
+                }
+
+                uint8_t btn_idx = 0;
+                uint32_t btn_flags = PR_FONT_INTERFACE;
+                if (font::find_main_font_by_name(btn_font_name, &btn_idx))
+                {
+                    btn_flags = PR_FONT_IDX(btn_idx, false);
+                }
+
+                char btnbuf[SCREEN_WIDTH_CHARS + 1];
+                vformat_buf(
+                    btnbuf, sizeof(btnbuf),
+                    "{button}", "button:but",
                     vformat_button(ActionSet_Menu, Action_Menu_Accept)
                 );
-                select_hint = buffer;
+
+                font::print(btn_flags, button_x, 230, btnbuf, tr/2, tg/2, tb/2);
             }
-            font::print(PR_CEN, -1, 230, select_hint, tr/2, tg/2, tb/2);
+            else
+            {
+                const char* select_hint;
+                char buffer[SCREEN_WIDTH_CHARS + 1];
+                if (BUTTONGLYPHS_keyboard_is_active())
+                {
+                    select_hint = loc::languagelist[game.currentmenuoption].action_hint.c_str();
+                }
+                else
+                {
+                    vformat_buf(buffer, sizeof(buffer),
+                        loc::languagelist[game.currentmenuoption].gamepad_hint.c_str(),
+                        "button:but",
+                        vformat_button(ActionSet_Menu, Action_Menu_Accept)
+                    );
+                    select_hint = buffer;
+                }
+                font::print(PR_CEN, -1, 230, select_hint, tr/2, tg/2, tb/2);
+            }
         }
         break;
     case Menu::translator_main:
