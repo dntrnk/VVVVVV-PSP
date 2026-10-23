@@ -38,6 +38,7 @@ public:
     g2dImage* im_image9 = NULL;
     g2dImage* im_image10 = NULL;
     g2dImage* im_image12 = NULL;
+    g2dImage* im_image13 = NULL;
 
     g2dImage* im_sprites_translated = NULL;
     g2dImage* im_flipsprites_translated = NULL;

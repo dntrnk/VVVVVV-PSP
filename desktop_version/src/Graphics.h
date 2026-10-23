@@ -33,6 +33,7 @@ enum ImageNames
     IMAGE_SITE3,
     IMAGE_ENDING,
     IMAGE_CUSTOMMINIMAP,
+    IMAGE_LANGNAMES,
     NUM_IMAGES
 };
 
@@ -147,6 +148,7 @@ public:
     void cutscenebarstimer(void);
     void setbars(const int position);
 
+    int lang_name_sprite(const char* code);
     void drawpartimage(int t, int xp, int yp, int wp, int hp);
 
     void drawpartimagecol(const int t, const int xp, const int yp, const g2dColor ct, const int wp, const int hp);

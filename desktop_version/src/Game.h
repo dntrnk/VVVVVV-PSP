@@ -32,6 +32,7 @@ struct MenuOption
     char text[MENU_TEXT_BYTES];
     bool active;
     uint32_t print_flags;
+    int sprite;
 };
 
 //Menu IDs
@@ -388,6 +389,7 @@ public:
         strlcpy(menuoption.text, text, sizeof(menuoption.text));
         menuoption.active = active;
         menuoption.print_flags = print_flags;
+        menuoption.sprite = -1;
         menuoptions.push_back(menuoption);
     }
 

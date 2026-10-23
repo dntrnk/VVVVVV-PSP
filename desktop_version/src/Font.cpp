@@ -62,6 +62,8 @@ struct Font
     char fallback_key[64];
     uint8_t fallback_idx;
     bool fallback_idx_valid;
+
+    bool unloaded;
 };
 
 struct FontContainer
@@ -260,14 +262,33 @@ static uint8_t load_font(FontContainer* container, const char* name)
     {
         return 0;
     }
-    Font* new_fonts = (Font*) realloc(container->fonts, sizeof(Font)*(container->count+1));
-    if (new_fonts == NULL)
+
+    uint8_t f_idx = 255;
+
+    for (uint8_t i = 0; i < container->count; i++)
     {
-        return 0;
+        if (container->fonts[i].unloaded
+        && strcmp(container->fonts[i].name, name) == 0)
+        {
+            f_idx = i;
+            break;
+        }
     }
-    container->fonts = new_fonts;
-    uint8_t f_idx = container->count++;
+
+    if (f_idx == 255)
+    {
+        Font* new_fonts = (Font*) realloc(container->fonts, sizeof(Font)*(container->count+1));
+        if (new_fonts == NULL)
+        {
+            return 0;
+        }
+        container->fonts = new_fonts;
+        f_idx = container->count++;
+    }
+
     Font* f = &container->fonts[f_idx];
+
+    f->unloaded = false;
 
     vlog_info("Loading font \"%s\"...", name);
 
@@ -513,6 +534,10 @@ static bool find_font_by_name(FontContainer* container, const char* name, uint8_
     uintptr_t i;
     if (hashmap_get(container->map_name_idx, name, strlen(name), &i))
     {
+        if (i < container->count && container->fonts[i].unloaded)
+        {
+            return false;
+        }
         *idx = i;
         return true;
     }
@@ -623,7 +648,16 @@ static void set_fallbacks(FontContainer* container)
     }
 }
 
-static void load_font_filename(bool is_custom, const char* filename)
+static bool font_is_cjk(const char* name)
+{
+    return strcmp(name, "font_ko") == 0
+        || strcmp(name, "font_ja") == 0
+        || strcmp(name, "font_tc") == 0
+        || strcmp(name, "font_sc") == 0;
+}
+
+
+static void load_font_filename(bool is_custom, const char* filename, const char* allow_cjk)
 {
     // Load font.png, and everything that matches *.fontmeta (but not font.fontmeta)
     size_t expected_ext_start;
@@ -642,6 +676,11 @@ static void load_font_filename(bool is_custom, const char* filename)
         strlcpy(font_name, filename, sizeof(font_name));
         font_name[std::min(static_cast<size_t>(63), expected_ext_start)] = '\0';
 
+        if (!is_custom && font_is_cjk(font_name) && (allow_cjk == NULL || strcmp(font_name, allow_cjk) != 0))
+        {
+            return;
+        }
+
         uint8_t f_idx = load_font(is_custom ? &fonts_custom : &fonts_main, font_name);
 
         if (is_fontpng && !is_custom)
@@ -651,14 +690,43 @@ static void load_font_filename(bool is_custom, const char* filename)
     }
 }
 
+static std::string get_lang_font_name(void)
+{
+    std::string path = "lang/" + loc::lang + "/meta.xml";
+    unsigned char* mem = NULL;
+    FILESYSTEM_loadFileToMemory(path.c_str(), &mem, NULL);
+    if (mem == NULL)
+    {
+        return "";
+    }
+    std::string result;
+    const char* p = (const char*) mem;
+    const char* tag = strstr(p, "<font>");
+    if (tag != NULL)
+    {
+        tag += 6;
+        const char* end = strstr(tag, "</font>");
+        if (end != NULL)
+        {
+            result.assign(tag, end - tag);
+        }
+    }
+    VVV_free(mem);
+    return result;
+}
+
 void load_main(void)
 {
+    
+    static std::string allow_cjk_str = get_lang_font_name();
+    const char* allow_cjk = allow_cjk_str.empty() ? NULL : allow_cjk_str.c_str();
+
     // Load all global fonts
     EnumHandle handle = {};
     const char* item;
     while ((item = FILESYSTEM_enumerate("graphics", &handle)) != NULL)
     {
-        load_font_filename(false, item);
+        load_font_filename(false, item, allow_cjk);
     }
     FILESYSTEM_freeEnumerate(&handle);
     font_idx_level = font_idx_8x8;
@@ -688,20 +756,73 @@ void load_main(void)
     }
 }
 
+bool is_cjk_font_name(const char* name)
+{
+    return font_is_cjk(name);
+}
+
+void load_main_font_by_name(const char* name)
+{
+    if (!font_is_cjk(name)) return;
+
+    uint8_t tmp;
+    if (find_main_font_by_name(name, &tmp)) return;
+
+    char meta_name[64];
+    snprintf(meta_name, sizeof(meta_name), "%s.fontmeta", name);
+    load_font_filename(false, meta_name, name);
+
+    VVV_freefunc(hashmap_free, fonts_main.map_name_idx);
+    fonts_main.map_name_idx = NULL;
+    fill_map_name_idx(&fonts_main);
+    set_fallbacks(&fonts_main);
+}
+
+void load_main_font_for_lang(void)
+{
+    std::string font_name = get_lang_font_name();
+    if (font_name.empty()) return;
+    load_main_font_by_name(font_name.c_str());
+}
+
 void load_custom(const char* name)
 {
     // Load all custom (level-specific assets) fonts
     unload_custom();
+
+    const char* allow_cjk = NULL;
+    if (font_is_cjk(name))
+    {
+        uint8_t tmp;
+        if (!find_main_font_by_name(name, &tmp))
+        {
+            allow_cjk = name;
+        }
+    }
+
     EnumHandle handle = {};
     const char* item;
     while ((item = FILESYSTEM_enumerateAssets("graphics", &handle)) != NULL)
     {
-        load_font_filename(true, item);
+        load_font_filename(true, item, allow_cjk);
     }
     FILESYSTEM_freeEnumerate(&handle);
 
     fill_map_name_idx(&fonts_custom);
     set_fallbacks(&fonts_custom);
+
+    // If the level uses a CJK font that isn't loaded, load it now
+    if (allow_cjk != NULL)
+    {
+        char meta_name[64];
+        snprintf(meta_name, sizeof(meta_name), "%s.fontmeta", allow_cjk);
+        load_font_filename(false, meta_name, allow_cjk);
+
+        VVV_freefunc(hashmap_free, fonts_main.map_name_idx);
+        fonts_main.map_name_idx = NULL;
+        fill_map_name_idx(&fonts_main);
+        set_fallbacks(&fonts_main);
+    }
 
     set_level_font(name);
 }
@@ -713,6 +834,61 @@ void unload_font(Font* f)
     for (int i = 0; i < FONT_N_PAGES; i++)
     {
         VVV_free(f->glyph_page[i]);
+    }
+
+    f->unloaded = true;
+}
+
+static bool font_used_by_any(const FontContainer* container, uint8_t idx)
+{
+    for (uint8_t i = 0; i < container->count; i++)
+    {
+        const Font* f = &container->fonts[i];
+        if (!f->unloaded && f->fallback_idx_valid && f->fallback_idx == idx)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void unload_unused_cjk(void)
+{
+    const char* keep_lang = loc::langmeta.font_name.c_str();
+    const char* keep_level = NULL;
+    if (!font_idx_level_is_custom
+    && font_idx_level < fonts_main.count
+    && font_is_cjk(fonts_main.fonts[font_idx_level].name))
+    {
+        keep_level = fonts_main.fonts[font_idx_level].name;
+    }
+
+    for (uint8_t i = 0; i < fonts_main.count; i++)
+    {
+        Font* f = &fonts_main.fonts[i];
+        if (f->unloaded)
+        {
+            continue;
+        }
+        if (!font_is_cjk(f->name))
+        {
+            continue;
+        }
+        if (keep_lang[0] != '\0' && strcmp(f->name, keep_lang) == 0)
+        {
+            continue;
+        }
+        if (keep_level != NULL && strcmp(f->name, keep_level) == 0)
+        {
+            continue;
+        }
+        if (font_used_by_any(&fonts_main, i))
+        {
+            continue;
+        }
+
+        vlog_info("Unloading unused CJK font \"%s\"", f->name);
+        unload_font(f);
     }
 }
 
@@ -733,6 +909,20 @@ void unload_custom(void)
 {
     // Unload all custom fonts
     unload_font_container(&fonts_custom);
+
+    const char* keep_lang = loc::langmeta.font_name.c_str();
+
+    for (uint8_t i = 0; i < fonts_main.count; i++)
+    {
+        Font* f = &fonts_main.fonts[i];
+        if (f->unloaded) continue;
+        if (!font_is_cjk(f->name)) continue;
+        if (keep_lang[0] != '\0' && strcmp(f->name, keep_lang) == 0) continue;
+        if (font_used_by_any(&fonts_main, i)) continue;
+
+        vlog_info("Unloading level CJK font \"%s\"", f->name);
+        unload_font(f);
+    }
 }
 
 void destroy(void)

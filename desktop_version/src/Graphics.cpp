@@ -24,6 +24,27 @@
 #include "VFormat.h"
 #include "Vlogging.h"
 
+struct LangNameSprite
+{
+    int x, y, w, h;
+};
+
+static const LangNameSprite lang_name_sprites[] = {
+    {0, 0, 22, 11}, // ja
+    {0, 11, 28, 9}, // ko
+    {0, 20, 47, 11}, // sc
+    {0, 31, 47, 11} // tc
+};
+
+int Graphics::lang_name_sprite(const char* code)
+{
+    if (strcmp(code, "JA") == 0) return 0;
+    if (strcmp(code, "KO") == 0) return 1;
+    if (strcmp(code, "ZH") == 0) return 2;
+    if (strcmp(code, "zh_TW") == 0) return 3;
+    return -1;
+}
+
 void Graphics::init(void)
 {
     flipmode = false;
@@ -1371,6 +1392,61 @@ void Graphics::drawmenu(int cr, int cg, int cb, enum Menu::MenuName menu)
         else
         {
             strlcpy(buffer, loc::remove_toupper_escape_chars(opt.text).c_str(), sizeof(buffer));
+        }
+
+        if (opt.sprite >= 0)
+        {
+            const LangNameSprite& s = lang_name_sprites[opt.sprite];
+
+            int sx, sy;
+            if (language_screen)
+            {
+                sx = (i < twocol_voptions ? 80 : 240) - s.w / 2;
+                sy = (y + (12 - s.h) / 2) - 2;
+            }
+            else
+            {
+                sx = i * game.menuspacing + game.menuxoff;
+                sy = y - 1;
+                switch (opt.sprite) {
+                    case 0: sx += 1; break;
+                    case 1: break;
+                    case 2: sx -= 1; break;
+                    case 3: sx -= 1; break;
+                }
+            }
+
+            const bool selected = (int) i == game.currentmenuoption && game.slidermode == SLIDER_NONE;
+
+            if (selected)
+            {
+                int bracket_line_length = opt.sprite == 0 ? 2 : 3;
+                int bracket_l_delay = 0;
+                int bracket_r_delay = 0;
+                switch (opt.sprite) {
+                    case 0: bracket_l_delay = 6; bracket_r_delay = 5; break;
+                    case 1: bracket_l_delay = 3; bracket_r_delay = 2; break;
+                    case 2: bracket_l_delay = 0; bracket_r_delay = 0; break;
+                    case 3: bracket_l_delay = 0; bracket_r_delay = 0; break;
+                }
+
+                int bracket_l_x = sx - 19 + bracket_l_delay;
+                int bracket_r_x = sx + s.w + 16 - bracket_r_delay;
+
+                // Left bracket
+                g2dHelperFillRect(bracket_l_x, sy, 1, s.h, G2D_RGB(fr, fg, fb));
+                g2dHelperFillRect(bracket_l_x + 1, sy, bracket_line_length, 1, G2D_RGB(fr, fg, fb));
+                g2dHelperFillRect(bracket_l_x + 1, sy + s.h - 1, bracket_line_length, 1, G2D_RGB(fr, fg, fb));
+
+                // Right bracket
+                g2dHelperFillRect(bracket_r_x, sy, 1, s.h, G2D_RGB(fr, fg, fb));
+                g2dHelperFillRect(bracket_r_x - bracket_line_length, sy, bracket_line_length, 1, G2D_RGB(fr, fg, fb));
+                g2dHelperFillRect(bracket_r_x - bracket_line_length, sy + s.h - 1, bracket_line_length, 1, G2D_RGB(fr, fg, fb));
+            }
+
+            draw_texture_part(images[IMAGE_LANGNAMES], sx, sy, s.x, s.y, s.w, s.h, 1, 1, G2D_RGB(fr, fg, fb));
+
+            continue;
         }
 
         font::print(opt.print_flags, x, y, buffer, fr, fg, fb);
@@ -3053,6 +3129,7 @@ bool Graphics::reloadresources(void)
     images[IMAGE_SITE3] = grphx.im_image9;
     images[IMAGE_ENDING] = grphx.im_image10;
     images[IMAGE_CUSTOMMINIMAP] = grphx.im_image12;
+    images[IMAGE_LANGNAMES] = grphx.im_image13;
 
     music.stopmusic();
     music.init();

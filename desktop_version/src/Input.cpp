@@ -792,6 +792,12 @@ static void menuactionpress(void)
             loc::lang = loc::languagelist[game.currentmenuoption].code;
             loc::loadtext(false);
             loc::lang_set = loc::lang_set_current;
+            font::load_main_font_for_lang();
+            if (!loc::langmeta.font_name.empty())
+            {
+                font::find_main_font_by_name(loc::langmeta.font_name.c_str(), &loc::langmeta.font_idx);
+            }
+            font::unload_unused_cjk();
             graphics.grphx.init_translations();
         }
 

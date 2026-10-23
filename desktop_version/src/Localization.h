@@ -31,6 +31,7 @@ struct LangMeta
     std::string menu_select;
     std::string menu_select_tight;
     uint8_t font_idx;
+    std::string font_name;
 };
 
 struct TextboxFormat

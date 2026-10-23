@@ -1383,6 +1383,8 @@ void GraphicsResources::preserve(void) {
         sceKernelDcacheWritebackAll();
     }
 
+    im_image13 = ReserveImageMemory("fonts/langnames.png", G2D_CLUT4);
+
     im_sprites_translated = ReserveImageMemory("graphics/sprites.png", G2D_CLUT4);
     im_flipsprites_translated = ReserveImageMemory("graphics/flipsprites.png", G2D_CLUT4);
 
@@ -1553,6 +1555,12 @@ void GraphicsResources::init(void)
         im_image10_is_custom = FILESYSTEM_customAssetExists("graphics/ending.png");
         g2dImageZero(im_image10);
         LoadImageInto(im_image10, "graphics/ending.png", TEX_COLOR, NULL);
+    }
+
+    if (!graphics_loaded)
+    {
+        g2dImageZero(im_image13);
+        LoadImageInto(im_image13, "fonts/langnames.png", TEX_WHITE, NULL);
     }
 
     init_translations();

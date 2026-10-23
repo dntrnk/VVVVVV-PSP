@@ -115,7 +115,10 @@ static void loadmeta(LangMeta& meta, const std::string& langcode = lang)
         else if (strcmp(pKey, "menu_select_tight") == 0)
             meta.menu_select_tight = std::string(pText);
         else if (strcmp(pKey, "font") == 0)
+        {
+            meta.font_name = std::string(pText);
             font::find_main_font_by_name(pText, &meta.font_idx);
+        }
     }
 }
 

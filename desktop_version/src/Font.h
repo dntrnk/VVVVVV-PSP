@@ -79,8 +79,12 @@ bool level_font_is_main_idx(uint8_t idx);
 void set_level_font(const char* name);
 void set_level_font_interface(void);
 void set_level_font_new(void);
+bool is_cjk_font_name(const char* name);
+void load_main_font_by_name(const char* name);
+void load_main_font_for_lang(void);
 void load_main(void);
 void load_custom(const char* name);
+void unload_unused_cjk(void);
 void unload_custom(void);
 void destroy(void);
 

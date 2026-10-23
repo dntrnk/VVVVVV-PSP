@@ -6571,15 +6571,49 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         break;
     case Menu::ed_font:
     {
-        int option_match = -1;
+        static const char* cjk_names[] = {"font_ja", "font_ko", "font_sc", "font_tc"};
+
+        const size_t max_names = font::font_idx_options_n + 4;
+        const char* names[max_names];
+        size_t names_count = 0;
+
         for (uint8_t i = 0; i < font::font_idx_options_n; i++)
+            names[names_count++] = font::get_main_font_name(font::font_idx_options[i]);
+
+        for (const char* cjk : cjk_names)
         {
-            uint8_t idx = font::font_idx_options[i];
-            option(font::get_main_font_display_name(idx), true, PR_FONT_IDX(idx, font::is_rtl(PR_FONT_INTERFACE)) | PR_RTL_XFLIP);
-            if (font::level_font_is_main_idx(idx))
-            {
+            bool already = false;
+            for (size_t j = 0; j < names_count; j++)
+                if (names[j] && strcmp(names[j], cjk) == 0) { already = true; break; }
+            if (!already && names_count < max_names)
+                names[names_count++] = cjk;
+        }
+
+        const char* level_name = font::get_main_font_name(font::font_idx_level);
+        int option_match = -1;
+
+        for (size_t i = 0; i < names_count; i++)
+        {
+            const char* name = names[i];
+            uint8_t idx = 0xFF;
+            if (!font::find_main_font_by_name(name, &idx))
+                idx = 0xFF;
+
+            uint8_t display_idx = (idx == 0xFF) ? font::get_font_idx_8x8() : idx;
+            const char* label = (idx == 0xFF) ? "" : font::get_main_font_display_name(idx);
+
+            option(label, true, PR_FONT_IDX(display_idx, font::is_rtl(PR_FONT_INTERFACE)) | PR_RTL_XFLIP);
+
+            int sprite = -1;
+            if (strcmp(name, "font_ja") == 0) sprite = graphics.lang_name_sprite("JA");
+            else if (strcmp(name, "font_ko") == 0) sprite = graphics.lang_name_sprite("KO");
+            else if (strcmp(name, "font_sc") == 0) sprite = graphics.lang_name_sprite("ZH");
+            else if (strcmp(name, "font_tc") == 0) sprite = graphics.lang_name_sprite("zh_TW");
+            if (sprite >= 0)
+                menuoptions.back().sprite = sprite;
+
+            if (level_name && strcmp(level_name, name) == 0)
                 option_match = i;
-            }
         }
 
         currentmenuoption = option_match != -1 ? option_match : 0;
@@ -6659,17 +6693,24 @@ void Game::createmenu( enum Menu::MenuName t, bool samemenu/*= false*/ )
         {
             for (size_t i = 0; i < loc::languagelist.size(); i++)
             {
-                if (loc::languagelist[i].nativename.empty())
+                const loc::LangMeta& meta = loc::languagelist[i];
+                if (meta.nativename.empty())
                 {
-                    option(loc::languagelist[i].code.c_str());
+                    option(meta.code.c_str());
                 }
                 else
                 {
                     option(
-                        loc::languagelist[i].nativename.c_str(),
+                        meta.nativename.c_str(),
                         true,
-                        PR_FONT_IDX(loc::languagelist[i].font_idx, loc::languagelist[i].rtl)
+                        PR_FONT_IDX(meta.font_idx, meta.rtl)
                     );
+                }
+
+                int sprite = graphics.lang_name_sprite(meta.code.c_str());
+                if (sprite >= 0)
+                {
+                    menuoptions.back().sprite = sprite;
                 }
             }
 
@@ -7348,6 +7389,7 @@ void Game::quittomenu(void)
     graphics.fademode = FADE_START_FADEIN;
     FILESYSTEM_unmountAssets();
     loc::unloadtext_custom();
+    font::set_level_font("font");
     font::unload_custom();
     cliplaytest = false;
     graphics.titlebg.tdrawback = true;

@@ -2938,17 +2938,36 @@ static void editormenuactionpress(void)
         break;
     case Menu::ed_font:
     {
-        uint8_t idx_selected = font::font_idx_options[game.currentmenuoption];
-        cl.level_font_name = font::get_main_font_name(idx_selected);
-        if (idx_selected == loc::get_langmeta()->font_idx)
+        static const char* cjk_names[] = {"font_ja", "font_ko", "font_sc", "font_tc"};
+        const size_t max_names = font::font_idx_options_n + 4;
+        const char* names[max_names];
+        size_t names_count = 0;
+
+        for (uint8_t i = 0; i < font::font_idx_options_n; i++)
+            names[names_count++] = font::get_main_font_name(font::font_idx_options[i]);
+        for (const char* cjk : cjk_names)
         {
+            bool already = false;
+            for (size_t j = 0; j < names_count; j++)
+                if (names[j] && strcmp(names[j], cjk) == 0) { already = true; break; }
+            if (!already && names_count < max_names)
+                names[names_count++] = cjk;
+        }
+
+        if ((size_t) game.currentmenuoption >= names_count) break;
+        cl.level_font_name = names[game.currentmenuoption];
+
+        uint8_t lang_font;
+        if (font::find_main_font_by_name(cl.level_font_name.c_str(), &lang_font)
+            && lang_font == loc::get_langmeta()->font_idx)
             loc::new_level_font = "";
-        }
         else
-        {
             loc::new_level_font = cl.level_font_name;
-        }
+
+        font::load_main_font_by_name(cl.level_font_name.c_str());
         font::set_level_font(cl.level_font_name.c_str());
+        font::unload_unused_cjk();
+
         music.playef(Sound_VIRIDIAN);
         game.returnmenu();
         map.nexttowercolour();
