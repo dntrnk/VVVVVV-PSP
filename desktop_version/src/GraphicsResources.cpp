@@ -1270,9 +1270,9 @@ void GraphicsResources::init_translations(void)
     const char* langcode = loc::lang.c_str();
 
     const char* path_template = "lang/%s/graphics/%s";
-    char path_xml[256];
-    char path_sprites[256];
-    char path_flipsprites[256];
+    char path_xml[512];
+    char path_sprites[512];
+    char path_flipsprites[512];
     snprintf(path_xml, sizeof(path_xml), path_template, langcode, "spritesmask.xml");
     snprintf(path_sprites, sizeof(path_sprites), path_template, langcode, "sprites.png");
     snprintf(path_flipsprites, sizeof(path_flipsprites), path_template, langcode, "flipsprites.png");
